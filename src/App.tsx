@@ -2,6 +2,8 @@ import { useState } from 'react'
 import Tabs from './components/Tabs'
 import { useSession, useStore } from './store'
 import { usernameFor } from './rules'
+import { clearSession, loadSession } from './auth'
+import Landing from './pages/Landing'
 import SkillCardForm from './pages/jobseeker/SkillCardForm'
 import FindJobs from './pages/jobseeker/FindJobs'
 import MyApplications from './pages/jobseeker/MyApplications'
@@ -87,12 +89,39 @@ export default function App() {
   const [jobseekerTab, setJobseekerTab] = useState<JobseekerTab>('jobs')
   const [employerTab, setEmployerTab] = useState<EmployerTab>('area')
   const [employerMode, setEmployerMode] = useState<EmployerMode>('existing')
+  // Landing page first; signing in (or "Explore without an account") opens the app.
+  const [entered, setEntered] = useState(() => loadSession() !== null)
+
+  if (!entered) {
+    return (
+      <Landing
+        onExplore={() => setEntered(true)}
+        onEnter={(_user, signup) => {
+          if (signup) {
+            dispatch({ type: 'actAs', role: signup.role, name: signup.name })
+            dispatch({ type: 'setView', view: signup.role })
+          }
+          setEntered(true)
+        }}
+      />
+    )
+  }
+
+  function signOut() {
+    clearSession()
+    setEntered(false)
+  }
 
   const shellHeader = (
     <>
       <div className="header">
         <strong className="brand">TanawKita</strong>
-        <span className="badge">Test mode</span>
+        <span className="row">
+          <span className="badge">Test mode</span>
+          <button type="button" className="chip" onClick={signOut}>
+            Sign out
+          </button>
+        </span>
       </div>
       <div className="segmented">
         <Tabs tabs={VIEWS} active={state.view} onChange={(view) => dispatch({ type: 'setView', view })} />
