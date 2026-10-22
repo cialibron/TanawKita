@@ -1,5 +1,6 @@
 import { useState, type ReactNode } from 'react'
 import type { View } from '../types'
+import { BrandEmblem } from './Logo'
 
 export interface WorkspaceNavItem {
   id: string
@@ -60,7 +61,7 @@ export default function MapShell({
     <main className={`mapshell${open ? ' menu-open' : ' menu-minimized'}${mapFullScreen ? ' map-fullscreen' : ''}`}>
       {!mapFullScreen && (
         <nav className="workspace-rail" aria-label={`${VIEW_LABEL[view]} navigation`}>
-          <div className="workspace-mark" title="TanawKita">T</div>
+          <div className="workspace-mark tk-brand-mark" title="TanawKita"><BrandEmblem height={30} /></div>
           <button
             type="button"
             className="rail-toggle"

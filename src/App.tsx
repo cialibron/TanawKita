@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import MapShell, { type WorkspaceNavItem } from './components/MapShell'
 import JobMap from './components/JobMap'
+import Logo from './components/Logo'
 import { useSession, useStore } from './store'
 import { usernameFor } from './rules'
 import SkillCardForm from './pages/jobseeker/SkillCardForm'
@@ -13,6 +14,8 @@ import Verifications from './pages/admin/Verifications'
 import MyBusiness from './pages/employer/MyBusiness'
 import MarketResearch from './pages/employer/MarketResearch'
 import Verify from './pages/employer/Verify'
+import Landing from './pages/Landing'
+import { clearSession, loadSession } from './pages/demoAuth'
 import type { Role, View } from './types'
 import type { CompetitorPlace, CompetitorSearchMode } from './businessDirectory'
 
@@ -88,13 +91,40 @@ export default function App() {
   const [competitorPlaces, setCompetitorPlaces] = useState<CompetitorPlace[]>([])
   const [selectedCompetitor, setSelectedCompetitor] = useState<CompetitorPlace | null>(null)
   const [competitorMode, setCompetitorMode] = useState<CompetitorSearchMode>('local')
+  // Demo-only welcome screen first; its sign-in is client-side and never contacts a server.
+  const [entered, setEntered] = useState(() => loadSession() !== null)
   const changeView = (view: View) => dispatch({ type: 'setView', view })
+
+  if (!entered) {
+    return (
+      <Landing
+        onExplore={() => setEntered(true)}
+        onEnter={(_user, signup) => {
+          if (signup) {
+            dispatch({ type: 'actAs', role: signup.role, name: signup.name })
+            dispatch({ type: 'setView', view: signup.role })
+          }
+          setEntered(true)
+        }}
+      />
+    )
+  }
+
+  function exitDemo() {
+    clearSession()
+    setEntered(false)
+  }
 
   const shellHeader = (
     <div className="workspace-heading">
       <div className="header">
-        <strong className="brand">TanawKita</strong>
-        <span className="badge">Demo</span>
+        <Logo height={34} />
+        <span className="row">
+          <span className="badge">Demo</span>
+          <button type="button" className="chip exit-demo" onClick={exitDemo}>
+            Exit demo
+          </button>
+        </span>
       </div>
       <p className="workspace-caption">Davao City · Local employment map</p>
     </div>
