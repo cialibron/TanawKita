@@ -1,7 +1,5 @@
 import { barangayName } from '../../data/barangays'
 import { useStore } from '../../store'
-import JobMap from '../../components/JobMap'
-import Verifications from './Verifications'
 
 const PILOT_BARANGAYS = ['116', '020', '124']
 
@@ -46,8 +44,6 @@ export default function Overview() {
         ))}
       </div>
 
-      <Verifications />
-
       <h2>Pilot barangays</h2>
       <div className="card">
         <table className="table">
@@ -71,9 +67,6 @@ export default function Overview() {
           </tbody>
         </table>
       </div>
-
-      <h2>All open jobs</h2>
-      <JobMap jobs={openJobs} height={260} />
 
       <h2>Test tools</h2>
       <button type="button" onClick={reset}>

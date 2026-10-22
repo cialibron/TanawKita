@@ -23,6 +23,20 @@ export interface SkillCard {
   daysAvailable: string[]
   expectedPay: number | null
   guardianConsent: boolean
+  // Optional resume/context fields for the richer synthetic simulation profiles.
+  employmentStatus?: string
+  yearsExperience?: number
+  education?: string
+  certifications?: string[]
+  preferredRoles?: string[]
+  preferredSectors?: string[]
+  preferredJobTypes?: JobType[]
+  expectedPayUnit?: PayUnit
+  languages?: string[]
+  commuteMode?: string
+  canStartInDays?: number
+  digitalAccess?: string
+  profileSummary?: string
 }
 
 export interface JobPost {
@@ -57,6 +71,21 @@ export interface Business {
   barangay: string
   lat: number
   lng: number
+  sector?: string
+  category?: string
+  businessModel?: string
+  franchiseBrand?: string
+  yearsOperating?: number
+  employeeCountRange?: string
+  currentlyHiring?: boolean
+  openRolesCount?: number
+  rolesHiring?: string[]
+  typicalPay?: number
+  payUnit?: PayUnit
+  skillsSought?: string[]
+  businessHours?: string
+  branchesInDavao?: number
+  simulation?: boolean
 }
 
 export interface AppState {

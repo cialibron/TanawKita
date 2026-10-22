@@ -37,6 +37,7 @@ export default function SkillCardForm() {
     if (days.length === 0) return setError('Pick at least one day you are available.')
 
     const card: SkillCard = {
+      ...existing,
       userId: session.userId,
       name: session.name,
       age: ageNumber,
@@ -45,6 +46,7 @@ export default function SkillCardForm() {
       hoursWanted: Number(hoursWanted),
       daysAvailable: days,
       expectedPay: expectedPay === '' ? null : Number(expectedPay),
+      expectedPayUnit: 'day',
       guardianConsent: gate === 'consent' ? consent : false,
     }
     dispatch({ type: 'saveSkillCard', card })

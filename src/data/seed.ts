@@ -3,6 +3,7 @@ import type { AppState, Business, JobPost, SkillCard } from '../types'
 import { mockSeekers } from './mockSeekers'
 import { mockApplications, mockEmployers } from './mockEmployers'
 import { requiredDocs, type EmployerKind, type UploadedDoc, type Verification } from '../verification'
+import { syntheticBusinesses, syntheticJobseekers } from './simulation'
 
 // Sample records for local testing only. Map pins are approximate, not real addresses. Pilot barangays: Talomo 116, Bucana 020, Tibungco 124.
 const employers = {
@@ -161,7 +162,8 @@ const cards: SkillCard[] = [
   },
 ]
 
-const allCards = [...cards, ...mockSeekers()]
+const legacyCards = [...cards, ...mockSeekers()]
+const allCards = [...legacyCards, ...syntheticJobseekers]
 
 // Each sample employer's business sits at its first job's location.
 const businesses: Record<string, Business> = {}
@@ -203,7 +205,15 @@ for (const e of extraEmployers) {
   businesses[e.id] = e.business
   verifications[e.id] = e.verification
 }
-const allJobs = [...jobs, ...extraEmployers.flatMap((e) => e.jobs)]
+for (const e of syntheticBusinesses) {
+  businesses[e.id] = e.business
+  verifications[e.id] = e.verification
+}
+const legacyJobs = [...jobs, ...extraEmployers.flatMap((e) => e.jobs)]
+const syntheticJobs = syntheticBusinesses.flatMap((e) => e.jobs)
+const allJobs = [...legacyJobs, ...syntheticJobs]
+// Keep the original demo applications stable; generate additional activity only for the new synthetic jobs.
+const sampleApplications = [...mockApplications(legacyJobs, legacyCards), ...mockApplications(syntheticJobs, allCards)]
 
 export const seedState: AppState = {
   view: 'jobseeker',
@@ -213,10 +223,11 @@ export const seedState: AppState = {
     ...allCards.map((c) => [c.userId, c.name]),
     ...Object.values(employers).map((n) => [userIdFor('employer', n), n]),
     ...extraEmployers.map((e) => [e.id, e.name]),
+    ...syntheticBusinesses.map((e) => [e.id, e.name]),
   ]),
   skillCards: Object.fromEntries(allCards.map((c) => [c.userId, c])),
   businesses,
   verifications,
   jobs: allJobs,
-  applications: mockApplications(allJobs, allCards),
+  applications: sampleApplications,
 }

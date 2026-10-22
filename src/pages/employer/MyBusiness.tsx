@@ -1,15 +1,26 @@
 import { useMemo, useState, type ReactNode } from 'react'
 import AreaMap from '../../components/AreaMap'
-import MapShell from '../../components/MapShell'
+import MapShell, { type WorkspaceNavItem } from '../../components/MapShell'
 import { areaStats, barangaysWithin, jobseekerHeat, nearestBarangay, seekerPoint } from '../../area'
 import { barangayName } from '../../data/barangays'
 import { distanceKm, matchScore, SKILLS } from '../../rules'
 import { useSession, useStore } from '../../store'
+import type { View } from '../../types'
+import type { CompetitorPlace, CompetitorSearchMode } from '../../businessDirectory'
 
 const RADII = [1, 3, 5]
 const ANY = ''
 
 interface Props {
+  view: View
+  onViewChange: (view: View) => void
+  navigation: WorkspaceNavItem[]
+  activeNavigation: string
+  onNavigationChange: (id: string) => void
+  competitorPlaces: CompetitorPlace[]
+  selectedCompetitor: CompetitorPlace | null
+  competitorMode: CompetitorSearchMode
+  onSelectedCompetitorChange: (place: CompetitorPlace | null) => void
   // Switcher and tabs shown at the top of the side panel.
   panelHeader: ReactNode
   // Content for the other employer tabs; when set it replaces the area and talent view.
@@ -17,7 +28,7 @@ interface Props {
 }
 
 // Employer home: full-screen map of the business area with a side panel for everything else.
-export default function MyBusiness({ panelHeader, panelContent }: Props) {
+export default function MyBusiness({ view, onViewChange, navigation, activeNavigation, onNavigationChange, competitorPlaces, selectedCompetitor, competitorMode, onSelectedCompetitorChange, panelHeader, panelContent }: Props) {
   const { state, dispatch } = useStore()
   const session = useSession('employer')
   const business = state.businesses[session.userId] ?? null
@@ -65,6 +76,18 @@ export default function MyBusiness({ panelHeader, panelContent }: Props) {
     <>
       <h1>{session.name}</h1>
       <p className="muted">{business ? barangayName(business.barangay) : 'Set your business location on the map.'}</p>
+      {business?.category && (
+        <div className="business-context-card">
+          <div className="business-context-grid">
+            <div><span>Category</span><strong>{business.category}</strong></div>
+            <div><span>Business model</span><strong>{business.businessModel}{business.franchiseBrand ? ` · ${business.franchiseBrand}` : ''}</strong></div>
+            <div><span>Operating</span><strong>{business.yearsOperating} year(s)</strong></div>
+            <div><span>Team size</span><strong>{business.employeeCountRange} people</strong></div>
+          </div>
+          <p>{business.currentlyHiring ? `Hiring ${business.openRolesCount} role(s): ${business.rolesHiring?.join(', ')}` : 'Not currently hiring'}</p>
+          <small>Synthetic business simulation profile · not a real registered business</small>
+        </div>
+      )}
 
       {statTiles && (
         <>
@@ -119,6 +142,17 @@ export default function MyBusiness({ panelHeader, panelContent }: Props) {
             {card.age >= 18 ? '18 and over' : 'Under 18'} · {barangayName(card.barangay)} · {km.toFixed(1)} km away ·{' '}
             {card.hoursWanted} hrs/week
           </div>
+          {(card.yearsExperience !== undefined || card.education || card.employmentStatus) && (
+            <div className="muted simulation-profile-meta">
+              {card.yearsExperience !== undefined ? `${card.yearsExperience} yr(s) experience` : ''}
+              {card.education ? ` · ${card.education}` : ''}
+              {card.employmentStatus ? ` · ${card.employmentStatus.replaceAll('_', ' ')}` : ''}
+            </div>
+          )}
+          {card.certifications && card.certifications.length > 0 && (
+            <div className="simulation-certifications">Training: {card.certifications.join(' · ')}</div>
+          )}
+          {card.profileSummary && <p className="simulation-profile-summary">{card.profileSummary}</p>}
           <div className="skill-tags">
             {card.skills.map((s) => (
               <span key={s} className={`tag${job?.skills.includes(s) || s === skill ? ' hit' : ''}`}>
@@ -148,16 +182,48 @@ export default function MyBusiness({ panelHeader, panelContent }: Props) {
 
   return (
     <MapShell
+      navigation={navigation}
+      activeNavigation={activeNavigation}
+      onNavigationChange={onNavigationChange}
+      detail={selectedCompetitor ? (
+        <div className="selected-business-detail">
+          <div className="detail-kicker">SELECTED COMPETITOR</div>
+          <h2>{selectedCompetitor.name}</h2>
+          <p className="muted">{selectedCompetitor.address || 'Mapped place of interest'}{selectedCompetitor.distanceKm !== undefined ? ` · ${selectedCompetitor.distanceKm.toFixed(1)} km away` : ''}</p>
+          <p className="advisor-synthetic-note">Approximate simulation location · not an actual storefront</p>
+        </div>
+      ) : business ? (
+        <div className="selected-business-detail">
+          <div className="detail-kicker">CURRENT BUSINESS AREA</div>
+          <h2>{business.name}</h2>
+          <p className="muted">{barangayName(business.barangay)} · {radiusKm} km talent search radius</p>
+          {stats && <div className="selected-job-metrics">
+            <div><span>Looking for work</span><strong>{stats.jobseekerPool.toLocaleString()}</strong></div>
+            <div><span>TVET graduates</span><strong>{stats.tvetGrads.toLocaleString()}</strong></div>
+            <div><span>Nearby barangays</span><strong>{stats.barangays.length}</strong></div>
+          </div>}
+        </div>
+      ) : undefined}
+      view={view}
+      onViewChange={onViewChange}
       map={
         <AreaMap
           fill
-          heat={heat}
+          heat={activeNavigation === 'area' ? heat : []}
           business={business}
-          radiusKm={radiusKm}
+          radiusKm={competitorMode === 'city' ? 0 : radiusKm}
+          places={competitorPlaces}
+          selectedPlaceId={selectedCompetitor?.id}
+          onPlaceSelect={(id) => onSelectedCompetitorChange(competitorPlaces.find((place) => place.id === id) ?? null)}
+          mapView={activeNavigation === 'franchise' || activeNavigation === 'competitors'
+            ? competitorMode === 'city'
+              ? { center: [7.0731, 125.6128], zoom: 10.2 }
+              : { center: business ? [business.lat, business.lng] : [7.0731, 125.6128], zoom: business ? 14 : 12.5 }
+            : undefined}
           onPick={pick}
         />
       }
-      overlay={
+      overlay={activeNavigation === 'area' ? (
         <>
           <div className="chips">
             {RADII.map((r) => (
@@ -181,7 +247,9 @@ export default function MyBusiness({ panelHeader, panelContent }: Props) {
             <span>More people needing jobs</span>
           </div>
         </>
-      }
+      ) : activeNavigation === 'franchise' || activeNavigation === 'competitors' ? (
+        <div className="map-hint">{competitorMode === 'city' ? 'Davao-wide synthetic business locations · select a marker or list item.' : 'Nearby franchise competitors · locations are simulation examples.'}</div>
+      ) : undefined}
       panel={
         <>
           {panelHeader}

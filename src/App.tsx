@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import Tabs from './components/Tabs'
+import MapShell, { type WorkspaceNavItem } from './components/MapShell'
+import JobMap from './components/JobMap'
 import { useSession, useStore } from './store'
 import { usernameFor } from './rules'
 import SkillCardForm from './pages/jobseeker/SkillCardForm'
@@ -8,42 +9,40 @@ import MyApplications from './pages/jobseeker/MyApplications'
 import PostJob from './pages/employer/PostJob'
 import MyPosts from './pages/employer/MyPosts'
 import Overview from './pages/admin/Overview'
+import Verifications from './pages/admin/Verifications'
 import MyBusiness from './pages/employer/MyBusiness'
-import Advisor from './pages/employer/Advisor'
+import MarketResearch from './pages/employer/MarketResearch'
 import Verify from './pages/employer/Verify'
 import type { Role, View } from './types'
+import type { CompetitorPlace, CompetitorSearchMode } from './businessDirectory'
 
-type JobseekerTab = 'jobs' | 'applications' | 'skillcard'
-type EmployerMode = 'existing' | 'advisor'
-type EmployerTab = 'area' | 'post' | 'posts' | 'verify'
+type JobseekerSection = 'jobs' | 'applications' | 'skillcard'
+type EmployerSection = 'area' | 'franchise' | 'competitors' | 'post' | 'posts' | 'verify'
+type AdminSection = 'overview' | 'verifications'
 
-const VIEWS: { id: View; label: string }[] = [
-  { id: 'jobseeker', label: 'Jobseeker' },
-  { id: 'employer', label: 'Employer' },
-  { id: 'admin', label: 'Admin' },
+const JOBSEEKER_NAV: WorkspaceNavItem[] = [
+  { id: 'jobs', label: 'Find jobs', icon: '⌕' },
+  { id: 'applications', label: 'My applications', icon: '▤' },
+  { id: 'skillcard', label: 'My profile / skill card', icon: '◉' },
 ]
 
-const JOBSEEKER_TABS: { id: JobseekerTab; label: string }[] = [
-  { id: 'jobs', label: 'Find jobs' },
-  { id: 'applications', label: 'Applications' },
-  { id: 'skillcard', label: 'Skill card' },
+const EMPLOYER_NAV: WorkspaceNavItem[] = [
+  { id: 'area', label: 'Business overview', icon: '▦' },
+  { id: 'franchise', label: 'Franchise planning', icon: '✧' },
+  { id: 'competitors', label: 'Competitor map', icon: '◎' },
+  { id: 'post', label: 'Post a job', icon: '+' },
+  { id: 'posts', label: 'My job posts', icon: '▤' },
+  { id: 'verify', label: 'Business verification', icon: '✓' },
 ]
 
-const EMPLOYER_MODES: { id: EmployerMode; label: string }[] = [
-  { id: 'existing', label: 'My business' },
-  { id: 'advisor', label: 'Business advisor' },
-]
-
-const EMPLOYER_TABS: { id: EmployerTab; label: string }[] = [
-  { id: 'area', label: 'Area' },
-  { id: 'post', label: 'Post job' },
-  { id: 'posts', label: 'My posts' },
-  { id: 'verify', label: 'Verify' },
+const ADMIN_NAV: WorkspaceNavItem[] = [
+  { id: 'overview', label: 'PESO overview', icon: '▦' },
+  { id: 'verifications', label: 'Verification review', icon: '✓' },
 ]
 
 const NEW_USER = '__new__'
 
-// Testing only: pick which jobseeker or employer you are acting as, or add one.
+// Test-mode account picker; it is intentionally separate from the user-facing role navigation.
 function ActingAs({ role }: { role: Role }) {
   const { state, dispatch } = useStore()
   const session = useSession(role)
@@ -52,7 +51,6 @@ function ActingAs({ role }: { role: Role }) {
     .filter(([id]) => id.startsWith(prefix))
     .sort(([, a], [, b]) => a.localeCompare(b))
 
-  // Extra hint per person so testers can pick an interesting account.
   function hint(id: string): string {
     if (role === 'employer') {
       const status = state.verifications[id]?.status ?? 'none'
@@ -84,37 +82,42 @@ function ActingAs({ role }: { role: Role }) {
 
 export default function App() {
   const { state, dispatch } = useStore()
-  const [jobseekerTab, setJobseekerTab] = useState<JobseekerTab>('jobs')
-  const [employerTab, setEmployerTab] = useState<EmployerTab>('area')
-  const [employerMode, setEmployerMode] = useState<EmployerMode>('existing')
+  const [jobseekerSection, setJobseekerSection] = useState<JobseekerSection>('jobs')
+  const [employerSection, setEmployerSection] = useState<EmployerSection>('area')
+  const [adminSection, setAdminSection] = useState<AdminSection>('overview')
+  const [competitorPlaces, setCompetitorPlaces] = useState<CompetitorPlace[]>([])
+  const [selectedCompetitor, setSelectedCompetitor] = useState<CompetitorPlace | null>(null)
+  const [competitorMode, setCompetitorMode] = useState<CompetitorSearchMode>('local')
+  const changeView = (view: View) => dispatch({ type: 'setView', view })
 
   const shellHeader = (
-    <>
+    <div className="workspace-heading">
       <div className="header">
         <strong className="brand">TanawKita</strong>
-        <span className="badge">Test mode</span>
+        <span className="badge">Demo</span>
       </div>
-      <div className="segmented">
-        <Tabs tabs={VIEWS} active={state.view} onChange={(view) => dispatch({ type: 'setView', view })} />
-      </div>
-    </>
+      <p className="workspace-caption">Davao City · Local employment map</p>
+    </div>
   )
 
-  // Jobseeker: the whole screen is the map; everything else lives in the side panel.
   if (state.view === 'jobseeker') {
     return (
       <FindJobs
+        view={state.view}
+        onViewChange={changeView}
+        navigation={JOBSEEKER_NAV}
+        activeNavigation={jobseekerSection}
+        onNavigationChange={(id) => setJobseekerSection(id as JobseekerSection)}
         panelHeader={
           <>
             {shellHeader}
             <ActingAs role="jobseeker" />
-            <Tabs tabs={JOBSEEKER_TABS} active={jobseekerTab} onChange={setJobseekerTab} />
           </>
         }
         panelContent={
-          jobseekerTab === 'applications' ? (
+          jobseekerSection === 'applications' ? (
             <MyApplications />
-          ) : jobseekerTab === 'skillcard' ? (
+          ) : jobseekerSection === 'skillcard' ? (
             <SkillCardForm />
           ) : undefined
         }
@@ -122,31 +125,47 @@ export default function App() {
     )
   }
 
-  // Employer: same layout, with the business area map behind the panel.
   if (state.view === 'employer') {
     return (
       <MyBusiness
         key={state.employerId}
+        view={state.view}
+        onViewChange={changeView}
+        navigation={EMPLOYER_NAV}
+        activeNavigation={employerSection}
+        onNavigationChange={(id) => {
+          const section = id as EmployerSection
+          setEmployerSection(section)
+          if (section !== 'franchise' && section !== 'competitors') {
+            setCompetitorPlaces([])
+            setSelectedCompetitor(null)
+            setCompetitorMode('local')
+          }
+        }}
+        competitorPlaces={competitorPlaces}
+        selectedCompetitor={selectedCompetitor}
+        competitorMode={competitorMode}
+        onSelectedCompetitorChange={setSelectedCompetitor}
         panelHeader={
           <>
             {shellHeader}
             <ActingAs role="employer" />
-            <div className="segmented">
-              <Tabs tabs={EMPLOYER_MODES} active={employerMode} onChange={setEmployerMode} />
-            </div>
-            {employerMode === 'existing' && (
-              <Tabs tabs={EMPLOYER_TABS} active={employerTab} onChange={setEmployerTab} />
-            )}
           </>
         }
         panelContent={
-          employerMode === 'advisor' ? (
-            <Advisor />
-          ) : employerTab === 'post' ? (
-            <PostJob onGetVerified={() => setEmployerTab('verify')} />
-          ) : employerTab === 'posts' ? (
+          employerSection === 'franchise' || employerSection === 'competitors' ? (
+            <MarketResearch
+              mode={employerSection === 'franchise' ? 'franchise' : 'city'}
+              business={state.businesses[state.employerId] ?? null}
+              onPlacesChange={setCompetitorPlaces}
+              onSelectedPlaceChange={setSelectedCompetitor}
+              onMapModeChange={setCompetitorMode}
+            />
+          ) : employerSection === 'post' ? (
+            <PostJob onGetVerified={() => setEmployerSection('verify')} />
+          ) : employerSection === 'posts' ? (
             <MyPosts />
-          ) : employerTab === 'verify' ? (
+          ) : employerSection === 'verify' ? (
             <Verify />
           ) : undefined
         }
@@ -155,9 +174,19 @@ export default function App() {
   }
 
   return (
-    <>
-      {shellHeader}
-      <Overview />
-    </>
+    <MapShell
+      navigation={ADMIN_NAV}
+      activeNavigation={adminSection}
+      onNavigationChange={(id) => setAdminSection(id as AdminSection)}
+      view={state.view}
+      onViewChange={changeView}
+      map={<JobMap fill jobs={state.jobs.filter((job) => job.status === 'open')} />}
+      panel={
+        <>
+          {shellHeader}
+          {adminSection === 'overview' ? <Overview /> : <Verifications />}
+        </>
+      }
+    />
   )
 }

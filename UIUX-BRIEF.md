@@ -1,52 +1,38 @@
-# UI/UX Brief — TanawKita pass (for Myles)
+# Frontend/UI-UX Brief — Build on TanawKita's working framework
 
-Working branch: `myles/frontend`. Work top-down (P0 first). Each item lists the file — you own
-all files below; if an item touches `App.tsx`/`store.tsx`/logic files, tell the main dev instead.
-The main dev stays out of your files while you work.
+This brief is for Myles. The main dev has already built the functional framework locally: keep it intact and layer the visual design on top. Work from the latest `origin/main`, in a feature branch; do not merge or push directly to `main`.
 
-## Who we are designing for
-- Jobseekers: workers 15+, often low-end Android phones, possibly on mobile data, may have limited
-  literacy. Employers: sari-sari/carinderia-scale owners registering documents on their phone.
-- Demo target: PSA/CBMS judges who must "get it" in 3 minutes. Every screen must show ₱ pay and
-  barangay context clearly.
+## Current interface framework
+- **Developer convenience:** role switcher is in the upper-right. It switches Jobseeker, Employer, and PESO Admin demos.
+- **Actual user navigation:** left icon rail changes by role. It contains feature navigation, not role switching.
+- **Menu behavior:** the left menu minimizes to the icon rail and maximizes as an overlay over the map. The map must not resize or jump when the menu opens.
+- **Map:** MapLibre/OpenFreeMap 3D Davao map is the shared map canvas. Preserve map click, pin selection, competitor clustering, business-radius, heat layer, and fit/full-map behavior.
+- **Selection detail:** selecting a job or competitor from the list or map highlights it and opens its details in the lower map panel. Preserve the selected item while styling the panel.
+- **Employer tools:** Business overview, Franchise planning, Competitor map, Post a job, My job posts, and Business verification are separate navigation options. The old generic Business advisor recommendation page has been removed.
+- **Simulation data:** business and jobseeker CSVs feed the local demo. They are synthetic, clearly labelled, and have approximate barangay locations.
 
-## P0 — do first (bare minimum confidence)
-1. **Find Jobs empty state** (`src/pages/jobseeker/FindJobs.tsx`): when filters produce zero jobs
-   the list is just blank. Add a friendly empty state ("No open jobs match — try All jobs or a
-   nearby barangay") plus one button clearing filters.
-2. **Skill card missing state** (`SkillCardForm`, `FindJobs`): without a skill card, applying is
-   blocked silently-ish. Show a persistent headline banner in the jobs list: "Create your skill card
-   to match and apply" with a link to the tab.
-3. **Apply flow feedback** (`FindJobs`): after apply, the job card should visibly flip to "Applied ✓"
-   state, not rely on the Applications tab.
-4. **Bottom sheet affordance** (`src/components/MapShell.tsx`): on phones, the collapsed sheet needs
-   a visible grab handle and a peek of the first list item so users discover it.
-5. **`prompt()` replacement** (`src/App.tsx` — ask main dev): "Acting as → + New" uses the ugly
-   native `prompt()`. Needs a small inline dialog/completely styled input. Main dev must implement
-   (file is out of your lane); flag it done and he'll match your look.
+## Design direction
+Use the supplied dark logistics-dashboard references: a narrow vertical feature rail, a readable secondary menu/list to its right, a large map on the remaining canvas, and a lower selected-item detail panel. Use TanawKita's existing colors and copy voice rather than copying another product's identity or text.
 
-## P1 — demo polish
-6. **Match score explanation**: `matchScore` already returns `reasons[]` — surface all of them in
-   the job detail, not only the percent. "Same barangay + pay passes wage check" beats "68%".
-7. **Verification screen literacy** (`src/pages/employer/Verify.tsx`, 267 lines of dense forms):
-   split into steps (1 Business type → 2 Numbers → 3 Documents → 4 Review). Show progress
-   ("Step 2 of 4"). Required docs list right now is a wall of 4+ filenames.
-8. **Wage-check messaging on Post Job** (`src/pages/employer/PostJob.tsx`): the wage error only
-   shows on submit. Show it live as the employer types (red inline under pay amount).
-9. **Job status visibility** (`src/pages/employer/MyPosts.tsx`): open/paused/filled needs colored
-   chips with a counts line ("2 hired of 3 slots") — data is already in `Application` records.
-10. **Admin Overview scan-ability** (`src/pages/admin/Overview.tsx`): stats cards good, but hero
-    demo moment belongs here — one barangay map with heat layer + 3 headline numbers. PESO =
-    the "government sees everything" story, sell it visually.
+## Implementation rule: visual layer over functional skeleton
+- Prefer CSS, reusable presentation components, and wrappers around the existing screens.
+- Keep existing `App.tsx` role flow, callback/prop contracts, form validation, store actions, pay/age/verification rules, and CSV-backed data.
+- Do not replace the app with hard-coded mock screens or a disconnected landing-page-only prototype.
+- Do not create real-looking competitor data in the UI; keep the synthetic-data disclosure visible.
+- The authentication experience is still a client-side demo. Do not claim Google/Facebook sign-in or account security is real until a backend/auth design is approved.
+- If you need a field, route, behavior, or source data that the current framework lacks, message the main dev with the exact request before changing shared contracts.
 
-## P2 — nice to have
-11. Dark mode pass, printed forms, retro with real skill tags + TVET labels.
-12. Use `analysis_*.md` findings in `/home/vonan/TANAWKITA` (outside the app repo) to tell the
-    story in the Admin view: "30,384 underemployed, 4,551 TVET grads" as context chips.
-13. Consistent chip component once `Tabs.tsx` styling settles.
-14. Icons: `public/icons.svg` exists — use one cohesive icon set across tabs.
+## Suggested frontend tasks
+1. Polish the left role-specific navigation rail and menu open/minimize transitions, preserving current actions.
+2. Improve list row density/readability and selected states, while retaining map synchronization.
+3. Style the lower selected job/competitor details to match the references and remain usable on narrow screens.
+4. Ensure keyboard focus, labels, touch targets, contrast, reduced-motion handling, and readable pay/location details.
+5. Only after a visual component pass, propose a cohesive design token/icon system. Avoid introducing dependencies without approval.
 
-## House style
-- Inputs/buttons already have 44px min-height — keep it.
-- Plain-English/Filipino copy voice; ₱ amounts as "₱550 / day", never "PHP550.00".
-- Test only with the seeded demo data; never invent new flows that need a backend.
+## Acceptance checklist
+- All three demo roles still switch via the upper-right developer control.
+- Each role's left icons navigate to its real functional sections.
+- Minimized/maximized menu never resizes or displaces the map.
+- Selecting a job or synthetic competitor works from both map and list and updates the lower details panel.
+- Forms, job application behavior, employer verification, and demo data remain intact.
+- `npm test`, `npx tsc -b`, `npm run lint`, and `npm run build` pass (or existing warnings are documented).

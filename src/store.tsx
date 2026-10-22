@@ -68,13 +68,31 @@ function reducer(state: AppState, action: Action): AppState {
   }
 }
 
+function mergeById<T extends { id: string }>(seed: T[], saved: T[]): T[] {
+  const records = new Map(seed.map((item) => [item.id, item]))
+  // Existing saved records win on duplicate IDs, preserving the user's edits and statuses.
+  for (const item of saved) records.set(item.id, item)
+  return [...records.values()]
+}
+
 function load(): AppState {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (raw) {
       const parsed = JSON.parse(raw) as AppState
-      // Only trust saved data that has the current shape.
-      if (Array.isArray(parsed.jobs) && parsed.names && parsed.businesses && parsed.verifications && parsed.jobseekerId && parsed.employerId) return parsed
+      // Keep prior demo/user data and add only rows that are new in the expanded local simulation.
+      if (Array.isArray(parsed.jobs) && Array.isArray(parsed.applications) && parsed.names && parsed.businesses && parsed.verifications && parsed.skillCards && parsed.jobseekerId && parsed.employerId) {
+        return {
+          ...seedState,
+          ...parsed,
+          names: { ...seedState.names, ...parsed.names },
+          businesses: { ...seedState.businesses, ...parsed.businesses },
+          verifications: { ...seedState.verifications, ...parsed.verifications },
+          skillCards: { ...seedState.skillCards, ...parsed.skillCards },
+          jobs: mergeById(seedState.jobs, parsed.jobs),
+          applications: mergeById(seedState.applications, parsed.applications),
+        }
+      }
     }
   } catch {
     // Storage blocked or corrupt: fall back to the seed data.

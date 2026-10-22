@@ -1,10 +1,10 @@
 import { useState, type ReactNode } from 'react'
 import JobMap from '../../components/JobMap'
-import MapShell from '../../components/MapShell'
+import MapShell, { type WorkspaceNavItem } from '../../components/MapShell'
 import { useSession, useStore } from '../../store'
 import { barangayName } from '../../data/barangays'
 import { blockedReason, matchScore } from '../../rules'
-import type { JobPost, JobType } from '../../types'
+import type { JobPost, JobType, View } from '../../types'
 import { VerificationBadge } from '../employer/Verify'
 
 function payLabel(job: JobPost): string {
@@ -20,6 +20,11 @@ const TYPE_CHIPS: { id: JobType | 'all'; label: string }[] = [
 ]
 
 interface Props {
+  view: View
+  onViewChange: (view: View) => void
+  navigation: WorkspaceNavItem[]
+  activeNavigation: string
+  onNavigationChange: (id: string) => void
   // Switcher and tabs shown at the top of the side panel.
   panelHeader: ReactNode
   // Content for the other jobseeker tabs; when set it replaces the job list.
@@ -27,7 +32,7 @@ interface Props {
 }
 
 // Full-screen map with floating search and a side panel (bottom sheet on phones).
-export default function FindJobs({ panelHeader, panelContent }: Props) {
+export default function FindJobs({ view, onViewChange, navigation, activeNavigation, onNavigationChange, panelHeader, panelContent }: Props) {
   const { state, dispatch } = useStore()
   const session = useSession('jobseeker')
   const card = state.skillCards[session.userId]
@@ -118,36 +123,57 @@ export default function FindJobs({ panelHeader, panelContent }: Props) {
             </div>
           </button>
 
-          {selectedId === job.id && (
-            <div className="section">
-              <p className="muted">
-                {job.hoursPerWeek} hours a week · starts {job.startDate} · {job.workers} needed
-              </p>
-              {match && <p className="muted">Why it fits: {match.reasons.join(', ') || 'No strong matches yet'}</p>}
-              {!card ? (
-                <p className="muted">Create your skill card to apply.</p>
-              ) : alreadyApplied(job.id) ? (
-                <p className="ok">You applied to this job.</p>
-              ) : (
-                <button
-                  type="button"
-                  className="primary"
-                  disabled={blockedReason(job, card) !== null}
-                  onClick={() => apply(job)}
-                >
-                  Apply
-                </button>
-              )}
-              {card && blockedReason(job, card) && <p className="error">{blockedReason(job, card)}</p>}
-            </div>
-          )}
         </div>
       ))}
     </>
   )
 
+  const selectedEntry = jobs.find(({ job }) => job.id === selectedId)
+  const selectedJobDetail = selectedEntry && (
+    <div className="selected-job-detail">
+      <div className="selected-job-heading">
+        <div>
+          <div className="detail-kicker">SELECTED OPPORTUNITY</div>
+          <h2>{selectedEntry.job.title}</h2>
+          <div className="muted">{selectedEntry.job.employerName} · {barangayName(selectedEntry.job.barangay)}</div>
+        </div>
+        <button type="button" className="detail-close" aria-label="Clear selected job" onClick={() => setSelectedId(null)}>×</button>
+      </div>
+      <div className="selected-job-metrics">
+        <div><span>Pay</span><strong>{payLabel(selectedEntry.job)}</strong></div>
+        <div><span>Schedule</span><strong>{selectedEntry.job.hoursPerWeek} hrs / week</strong></div>
+        <div><span>Workers</span><strong>{selectedEntry.job.workers} needed</strong></div>
+        <div><span>Start date</span><strong>{selectedEntry.job.startDate}</strong></div>
+      </div>
+      <div className="selected-job-footer">
+        <div>
+          <div className="detail-kicker">SKILLS</div>
+          <div className="skill-tags">{selectedEntry.job.skills.map((skill) => <span className="tag" key={skill}>{skill}</span>)}</div>
+          {selectedEntry.match && <p className="muted">{selectedEntry.match.percent}% match · {selectedEntry.match.reasons.join(' · ') || 'No strong matches yet'}</p>}
+          <VerificationBadge employerId={selectedEntry.job.employerId} />
+        </div>
+        <div className="selected-job-action">
+          {!card ? (
+            <button type="button" className="primary" onClick={() => onNavigationChange('skillcard')}>Create skill card</button>
+          ) : alreadyApplied(selectedEntry.job.id) ? (
+            <span className="ok">✓ Application sent</span>
+          ) : (
+            <button type="button" className="primary" disabled={blockedReason(selectedEntry.job, card) !== null} onClick={() => apply(selectedEntry.job)}>Apply now</button>
+          )}
+          {card && blockedReason(selectedEntry.job, card) && <span className="error">{blockedReason(selectedEntry.job, card)}</span>}
+        </div>
+      </div>
+    </div>
+  )
+
   return (
     <MapShell
+      navigation={navigation}
+      activeNavigation={activeNavigation}
+      onNavigationChange={onNavigationChange}
+      detail={selectedJobDetail}
+      view={view}
+      onViewChange={onViewChange}
       panelOpen={panelOpen}
       onPanelOpenChange={setPanelOpen}
       map={<JobMap fill jobs={jobs.map((j) => j.job)} selectedId={selectedId} onSelect={select} me={me} />}

@@ -1,73 +1,61 @@
-# CLAUDE.md — TanawKita (Myles's copy)
+# CLAUDE.md — TanawKita
 
-Read this file fully every session. Follow it even if the user prompt seems to contradict it — if there is a conflict, ask the main dev first.
+Read this file at the start of every session. You are assisting Myles, the frontend/UI-UX developer. The main dev owns business logic, data, and architecture; coordinate before changing those contracts.
 
-## Who you are working for
-You are assisting **Myles**, the **frontend / UI-UX developer** of TanawKita.
-The **main dev** (logic, data, architecture) works in a separate copy and reviews everything Myles produces before it reaches `main`.
+## Project
+TanawKita is a Davao City jobs-matching prototype for the CBMS Innovation Challenge (SDG 8). It uses Vite, React 19, TypeScript, and MapLibre GL with free OpenFreeMap vector tiles. There is no backend. Demo state is held in `src/store.tsx` and saved locally; synthetic records are loaded from `simulation-data/` and added without replacing existing saved records. The remote `myles/landing-page` branch is an older design prototype based on Leaflet and demo-only sign-in; use it as a visual reference, not as a wholesale replacement for the current app.
 
-## Project one-liner
-TanawKita is a jobs-matching prototype for Davao City (CBMS Innovation Challenge, SDG 8).
-Vite + React 19 + TypeScript + Leaflet. No backend: all state lives in `src/store.tsx`
-(a `useReducer`) and persists to `localStorage` key `tanawkita:v6`.
-Read `CONTRIBUTING.md` first — it has the full role map.
+## Frontend goal: keep the framework, layer the design on top
+Treat the existing app as a working functional skeleton. Improve its presentation without replacing its role flows, callbacks, validation, map behavior, or data connections.
 
-## Myles's file ownership — YOU may edit these freely
-- `src/pages/**` (jobseeker, employer, admin screens)
-- `src/components/**` (maps, tabs, shells)
-- `index.css`
-- `index.html`
+Current interaction framework to preserve:
+- Developer-only role switch is in the **upper-right**. It switches Jobseeker, Employer, and PESO Admin demo interfaces.
+- The **left icon rail is for the current role's actual navigation**, not for switching roles.
+- The left menu minimizes to the icon rail; maximizing it overlays the map rather than resizing or moving the map.
+- Selecting a job or competitor from its list or map marker highlights it and shows details in the map's lower detail panel.
+- MapLibre is the shared Davao map. Keep its selection, map-picking, 3D building, heatmap, business-radius, and competitor-marker behavior working.
+- Employer navigation has separate **Franchise planning** and **Competitor map** screens. Do not bring back the old generic “Business advisor” recommendations page.
 
-## Off-limits — do NOT edit without explicit approval from the main dev
-- `src/types.ts` — the contract between frontend and logic. Only the main dev changes it.
-- `src/rules.ts`, `src/verification.ts`, `src/advisor.ts`, `src/area.ts` — business logic + its tests.
-- `src/store.tsx`, `src/data/**`, `scripts/**`
-- If a UI change needs a new field or a changed field there, STOP and write the request as a
-  message (exact field name, type, where it's used) for the main dev — do not implement it in
-  these files yourself.
+For a visual refresh, prefer CSS, presentational components, and wrappers around existing functional pages. Keep the existing data and behavior as the foundation; put the new visual design on top. Do not replace `App.tsx` with a disconnected prototype or hard-coded mock screen. Preserve the same callback and prop contracts so the demo still works.
 
-## Workflow rules
-1. `main` is always working. Never commit or push to `main`.
-2. Work on branch `myles/frontend` (already exists) or a feature branch cut from it:
-   `myles/<feature-name>`.
-3. Commit small and often; messages like "Find jobs: card hover state".
-4. When a batch is done: `git push` and tell the main dev it is ready for review.
-   He reviews it in a git worktree, so keep `main` clean and never merge yourself.
-5. Never force-push, never reset `main`, never edit commits on branches the main dev may pull.
-6. Before starting work, always: `git pull` then `git fetch origin` and rebase your branch on
-   `origin/main` if it has moved.
-7. UI copy for users: simple English / informal Filipino toned like the existing screens.
-   Code comments in English only.
-8. Do not add new npm dependencies without listing the package + reason in your readiness
-   message to the main dev.
+## Synthetic data and accuracy
+- `simulation-data/businesses.csv` contains fictional sample businesses; `simulation-data/jobseekers.csv` contains fictional sample profiles. All locations are approximate simulation points, not real storefronts or homes.
+- Keep the visible synthetic/demo disclosure. Never present these records as actual DTI/PESO/CBMS records, real competitors, or real people.
+- Competitor maps use the local simulation sheet; do not invent live-business claims or merge simulation pins indistinguishably with real listings.
+- No real authentication exists. Sign-in/SSO concepts from a visual prototype must stay clearly demo-only until the main dev approves a backend/auth plan. Never describe the current client-side demo login as secure authentication.
 
-## Verification before every push (CI equivalent)
+## File ownership
+You may edit presentation-focused work in:
+- `src/pages/**`
+- Presentational pieces in `src/components/**`
+- `src/index.css`, `src/landing.css` (if present), and `index.html`
+
+Ask the main dev before changing these shared/core areas:
+- `src/types.ts`, `src/store.tsx`, `src/data/**`, `simulation-data/**`
+- `src/rules.ts`, `src/verification.ts`, `src/area.ts`, `src/businessDirectory.ts`, `src/data/simulation.ts`
+- `src/components/MapLibreView.tsx`, map data contracts, `vite.config.ts`, or package/deployment configuration
+
+If a design requires new data or behavior, stop and send the main dev a short request with the field/behavior, where it is needed, and why. Do not add fake values in the UI to fill the gap.
+
+## Git workflow
+1. Never commit directly to `main`; never merge your own work.
+2. Start a feature branch from the latest `origin/main`, e.g. `myles/franchise-layout`. Do not assume an old branch is current.
+3. Make small commits, push your branch, and tell the main dev when it's ready for local review.
+4. Never force-push, reset `main`, or rewrite a branch the main dev may be reviewing.
+5. Don't add dependencies without stating the package and reason in the readiness note.
+
+## Checks before requesting review
 ```bash
-npm test          # 29 tests must stay green
-npx tsc -b        # typecheck must be clean
-npm run lint      # oxlint
-npm run build     # production build must succeed
+npm test
+npx tsc -b
+npm run lint
+npm run build
 ```
-If something fails and you cannot fix it inside your owned files, say so in the PR/message
-instead of pushing red code.
+If something fails outside your owned files, report it rather than changing core logic to silence it.
 
-## How to run the app
+## Running locally
 ```bash
 npm install
-npm run dev -- --port 5174   # use 5174 so you don't clash with the main dev's server
+npm run dev -- --port 5174
 ```
-Maps need a CARTO key: create `env/.env.local`-style file (**`.env.local` at repo root**)
-with `VITE_CARTO_KEY=<key>` (ask main dev for the key).
-
-## Design context (memorize these)
-- Users: jobseekers with low-end phones, possibly low literacy → big touch targets, minimal
-  text, plain words, ₱ amounts always visible as "₱X / day" style labels.
-- Test-mode app: an "Acting as" switcher simulates different users; keep it working.
-- Match score, wage gate (₱500/day placeholder), age gate (<15 blocked, <18 needs guardian
-  consent) and employer verification badges are all business rules controlled by the main dev —
-  display them, never bypass or restyle them into weakness.
-- Pilot barangays: Talomo (116), Bucana (020), Tibungco (124).
-
-## Style of your replies to Myles
-Be brief, code-first. When proposing UI edits give a full file or a minimal diff, and state
-which owned file each change touches. Flag anything that would require touching a shared file.
+Map tiles require internet access but no API key or credit card. Keep user-facing copy short, plain, and accessible; use large touch targets and show pay as `₱X / day` (or the correct pay unit).
