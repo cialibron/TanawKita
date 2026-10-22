@@ -695,12 +695,12 @@ ul.error {
 
 /* TanawKita's map-first workspace: dark tracking-dashboard layout with left navigation. */
 .mapshell {
-  --bg: #141517;
-  --card: #1d1f22;
+  --bg: #0a1022;
+  --card: #0f1831;
   --text: #f1f2f3;
   --muted: #9a9da3;
-  --border: #303236;
-  --accent: #26a6d8;
+  --border: #19274f;
+  --accent: #286ce3;
   --accent-text: #fff;
   --ok: #57b879;
   --error: #f0756c;
@@ -710,7 +710,7 @@ ul.error {
   display: flex;
   overflow: hidden;
   color: var(--text);
-  background: #141517;
+  background: #0a1022;
   font-family: Inter, system-ui, -apple-system, 'Segoe UI', sans-serif;
 }
 
@@ -723,8 +723,8 @@ ul.error {
   gap: 10px;
   padding: 12px 0;
   box-sizing: border-box;
-  border-right: 1px solid #292b2e;
-  background: #101113;
+  border-right: 1px solid #152143;
+  background: #080d1c;
 }
 
 .workspace-mark,
@@ -733,16 +733,16 @@ ul.error {
   width: 34px;
   height: 34px;
   place-items: center;
-  border: 1px solid #3b3e42;
+  border: 1px solid #20305f;
   border-radius: 10px;
-  background: #202327;
-  color: #70d2f5;
+  background: #111b37;
+  color: #6aeafb;
   font-weight: 800;
 }
 
 .workspace-mark {
-  background: #167ba2;
-  border-color: #32b7e5;
+  background: #104bb1;
+  border-color: #38e3fa;
   color: #fff;
 }
 
@@ -765,13 +765,13 @@ ul.error {
 .rail-toggle:hover,
 .role-rail-button:hover,
 .role-rail-button.active {
-  border-color: #313438;
-  background: #24272a;
+  border-color: #1a2851;
+  background: #131d3d;
   color: #fff;
 }
 
 .role-rail-button.active {
-  box-shadow: inset 3px 0 #2db6e7;
+  box-shadow: inset 3px 0 #38e3fa;
 }
 
 .role-tooltip {
@@ -781,9 +781,9 @@ ul.error {
   width: max-content;
   max-width: 180px;
   padding: 7px 10px;
-  border: 1px solid #3a3d42;
+  border: 1px solid #20305f;
   border-radius: 8px;
-  background: #25272a;
+  background: #131e3d;
   color: #f3f4f5;
   font-size: 12px;
   font-weight: 600;
@@ -802,7 +802,7 @@ ul.error {
 .rail-divider {
   width: 30px;
   height: 1px;
-  background: #303236;
+  background: #19274f;
 }
 
 .role-rail {
@@ -822,9 +822,9 @@ ul.error {
   width: 360px;
   min-width: 0;
   border: 0;
-  border-right: 1px solid #2c2e31;
+  border-right: 1px solid #172348;
   border-radius: 0;
-  background: #17181a;
+  background: #0b1227;
   box-shadow: 8px 0 24px rgba(0, 0, 0, 0.18);
   transition: flex-basis 200ms ease, width 200ms ease, transform 200ms ease;
 }
@@ -853,12 +853,12 @@ ul.error {
   flex: 1 1 auto;
   min-width: 0;
   height: 100%;
-  background: #181a1d;
+  background: #0c142a;
 }
 
 .workspace-heading {
   padding: 2px 1px 12px;
-  border-bottom: 1px solid #303236;
+  border-bottom: 1px solid #19274f;
   margin-bottom: 12px;
 }
 
@@ -874,8 +874,8 @@ ul.error {
 }
 
 .mapshell .badge {
-  border-color: #373a3e;
-  background: #242629;
+  border-color: #1e2d5a;
+  background: #131d3c;
   color: #a4a7ad;
 }
 
@@ -888,8 +888,8 @@ ul.error {
 .mapshell .acting-as select,
 .mapshell input,
 .mapshell select {
-  border-color: #383b3f;
-  background: #202225;
+  border-color: #1e2e5b;
+  background: #111a36;
   color: #f1f2f3;
 }
 
@@ -904,9 +904,9 @@ ul.error {
 }
 
 .mapshell .card {
-  border-color: #303236;
+  border-color: #19274f;
   border-radius: 12px;
-  background: #1d1f22;
+  background: #0f1831;
   color: #e8e9eb;
 }
 
@@ -918,9 +918,9 @@ ul.error {
   gap: 4px;
   overflow-x: auto;
   padding: 3px;
-  border: 1px solid #303236;
+  border: 1px solid #19274f;
   border-radius: 10px;
-  background: #111214;
+  background: #090e1d;
   scrollbar-width: none;
 }
 
@@ -936,20 +936,20 @@ ul.error {
 }
 
 .mapshell button.tab.active {
-  border-color: #34383b;
-  background: #292c2f;
+  border-color: #1c2a55;
+  background: #162144;
   color: #fff;
 }
 
 .mapshell button:not(.tab):not(.chip):not(.rail-toggle):not(.role-rail-button):not(.map-action-button) {
-  border-color: #3a3d41;
-  background: #25272a;
+  border-color: #202f5e;
+  background: #131e3d;
   color: #e8e9eb;
 }
 
 .mapshell button.primary {
-  border-color: #1688b3;
-  background: #1688b3;
+  border-color: #0f51c4;
+  background: #0f51c4;
   color: #fff;
 }
 
@@ -971,21 +971,21 @@ ul.error {
 
 .mapshell .searchbar input {
   border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(25, 27, 30, 0.94);
+  background: rgba(13, 21, 43, 0.94);
   color: #f4f5f6;
   backdrop-filter: blur(12px);
 }
 
 .mapshell button.chip {
   border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(26, 28, 31, 0.92);
+  background: rgba(13, 21, 45, 0.92);
   color: #e1e3e5;
   backdrop-filter: blur(12px);
 }
 
 .mapshell button.chip.active {
-  border-color: #2db6e7;
-  background: #12759a;
+  border-color: #38e3fa;
+  background: #0c45a9;
   color: white;
 }
 
@@ -1002,9 +1002,9 @@ ul.error {
   gap: 8px;
   min-height: 38px;
   padding: 8px 12px;
-  border: 1px solid #3b3e42;
+  border: 1px solid #20305f;
   border-radius: 9px;
-  background: rgba(24, 26, 29, 0.94);
+  background: rgba(12, 20, 42, 0.94);
   color: #f5f6f7;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
   cursor: pointer;
@@ -1012,14 +1012,14 @@ ul.error {
 }
 
 .map-action-button:hover {
-  background: #2b2e32;
+  background: #172348;
 }
 
 .mapshell .heat-legend,
 .mapshell .map-hint {
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 9px;
-  background: rgba(24, 26, 29, 0.92);
+  background: rgba(12, 20, 42, 0.92);
   color: #e4e6e8;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
   backdrop-filter: blur(12px);
@@ -1098,7 +1098,7 @@ ul.error {
   flex: none;
   transform: translateX(calc(-100% - 8px));
   overflow: hidden;
-  border-right: 1px solid #303236;
+  border-right: 1px solid #19274f;
   box-shadow: none;
   transition: transform 200ms ease;
   pointer-events: none;
@@ -1113,7 +1113,7 @@ ul.error {
 .mapshell.menu-minimized .mapshell-panel {
   flex-basis: auto;
   width: 360px;
-  border-right: 1px solid #303236;
+  border-right: 1px solid #19274f;
 }
 
 .mapshell-panel .panel-body {
@@ -1146,9 +1146,9 @@ ul.error {
   display: none;
   min-width: 190px;
   padding: 5px;
-  border: 1px solid #3a3d42;
+  border: 1px solid #20305f;
   border-radius: 10px;
-  background: #202225;
+  background: #111a36;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
 }
 
@@ -1171,7 +1171,7 @@ ul.error {
 
 .dev-role-menu button:hover,
 .dev-role-menu button.active {
-  background: #303438;
+  background: #1a2850;
   color: #fff;
 }
 
@@ -1183,9 +1183,9 @@ ul.error {
   z-index: 1002;
   max-height: min(300px, 34vh);
   overflow: hidden;
-  border: 1px solid #3a3d42;
+  border: 1px solid #20305f;
   border-radius: 14px;
-  background: rgba(23, 25, 28, 0.97);
+  background: rgba(12, 19, 40, 0.97);
   color: #f1f2f3;
   box-shadow: 0 8px 28px rgba(0, 0, 0, 0.48);
   backdrop-filter: blur(14px);
@@ -1216,9 +1216,9 @@ ul.error {
 .workspace-detail-controls button {
   min-height: 30px;
   padding: 4px 9px;
-  border: 1px solid #41454a;
+  border: 1px solid #24366a;
   border-radius: 7px;
-  background: #292c30;
+  background: #162245;
   color: #eceef0;
   font-size: 12px;
   cursor: pointer;
@@ -1246,7 +1246,7 @@ ul.error {
 }
 
 .detail-kicker {
-  color: #68c7e9;
+  color: #56e8fb;
   font-size: 10px;
   font-weight: 800;
   letter-spacing: 0.12em;
@@ -1259,9 +1259,9 @@ ul.error {
   width: 30px;
   min-height: 30px;
   padding: 0;
-  border: 1px solid #41454a;
+  border: 1px solid #24366a;
   border-radius: 50%;
-  background: #25282c;
+  background: #141f3f;
   color: #ddd;
   font-size: 20px;
   cursor: pointer;
@@ -1278,9 +1278,9 @@ ul.error {
   display: grid;
   gap: 5px;
   padding: 9px 11px;
-  border: 1px solid #34373b;
+  border: 1px solid #1c2a55;
   border-radius: 9px;
-  background: #202225;
+  background: #111a36;
 }
 
 .selected-job-metrics span {
@@ -1395,9 +1395,9 @@ ul.error {
   justify-items: start;
   gap: 3px;
   padding: 8px 10px;
-  border: 1px solid #34373b;
+  border: 1px solid #1c2a55;
   border-radius: 10px;
-  background: #202225;
+  background: #111a36;
   color: #b7bbc0;
   font-size: 12px;
   text-align: left;
@@ -1412,20 +1412,20 @@ ul.error {
 }
 
 .advisor-tabs button.active {
-  border-color: #1a8eb8;
-  background: #152a31;
-  color: #f1f7f9;
+  border-color: #1356c9;
+  background: #152035;
+  color: #ebfcfe;
 }
 
 .advisor-tabs button.active span {
-  color: #59c3e4;
+  color: #43e5fa;
 }
 
 .advisor-filter-card {
   padding: 12px;
-  border: 1px solid #33363a;
+  border: 1px solid #1b2a54;
   border-radius: 11px;
-  background: #1c1e20;
+  background: #0e162f;
 }
 
 .advisor-filter-card label {
@@ -1448,17 +1448,17 @@ ul.error {
   flex: 1;
   min-height: 34px;
   padding: 5px 8px;
-  border: 1px solid #393c40;
+  border: 1px solid #1f2e5c;
   border-radius: 8px;
-  background: #25272a;
+  background: #131e3d;
   color: #c0c3c7;
   cursor: pointer;
 }
 
 .advisor-radius.active {
-  border-color: #229cc5;
-  background: #16475a;
-  color: #f0fbff;
+  border-color: #1b60d7;
+  background: #143062;
+  color: #f0fdff;
 }
 
 .advisor-search-context {
@@ -1472,7 +1472,7 @@ ul.error {
 }
 
 .advisor-search-context > span:first-child {
-  color: #62c9ed;
+  color: #54e7fb;
   font-size: 16px;
   line-height: 1;
 }
@@ -1509,9 +1509,9 @@ ul.error {
   width: 34px;
   min-height: 34px;
   padding: 0;
-  border: 1px solid #383b3f;
+  border: 1px solid #1e2e5b;
   border-radius: 9px;
-  background: #232528;
+  background: #121c3a;
   color: #dfe2e4;
   font-size: 19px;
   cursor: pointer;
@@ -1528,9 +1528,9 @@ ul.error {
   display: grid;
   gap: 4px;
   padding: 10px;
-  border: 1px solid #34373a;
+  border: 1px solid #1c2a54;
   border-radius: 9px;
-  background: #202225;
+  background: #111a36;
 }
 
 .advisor-market-snapshot span {
@@ -1559,9 +1559,9 @@ ul.error {
   gap: 9px;
   min-height: 55px;
   padding: 8px 9px;
-  border: 1px solid #303337;
+  border: 1px solid #1a274f;
   border-radius: 9px;
-  background: #1d1f22;
+  background: #0f1831;
   color: #eceef0;
   text-align: left;
   cursor: pointer;
@@ -1569,7 +1569,7 @@ ul.error {
 
 .advisor-place:hover,
 .advisor-place.selected {
-  border-color: #248fb4;
+  border-color: #1e5bc5;
   background: #202a2e;
 }
 
@@ -1580,8 +1580,8 @@ ul.error {
   flex: 0 0 27px;
   place-items: center;
   border-radius: 8px;
-  background: #292c30;
-  color: #8fcde1;
+  background: #162245;
+  color: #75ecfb;
   font-size: 10px;
   font-weight: 800;
 }
@@ -1610,7 +1610,7 @@ ul.error {
 
 .advisor-place-marker {
   margin-left: auto;
-  color: #69c6e5;
+  color: #53e7fb;
 }
 
 .advisor-empty,
@@ -1618,9 +1618,9 @@ ul.error {
 .advisor-loading {
   margin: 10px 0;
   padding: 13px;
-  border: 1px solid #35383c;
+  border: 1px solid #1d2b57;
   border-radius: 10px;
-  background: #202225;
+  background: #111a36;
   color: #c2c5c8;
   font-size: 12px;
   line-height: 1.45;
@@ -1632,7 +1632,7 @@ ul.error {
 }
 
 .advisor-empty > span {
-  color: #64c5e4;
+  color: #4ee6fa;
   font-size: 20px;
 }
 
@@ -1661,7 +1661,7 @@ ul.error {
 }
 
 .advisor-loading {
-  color: #b1dae7;
+  color: #9cf1fc;
 }
 
 .advisor-selected-place {
@@ -1669,9 +1669,9 @@ ul.error {
   gap: 5px;
   margin: 9px 0;
   padding: 11px;
-  border: 1px solid #1f7d9e;
+  border: 1px solid #1a50ad;
   border-radius: 10px;
-  background: #172b31;
+  background: #172235;
   font-size: 12px;
 }
 
@@ -1691,20 +1691,20 @@ ul.error {
 
 .advisor-selected-place a,
 .selected-business-detail a {
-  color: #69c9e8;
+  color: #56e8fb;
   text-decoration: none;
 }
 
 .advisor-positioning {
   margin: 12px 0 8px;
   padding: 11px;
-  border-left: 2px solid #2da6cb;
+  border-left: 2px solid #2b6bda;
   background: #1c2326;
 }
 
 .advisor-positioning h3 {
   margin: 0 0 5px;
-  color: #e7f3f7;
+  color: #e0fbfe;
   font-size: 12px;
 }
 
@@ -1725,9 +1725,9 @@ ul.error {
   gap: 8px;
   margin: 12px 0;
   padding: 11px;
-  border: 1px solid #34383c;
+  border: 1px solid #1c2b56;
   border-radius: 10px;
-  background: #1d2023;
+  background: #0f1832;
 }
 
 .business-context-grid {
@@ -1754,7 +1754,7 @@ ul.error {
 
 .business-context-card p {
   margin: 0;
-  color: #b5dfe9;
+  color: #a1f2fd;
   font-size: 11px;
 }
 
@@ -1765,7 +1765,7 @@ ul.error {
 
 .simulation-certifications {
   margin-top: 6px;
-  color: #80cce4;
+  color: #69eafb;
   font-size: 11px;
 }
 
@@ -1926,4 +1926,128 @@ ul.error {
 .mapshell button.chip.exit-demo {
   min-height: 32px;
   font-size: 12px;
+}
+
+/* ===== Landing brand skin on the workspace ===== */
+.mapshell {
+  --accent: #2f74f0;
+  font-family: 'Poppins', Inter, system-ui, sans-serif;
+}
+
+.mapshell-panel {
+  background:
+    linear-gradient(180deg, rgba(8, 18, 52, 0.9), rgba(6, 14, 40, 0.94)),
+    url('./assets/brand/bg-4.svg') center / cover;
+  backdrop-filter: blur(10px);
+}
+
+.workspace-rail {
+  background: linear-gradient(180deg, #071233 0%, #050b22 100%);
+}
+
+.role-rail-button.active {
+  box-shadow: inset 3px 0 #3ee8ff, 0 0 12px rgba(62, 232, 255, 0.18);
+}
+
+.workspace-avatar.tk-eye-avatar {
+  background: rgba(59, 130, 255, 0.18);
+}
+
+/* Salary tags: square blue glass with the brand eye. Each pin gets its own shade of the landing palette. */
+.tanawkita-map-marker:has(.pay-pin) {
+  --hl: #3ee8ff;
+}
+
+.tanawkita-map-marker:has(.pay-pin):nth-of-type(8n + 1) { --hl: #ff8a3d; }
+.tanawkita-map-marker:has(.pay-pin):nth-of-type(8n + 2) { --hl: #ff4fa3; }
+.tanawkita-map-marker:has(.pay-pin):nth-of-type(8n + 3) { --hl: #3ee8ff; }
+.tanawkita-map-marker:has(.pay-pin):nth-of-type(8n + 4) { --hl: #ffc94a; }
+.tanawkita-map-marker:has(.pay-pin):nth-of-type(8n + 5) { --hl: #ffb27a; }
+.tanawkita-map-marker:has(.pay-pin):nth-of-type(8n + 6) { --hl: #ff8cc6; }
+.tanawkita-map-marker:has(.pay-pin):nth-of-type(8n + 7) { --hl: #8ff3ff; }
+.tanawkita-map-marker:has(.pay-pin):nth-of-type(8n + 8) { --hl: #ffe08f; }
+
+/* Hatched ground highlight under each pinned location (drawn flat, like a lot on the map). */
+.tanawkita-map-marker:has(.pay-pin)::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 42px;
+  height: 42px;
+  border: 1px solid var(--hl);
+  background: repeating-linear-gradient(90deg, var(--hl) 0 3px, transparent 3px 8px);
+  opacity: 0.55;
+  box-shadow: 0 0 14px var(--hl);
+  transform: translate(-50%, -50%) scaleY(0.55) rotate(45deg);
+  pointer-events: none;
+}
+
+.tanawkita-map-marker:has(.pay-pin.selected) {
+  --hl: #ffc94a;
+}
+
+.tanawkita-map-marker:has(.pay-pin.selected)::before {
+  width: 60px;
+  height: 60px;
+  opacity: 0.8;
+}
+
+.mapshell .pay-pin,
+.mapshell .pay-pin.selected {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px 6px 8px;
+  border: 1px solid rgba(170, 205, 255, 0.45);
+  border-left: 3px solid var(--hl, #3ee8ff);
+  border-radius: 0;
+  background: linear-gradient(135deg, rgba(59, 130, 255, 0.62) 0%, rgba(16, 52, 150, 0.6) 100%);
+  backdrop-filter: blur(8px) saturate(140%);
+  -webkit-backdrop-filter: blur(8px) saturate(140%);
+  color: #fff;
+  font: 600 12px/1 'Poppins', system-ui, sans-serif;
+  letter-spacing: 0.01em;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.28);
+  transform: translate(-50%, calc(-100% - 14px));
+}
+
+.mapshell .pay-pin:hover {
+  transform: translate(-50%, calc(-100% - 14px)) scale(1.08);
+}
+
+.mapshell .pay-pin.selected {
+  border-color: rgba(255, 201, 74, 0.85);
+  background: linear-gradient(135deg, rgba(59, 130, 255, 0.85) 0%, rgba(20, 64, 180, 0.82) 100%);
+  transform: translate(-50%, calc(-100% - 14px)) scale(1.15);
+}
+
+/* The brand eye beside the salary (three layers of the Figma eye asset). */
+.mapshell .pay-pin::before {
+  content: '';
+  flex: 0 0 20px;
+  height: 11px;
+  background:
+    url('./assets/brand/icon-eye-star.png') 5.8px 1.3px / 8.4px 8.4px no-repeat,
+    url('./assets/brand/icon-eye-pupil.svg') 4.5px 0 / 11px 11px no-repeat,
+    url('./assets/brand/icon-eye-white.svg') 0 0 / 20px 11px no-repeat;
+}
+
+/* Leader line from the tag down to the highlighted spot. */
+.mapshell .pay-pin::after,
+.mapshell .pay-pin.selected::after {
+  left: 50%;
+  bottom: -15px;
+  width: 1px;
+  height: 14px;
+  border: 0;
+  background: var(--hl, #3ee8ff);
+  box-shadow: 0 0 6px var(--hl, #3ee8ff);
+  transform: translateX(-50%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mapshell .pay-pin {
+    transition: none;
+  }
 }

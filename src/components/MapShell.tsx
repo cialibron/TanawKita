@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from 'react'
 import type { View } from '../types'
 import { BrandEmblem } from './Logo'
+import EyeIcon from './EyeIcon'
 
 export interface WorkspaceNavItem {
   id: string
@@ -93,7 +94,7 @@ export default function MapShell({
             ))}
           </div>
           <div className="rail-spacer" />
-          <div className="workspace-avatar" title="Demo workspace">TK</div>
+          <div className="workspace-avatar tk-eye-avatar" title="TanawKita demo"><EyeIcon width={22} /></div>
         </nav>
       )}
 
