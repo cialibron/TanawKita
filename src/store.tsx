@@ -1,0 +1,125 @@
+import { createContext, useContext, useEffect, useReducer, type Dispatch, type ReactNode } from 'react'
+import { userIdFor } from './rules'
+import { seedState } from './data/seed'
+import type { Verification } from './verification'
+import type { AppState, Application, ApplicationStatus, Business, JobPost, JobStatus, Role, Session, SkillCard, View } from './types'
+
+const STORAGE_KEY = 'tanawkita:v6'
+
+export type Action =
+  | { type: 'setView'; view: View }
+  | { type: 'actAs'; role: Role; name: string }
+  | { type: 'reset' }
+  | { type: 'setBusiness'; employerId: string; business: Business }
+  | { type: 'submitVerification'; employerId: string; verification: Verification }
+  | { type: 'reviewVerification'; employerId: string; approve: boolean; reason?: string }
+  | { type: 'saveSkillCard'; card: SkillCard }
+  | { type: 'postJob'; job: JobPost }
+  | { type: 'updateJob'; jobId: string; status: JobStatus }
+  | { type: 'apply'; application: Application }
+  | { type: 'setStatus'; applicationId: string; status: ApplicationStatus }
+
+function reducer(state: AppState, action: Action): AppState {
+  switch (action.type) {
+    case 'setView':
+      return { ...state, view: action.view }
+    case 'actAs': {
+      const userId = userIdFor(action.role, action.name)
+      const names = { ...state.names, [userId]: action.name }
+      return action.role === 'jobseeker'
+        ? { ...state, names, jobseekerId: userId }
+        : { ...state, names, employerId: userId }
+    }
+    case 'reset':
+      return seedState
+    case 'setBusiness':
+      return { ...state, businesses: { ...state.businesses, [action.employerId]: action.business } }
+    case 'submitVerification':
+      return { ...state, verifications: { ...state.verifications, [action.employerId]: action.verification } }
+    case 'reviewVerification': {
+      const current = state.verifications[action.employerId]
+      if (!current) return state
+      const reviewed: Verification = {
+        ...current,
+        status: action.approve ? 'verified' : 'rejected',
+        reviewedAt: new Date().toISOString(),
+        rejectReason: action.approve ? undefined : action.reason,
+      }
+      return { ...state, verifications: { ...state.verifications, [action.employerId]: reviewed } }
+    }
+    case 'saveSkillCard':
+      return { ...state, skillCards: { ...state.skillCards, [action.card.userId]: action.card } }
+    case 'postJob':
+      return { ...state, jobs: [action.job, ...state.jobs] }
+    case 'updateJob':
+      return {
+        ...state,
+        jobs: state.jobs.map((j) => (j.id === action.jobId ? { ...j, status: action.status } : j)),
+      }
+    case 'apply':
+      return { ...state, applications: [action.application, ...state.applications] }
+    case 'setStatus':
+      return {
+        ...state,
+        applications: state.applications.map((a) =>
+          a.id === action.applicationId ? { ...a, status: action.status } : a,
+        ),
+      }
+  }
+}
+
+function load(): AppState {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY)
+    if (raw) {
+      const parsed = JSON.parse(raw) as AppState
+      // Only trust saved data that has the current shape.
+      if (Array.isArray(parsed.jobs) && parsed.names && parsed.businesses && parsed.verifications && parsed.jobseekerId && parsed.employerId) return parsed
+    }
+  } catch {
+    // Storage blocked or corrupt: fall back to the seed data.
+  }
+  return seedState
+}
+
+interface StoreValue {
+  state: AppState
+  dispatch: Dispatch<Action>
+}
+
+const StoreContext = createContext<StoreValue | null>(null)
+
+export function StoreProvider({ children }: { children: ReactNode }) {
+  const [state, dispatch] = useReducer(reducer, undefined, load)
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
+    } catch {
+      // Storage full or blocked: the app keeps working in memory.
+    }
+  }, [state])
+
+  return <StoreContext.Provider value={{ state, dispatch }}>{children}</StoreContext.Provider>
+}
+
+export function useStore(): StoreValue {
+  const value = useContext(StoreContext)
+  if (!value) throw new Error('useStore must be used inside StoreProvider')
+  return value
+}
+
+export function useSession(role: Role): Session {
+  const { state } = useStore()
+  const userId = role === 'jobseeker' ? state.jobseekerId : state.employerId
+  return { role, userId, name: state.names[userId] ?? userId }
+}
+
+/** Wipes saved data without needing React, for the crash screen. */
+export function clearSavedState() {
+  try {
+    localStorage.removeItem(STORAGE_KEY)
+  } catch {
+    // Nothing saved to clear.
+  }
+}
