@@ -1977,10 +1977,19 @@ ul.error {
   height: 42px;
   border: 1px solid var(--hl);
   background: repeating-linear-gradient(90deg, var(--hl) 0 3px, transparent 3px 8px);
-  opacity: 0.55;
   box-shadow: 0 0 14px var(--hl);
-  transform: translate(-50%, -50%) scaleY(0.55) rotate(45deg);
   pointer-events: none;
+  /* Hidden when zoomed out; scales up and fades in once the map reaches street level. */
+  opacity: 0;
+  transform: translate(-50%, -50%) scaleY(0.55) rotate(45deg) scale(0.3);
+  transition:
+    opacity 320ms ease,
+    transform 420ms cubic-bezier(0.2, 0.9, 0.3, 1.25);
+}
+
+.map-zoomed-in .tanawkita-map-marker:has(.pay-pin)::before {
+  opacity: 0.55;
+  transform: translate(-50%, -50%) scaleY(0.55) rotate(45deg) scale(1);
 }
 
 .tanawkita-map-marker:has(.pay-pin.selected) {
@@ -1990,7 +1999,15 @@ ul.error {
 .tanawkita-map-marker:has(.pay-pin.selected)::before {
   width: 60px;
   height: 60px;
+}
+
+.map-zoomed-in .tanawkita-map-marker:has(.pay-pin.selected)::before {
   opacity: 0.8;
+}
+
+/* Wrapper for the zoom sampler; it must not affect the map's layout. */
+.job-map-layer {
+  display: contents;
 }
 
 .mapshell .pay-pin,
@@ -2047,7 +2064,8 @@ ul.error {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .mapshell .pay-pin {
+  .mapshell .pay-pin,
+  .tanawkita-map-marker:has(.pay-pin)::before {
     transition: none;
   }
 }
