@@ -10,6 +10,7 @@ import {
   ShieldCheckIcon,
 } from '../components/LandingIcons'
 import EyeIcon from '../components/EyeIcon'
+import LandingMap from '../components/LandingMap'
 import { PlacesCaption, PlacesSlides } from '../components/PlacesSlideshow'
 import { PLACES, useSlide } from '../components/places'
 import background from '../assets/brand/bg-4.svg'
@@ -167,6 +168,7 @@ export default function Landing({ onEnter, onExplore }: Props) {
 
   return (
     <div className="landing" style={{ backgroundImage: `url("${background}")` }}>
+      <LandingMap />
       <div className="landing-glass" aria-hidden="true">
         <PlacesSlides index={slide} />
       </div>
@@ -431,6 +433,17 @@ export default function Landing({ onEnter, onExplore }: Props) {
         <p className="landing-disclosure">
           Sample businesses and jobseekers in this demo are synthetic. Map pins are approximate, not real storefronts or
           homes.
+        </p>
+        <p className="landing-map-credit">
+          Map ©{' '}
+          <a href="https://openfreemap.org" target="_blank" rel="noreferrer">
+            OpenFreeMap
+          </a>{' '}
+          ©{' '}
+          <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">
+            OpenStreetMap
+          </a>{' '}
+          contributors
         </p>
       </div>
     </div>

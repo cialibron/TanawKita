@@ -1014,3 +1014,110 @@
   box-shadow: none;
 }
 
+
+/* ===== Live map background (MapLibre + OpenFreeMap) ===== */
+.landing-map {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  /* Fade the map out toward the edges so it reads as texture, not a widget. */
+  mask-image: radial-gradient(ellipse 85% 80% at 50% 50%, #000 55%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse 85% 80% at 50% 50%, #000 55%, transparent 100%);
+}
+
+.landing-map.maplibregl-map {
+  background: transparent;
+}
+
+/* Only the tiles are faded and blended; pins (DOM markers above the canvas) stay bright. */
+.landing-map .maplibregl-canvas {
+  opacity: 0.5;
+  mix-blend-mode: screen;
+}
+
+.landing-pin {
+  width: 10px;
+  height: 10px;
+}
+
+.map-dot {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: var(--dot);
+  box-shadow: 0 0 8px var(--dot), 0 0 18px var(--dot);
+  animation: map-twinkle 3.2s ease-in-out infinite;
+}
+
+/* Activity indicator: a ring that ripples out from busy pins. */
+.map-dot.active::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 2px solid var(--dot);
+  animation: map-pulse 2.4s ease-out infinite;
+  animation-delay: inherit;
+}
+
+.map-dot-orange {
+  --dot: #ff8a3d;
+}
+
+.map-dot-pink {
+  --dot: #ff4fa3;
+}
+
+.map-dot-cyan {
+  --dot: #2ee6ff;
+}
+
+.map-dot-gold {
+  --dot: #ffc94a;
+}
+
+@keyframes map-twinkle {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(0.8);
+  }
+}
+
+@keyframes map-pulse {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(3.2);
+    opacity: 0;
+  }
+}
+
+/* The map credit sits outside the faded map layer so it stays readable. */
+.landing-map-credit {
+  position: absolute;
+  right: 12px;
+  bottom: 8px;
+  z-index: 3;
+  margin: 0;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.landing-map-credit a {
+  color: inherit;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .map-dot,
+  .map-dot.active::after {
+    animation: none;
+  }
+}
