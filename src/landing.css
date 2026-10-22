@@ -1,0 +1,1016 @@
+/* Landing and sign-in page. Always dark: it sits on the navy brand background in both themes. */
+.landing {
+  --l-text: #f4f8ff;
+  --l-muted: #b9c8e6;
+  --l-field: rgba(6, 18, 58, 0.55);
+  --l-border: rgba(185, 200, 230, 0.35);
+  --l-accent: #48a9f5;
+  --l-cta: #ffffff;
+  --l-cta-text: #0b1c48;
+  --l-error: #ff9b94;
+  --l-error-border: #ff6b61;
+
+  position: fixed;
+  inset: 0;
+  overflow-y: auto;
+  color: var(--l-text);
+  background-color: #06123a;
+  background-size: cover;
+  background-position: center;
+  font-family: 'Poppins', system-ui, sans-serif;
+}
+
+.landing-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 20px 24px;
+}
+
+.landing-main {
+  display: grid;
+  grid-template-columns: 1.1fr minmax(320px, 420px);
+  gap: 56px;
+  align-items: center;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 24px 24px 64px;
+}
+
+.landing-eyebrow {
+  color: var(--l-accent);
+  font-weight: 600;
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin: 0 0 12px;
+}
+
+.landing-pitch h1 {
+  font-size: clamp(2rem, 4.5vw, 3.25rem);
+  line-height: 1.1;
+  margin: 0 0 16px;
+  font-weight: 700;
+}
+
+.landing-pitch h1 span {
+  display: block;
+  color: var(--l-accent);
+}
+
+.landing-pitch {
+  max-width: 500px;
+}
+
+.landing-lead {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: var(--l-muted);
+  max-width: 34em;
+  margin: 0 0 28px;
+}
+
+.landing-features {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 14px;
+}
+
+.landing-features li {
+  display: grid;
+  gap: 2px;
+  padding-left: 16px;
+  border-left: 3px solid var(--l-accent);
+}
+
+.landing-features span {
+  color: var(--l-muted);
+  font-size: 0.95rem;
+}
+
+/* Glass panel: the right part of the page behind a diagonal edge, wider at the bottom. */
+.landing {
+  --edge-top: 60%;
+  --edge-bottom: 49%;
+}
+
+.landing-glass {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.landing-glass {
+  clip-path: polygon(var(--edge-top) 0, 100% 0, 100% 100%, var(--edge-bottom) 100%);
+  background: linear-gradient(120deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0.05) 45%, rgba(120, 190, 255, 0.1) 100%);
+  backdrop-filter: blur(22px) saturate(160%);
+  -webkit-backdrop-filter: blur(22px) saturate(160%);
+}
+
+/* Soft shine running along the diagonal edge, above the photos. */
+.landing-glass::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(105deg, transparent 40%, rgba(255, 255, 255, 0.18) 52%, transparent 66%);
+}
+
+/* The sign-in form sits directly on the glass, no box, centered in the glass part of the screen. */
+.landing-card {
+  padding: 8px 0;
+  width: 100%;
+  max-width: 380px;
+  justify-self: center;
+}
+
+/* Two columns split where the diagonal crosses mid-height, so the right column is the glass. */
+.landing-main {
+  --split: calc((var(--edge-top) + var(--edge-bottom)) / 2);
+  grid-template-columns: var(--split) 1fr;
+  gap: 0;
+  max-width: none;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+/* Pitch is centered in the left (non-glass) part of the screen. */
+.landing-pitch {
+  justify-self: center;
+  padding: 0 48px;
+  text-align: center;
+}
+
+.landing-pitch .landing-lead {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Feature list stays left-aligned for easy scanning, as a centered block. */
+.landing-pitch .landing-features {
+  width: fit-content;
+  margin: 0 auto;
+  text-align: left;
+}
+
+/* Wrapper so the credit can sit at the bottom of the page, under the content. */
+.landing-page {
+  position: relative;
+  z-index: 2;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.landing-main {
+  flex: 1 0 auto;
+}
+
+/* Inside the column wrapper, auto margins would shrink these to fit; keep them full width. */
+.landing-nav,
+.landing-main {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.landing-card h2 {
+  margin: 0 0 20px;
+  font-size: 1.5rem;
+}
+
+.landing .sso {
+  display: grid;
+  gap: 10px;
+}
+
+.landing .sso-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 46px;
+  border-radius: 10px;
+  border: 1px solid var(--l-border);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--l-text);
+  font: 500 0.95rem 'Poppins', system-ui, sans-serif;
+}
+
+.landing .sso-button:not(:disabled):hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: var(--l-accent);
+}
+
+.landing .divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0;
+  color: var(--l-muted);
+  font-size: 0.85rem;
+}
+
+.landing .divider::before,
+.landing .divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--l-border);
+}
+
+.landing .field {
+  margin-bottom: 16px;
+}
+
+.landing label {
+  margin: 0 0 6px;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.landing .field-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.landing input:not([type='checkbox']):not([type='radio']) {
+  min-height: 48px;
+  border-radius: 10px;
+  border: 1px solid var(--l-border);
+  background: var(--l-field);
+  color: var(--l-text);
+  font-family: inherit;
+}
+
+.landing input::placeholder {
+  color: rgba(185, 200, 230, 0.6);
+}
+
+.landing input:focus-visible {
+  outline: 2px solid var(--l-accent);
+  outline-offset: 1px;
+}
+
+.landing .field.invalid input:not([type='checkbox']):not([type='radio']) {
+  border-color: var(--l-error-border);
+  box-shadow: 0 0 0 1px var(--l-error-border);
+}
+
+.landing .field-error {
+  color: var(--l-error);
+  font-size: 0.85rem;
+  margin: 6px 0 0;
+}
+
+.landing .form-error {
+  background: rgba(255, 107, 97, 0.15);
+  border: 1px solid var(--l-error-border);
+  color: var(--l-text);
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin-bottom: 16px;
+  font-size: 0.9rem;
+}
+
+.landing .password-wrap {
+  position: relative;
+}
+
+.landing .password-wrap input {
+  padding-right: 56px;
+}
+
+.landing .toggle-password {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  min-height: 40px;
+  width: 48px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: transparent;
+}
+
+.landing .toggle-password:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.landing .remember {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 400;
+  margin: 4px 0 20px;
+  color: var(--l-muted);
+}
+
+.landing .cta {
+  width: 100%;
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--l-cta);
+  color: var(--l-cta-text);
+  font: 700 1.05rem 'Poppins', system-ui, sans-serif;
+  box-shadow: 0 6px 20px rgba(72, 169, 245, 0.35);
+}
+
+.landing .cta:not(:disabled):hover {
+  background: #e6f3ff;
+}
+
+.landing .cta:disabled {
+  opacity: 0.85;
+  cursor: progress;
+}
+
+.landing .spinner {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2.5px solid currentColor;
+  border-right-color: transparent;
+  animation: tk-spin 0.8s linear infinite;
+}
+
+@keyframes tk-spin {
+  to { transform: rotate(360deg); }
+}
+
+.landing .landing-link {
+  all: unset;
+  cursor: pointer;
+  color: var(--l-accent);
+  font-weight: 600;
+}
+
+.landing .landing-link:hover {
+  text-decoration: underline;
+}
+
+.landing .landing-link:focus-visible {
+  outline: 2px solid var(--l-accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.landing .landing-link.small {
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.landing-nav > .landing-link {
+  padding: 10px 16px;
+  border: 1px solid var(--l-border);
+  border-radius: 999px;
+}
+
+.landing .card-footer {
+  margin: 20px 0 0;
+  text-align: center;
+  color: var(--l-muted);
+}
+
+.landing .card-hint {
+  margin: 12px 0 0;
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--l-muted);
+}
+
+.landing .demo-banner {
+  margin: 0 0 16px;
+  padding: 10px 12px;
+  border: 1px solid #ffc94a;
+  border-radius: 10px;
+  background: rgba(255, 201, 74, 0.14);
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+
+.landing .demo-banner strong {
+  color: #ffc94a;
+}
+
+.landing .notice {
+  background: rgba(72, 169, 245, 0.15);
+  border: 1px solid var(--l-accent);
+  border-radius: 10px;
+  padding: 12px;
+  line-height: 1.5;
+}
+
+.landing .role-pick {
+  border: 0;
+  padding: 0;
+  margin: 0 0 16px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.landing .role-pick legend {
+  font-weight: 500;
+  font-size: 0.9rem;
+  margin-bottom: 6px;
+}
+
+.landing .role-pick label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 12px;
+  border: 1px solid var(--l-border);
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.landing .role-pick label.selected {
+  border-color: var(--l-accent);
+  background: rgba(72, 169, 245, 0.12);
+}
+
+@media (max-width: 860px) {
+  .landing-main {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+
+  .landing-pitch {
+    padding: 0;
+  }
+
+  .landing-features {
+    display: none;
+  }
+
+  .landing-nav,
+  .landing-main {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .landing-glass,
+  .glow-edge {
+    display: none;
+  }
+
+  /* The glass band runs from the form to the bottom of the page. */
+  .landing-main {
+    grid-template-rows: auto 1fr;
+    align-items: stretch;
+    padding-bottom: 0;
+  }
+
+  .landing-card {
+    width: auto;
+    max-width: none;
+    justify-self: stretch;
+    margin: 0 -16px;
+    padding: 56px 20px 48px;
+    clip-path: polygon(0 32px, 100% 0, 100% 100%, 0 100%);
+    background: linear-gradient(160deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0.05) 50%, rgba(120, 190, 255, 0.1) 100%);
+    backdrop-filter: blur(22px) saturate(160%);
+    -webkit-backdrop-filter: blur(22px) saturate(160%);
+  }
+}
+
+/* Let grid columns shrink below their content on narrow phones. */
+.landing-pitch,
+.landing-card {
+  min-width: 0;
+}
+
+/* Synthetic-data disclosure, pinned to the bottom-left of the page. */
+.landing-disclosure {
+  position: absolute;
+  left: 24px;
+  bottom: 12px;
+  z-index: 3;
+  max-width: 52ch;
+  margin: 0;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.landing-nav,
+.landing-main {
+  position: relative;
+  z-index: 2;
+}
+
+/* Photo slideshow filling the glass panel. Cross-fades with a slow zoom. */
+.places-slides,
+.places-slides img,
+.places-wash {
+  position: absolute;
+  inset: 0;
+}
+
+.places-slides img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transform: scale(1.04);
+  transition: opacity 1.2s ease, transform 7s ease-out;
+}
+
+.places-slides img.active {
+  opacity: 1;
+  transform: scale(1.12);
+}
+
+/* Navy wash so the form on top stays readable over any photo. */
+.places-wash {
+  background: linear-gradient(160deg, rgba(6, 18, 58, 0.62) 0%, rgba(6, 18, 58, 0.72) 55%, rgba(10, 40, 100, 0.6) 100%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .places-slides img {
+    transition: none;
+    transform: none;
+  }
+}
+
+.places-caption {
+  position: fixed;
+  right: 24px;
+  bottom: 32px;
+  z-index: 3;
+  display: grid;
+  gap: 2px;
+  text-align: right;
+  font-size: 0.85rem;
+  color: var(--l-muted);
+}
+
+.places-caption strong {
+  color: var(--l-text);
+  font-size: 1rem;
+}
+
+.places-label {
+  color: var(--l-accent);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.places-caption a {
+  color: inherit;
+  font-size: 0.75rem;
+}
+
+@media (max-width: 860px) {
+  .places-caption {
+    display: none;
+  }
+}
+
+/* ===== Redesign: cyber-ambient dark mode ===== */
+.landing {
+  --l-text: #ffffff;
+  --l-muted: #c9d6ee;
+  --l-accent: #3ee8ff;
+  --l-blue: #3b82ff;
+  --l-field: rgba(8, 20, 60, 0.55);
+  --l-border: rgba(120, 180, 255, 0.28);
+  background-color: #040b26;
+}
+
+/* Brand lockup: glowing emblem + wordmark + tagline. */
+.brand-lockup {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.tk-emblem {
+  position: relative;
+  flex-shrink: 0;
+  filter: drop-shadow(0 0 10px rgba(62, 232, 255, 0.55)) drop-shadow(0 0 24px rgba(59, 130, 255, 0.45));
+}
+
+.brand-text {
+  display: grid;
+  gap: 2px;
+}
+
+.brand-word {
+  font-weight: 800;
+  font-size: 1.7rem;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  color: #fff;
+  text-shadow: 0 0 18px rgba(120, 200, 255, 0.35);
+}
+
+.brand-sub {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #5cc8ff;
+}
+
+/* Headline */
+.landing-pitch h1 {
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: #fff;
+}
+
+.landing-pitch h1 span {
+  display: inline;
+}
+
+.hl-cyan {
+  color: #3ee8ff;
+  text-shadow: 0 0 22px rgba(62, 232, 255, 0.55);
+}
+
+.hl-blue {
+  color: #3b82ff;
+  text-shadow: 0 0 22px rgba(59, 130, 255, 0.65);
+}
+
+.landing-lead {
+  color: #e3ebf8;
+}
+
+/* Features with glowing icons */
+.landing-features {
+  gap: 18px;
+}
+
+.landing-features li.feature {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding-left: 0;
+  border-left: 0;
+}
+
+.feature-icon {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  color: var(--tone);
+  background: color-mix(in srgb, var(--tone) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--tone) 45%, transparent);
+  box-shadow:
+    0 0 18px color-mix(in srgb, var(--tone) 40%, transparent),
+    inset 0 0 12px color-mix(in srgb, var(--tone) 18%, transparent);
+}
+
+.feature-icon svg {
+  filter: drop-shadow(0 0 4px var(--tone));
+}
+
+.feature-text {
+  display: grid;
+  gap: 2px;
+}
+
+.feature-text strong {
+  color: #fff;
+}
+
+.feature-text span {
+  color: var(--l-muted);
+}
+
+.feature-cyan {
+  --tone: #3ee8ff;
+}
+
+.feature-violet {
+  --tone: #8b7bff;
+}
+
+.feature-gold {
+  --tone: #ffc94a;
+}
+
+/* Glowing diagonal edge with drifting particles */
+.glow-edge {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.glow-edge svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.glow-edge-halo {
+  stroke-width: 14px;
+  opacity: 0.22;
+  filter: blur(6px);
+}
+
+.glow-particle {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0;
+  animation: glow-drift linear infinite;
+}
+
+@keyframes glow-drift {
+  0% {
+    opacity: 0;
+    transform: translate(0, 12px);
+  }
+  20% {
+    opacity: 0.9;
+  }
+  80% {
+    opacity: 0.6;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(6px, -48px);
+  }
+}
+
+/* Glass login card */
+.landing-card {
+  max-width: 420px;
+  padding: 32px 30px 26px;
+  border-radius: 24px;
+  background: linear-gradient(160deg, rgba(20, 40, 100, 0.62) 0%, rgba(8, 20, 60, 0.55) 100%);
+  border: 1px solid rgba(160, 200, 255, 0.22);
+  backdrop-filter: blur(20px) saturate(150%);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+  box-shadow:
+    0 30px 80px rgba(0, 0, 0, 0.5),
+    0 0 40px rgba(59, 130, 255, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+.landing-card h2 {
+  font-weight: 800;
+  color: #fff;
+}
+
+/* SSO pills */
+.landing .sso-button {
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(160, 200, 255, 0.3);
+  transition:
+    background-color 0.2s,
+    border-color 0.2s,
+    box-shadow 0.2s;
+}
+
+.landing .sso-button:not(:disabled):hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--l-accent);
+  box-shadow: 0 0 18px rgba(62, 232, 255, 0.3);
+}
+
+.landing .divider {
+  color: #b4c3e0;
+}
+
+/* Glowing inputs with icons */
+.landing .input-wrap {
+  position: relative;
+}
+
+.landing .input-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: grid;
+  color: #7fb4ff;
+  pointer-events: none;
+}
+
+.landing .input-wrap input:not([type='checkbox']):not([type='radio']) {
+  padding-left: 44px;
+  background: var(--l-field);
+  border-color: var(--l-border);
+  box-shadow: inset 0 0 12px rgba(59, 130, 255, 0.12);
+}
+
+.landing .input-wrap input:focus {
+  border-color: var(--l-accent);
+  box-shadow:
+    0 0 0 3px rgba(62, 232, 255, 0.18),
+    0 0 18px rgba(62, 232, 255, 0.25);
+  outline: none;
+}
+
+.landing .input-wrap:focus-within .input-icon {
+  color: var(--l-accent);
+}
+
+/* Primary CTA: electric blue to azure */
+.landing .cta {
+  background: linear-gradient(90deg, #2563ff 0%, #22b8ff 100%);
+  color: #fff;
+  box-shadow:
+    0 10px 30px rgba(34, 140, 255, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  transition:
+    filter 0.2s,
+    box-shadow 0.2s,
+    transform 0.1s;
+}
+
+.landing .cta:not(:disabled):hover {
+  background: linear-gradient(90deg, #2563ff 0%, #22b8ff 100%);
+  filter: brightness(1.1);
+  box-shadow:
+    0 12px 38px rgba(34, 160, 255, 0.75),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+
+/* Bright cyan links; nav pill with glow */
+.landing .landing-link {
+  color: var(--l-accent);
+}
+
+.landing-nav > .landing-link {
+  border-color: rgba(62, 232, 255, 0.5);
+  box-shadow: 0 0 14px rgba(62, 232, 255, 0.2);
+  background: rgba(4, 11, 38, 0.35);
+}
+
+.landing-nav > .landing-link:hover {
+  text-decoration: none;
+  box-shadow: 0 0 22px rgba(62, 232, 255, 0.45);
+}
+
+.landing .card-footer,
+.landing .card-hint {
+  color: #c2d0ea;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glow-particle {
+    animation: none;
+  }
+}
+
+@media (max-width: 860px) {
+  .brand-word {
+    font-size: 1.3rem;
+  }
+
+  .brand-sub {
+    display: none;
+  }
+
+  .landing-card {
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+}
+
+/* Headline colors must beat the older ".landing-pitch h1 span" rule. */
+.landing-pitch h1 .hl-cyan {
+  color: #3ee8ff;
+}
+
+.landing-pitch h1 .hl-blue {
+  color: #3b82ff;
+}
+
+/* Photo caption sits at the bottom of the page (above the map credit), not over the form. */
+.places-caption {
+  position: absolute;
+  bottom: 28px;
+  right: 12px;
+  display: block;
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.places-caption > * {
+  display: inline;
+}
+
+.places-caption > * + *::before {
+  content: ' · ';
+  color: var(--l-muted);
+}
+
+.places-caption .places-label + strong::before {
+  content: '  ';
+}
+
+.places-caption strong {
+  font-size: 0.85rem;
+}
+
+.places-caption a {
+  display: block;
+}
+
+.places-caption a::before {
+  content: none;
+}
+
+.landing-main {
+  padding-bottom: 96px;
+}
+
+@media (max-width: 860px) {
+  .landing-card {
+    max-width: none;
+    padding: 56px 20px 48px;
+  }
+
+  .landing-main {
+    padding-bottom: 0;
+  }
+}
+
+/* Phones show no photos, so no photo caption either. */
+@media (max-width: 860px) {
+  .places-caption {
+    display: none;
+  }
+}
+
+/* ===== No glow outside the logo ===== */
+.hl-cyan,
+.hl-blue {
+  text-shadow: none;
+}
+
+.feature-icon {
+  box-shadow: none;
+}
+
+.feature-icon svg {
+  filter: none;
+}
+
+.glow-edge-halo {
+  display: none;
+}
+
+.glow-particle {
+  box-shadow: none !important;
+}
+
+.landing-card {
+  box-shadow:
+    0 24px 60px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.landing .sso-button:not(:disabled):hover {
+  box-shadow: none;
+}
+
+.landing .input-wrap input:not([type='checkbox']):not([type='radio']) {
+  box-shadow: none;
+}
+
+/* Plain focus ring (no glow) so keyboard users still see where they are. */
+.landing .input-wrap input:focus {
+  box-shadow: 0 0 0 2px rgba(62, 232, 255, 0.45);
+}
+
+.landing .cta,
+.landing .cta:not(:disabled):hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+}
+
+.landing-nav > .landing-link,
+.landing-nav > .landing-link:hover {
+  box-shadow: none;
+}
+
