@@ -5895,3 +5895,48 @@ button.skill-picker-option.custom {
 :root:not([data-theme='light']) .bento-card.bento-cta {
   background: linear-gradient(120deg, #12307f, #1d4fb8);
 }
+
+/* Outer buttons, on the edge of the screen away from the panel content (Sign out, Developer view, Full map,
+   Default zoom and the chips over the map), have no box at all: just the label. Hover brightens the label;
+   keyboard focus still shows an outline. A selected chip keeps its fill. */
+:root .mapshell :is(
+    .workspace-heading button.sign-out,
+    .map-actions button.map-action-button,
+    .map-view-controls button.map-zoom-reset,
+    .map-overlay .chips button.chip:not(.active)
+  ),
+:root .mapshell :is(
+    .workspace-heading button.sign-out,
+    .map-actions button.map-action-button,
+    .map-view-controls button.map-zoom-reset,
+    .map-overlay .chips button.chip:not(.active)
+  ):is(:hover, :focus-visible) {
+  border-color: transparent !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
+:root .mapshell :is(
+    .workspace-heading button.sign-out,
+    .map-actions button.map-action-button,
+    .map-view-controls button.map-zoom-reset,
+    .map-overlay .chips button.chip:not(.active)
+  ):hover {
+  color: #8cc4ff !important;
+}
+
+:root .mapshell :is(
+    .workspace-heading button.sign-out,
+    .map-actions button.map-action-button,
+    .map-view-controls button.map-zoom-reset,
+    .map-overlay .chips button.chip:not(.active)
+  ):focus-visible {
+  outline: 2px solid #8cc4ff;
+  outline-offset: 2px;
+}
+
+/* Chips over the map lose their box too, so they get the same dark halo as the other map buttons. */
+.map-overlay .chips button.chip:not(.active) {
+  text-shadow: 0 0 3px #0b1c48, 0 0 6px #0b1c48, 0 1px 2px #0b1c48;
+}
