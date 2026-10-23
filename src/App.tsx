@@ -8,7 +8,7 @@ import Landing from './pages/Landing'
 import SetupPanel from './pages/SetupPanel'
 import WelcomeTutorial from './pages/WelcomeTutorial'
 import GuidedTour from './pages/GuidedTour'
-import { JOBSEEKER_TOUR, LOGIN_TOUR, markTutorialSeen, onReplayTutorial, tutorialSeen } from './pages/tutorial'
+import { JOBSEEKER_TOUR, LOGIN_TOUR, forScreen, markTutorialSeen, onReplayTutorial, tutorialSeen } from './pages/tutorial'
 import { accountKey, getSetup, type SetupStep } from './onboarding'
 import ProfilePage from './pages/jobseeker/ProfilePage'
 import FindJobs from './pages/jobseeker/FindJobs'
@@ -26,22 +26,22 @@ type EmployerSection = 'area' | 'people' | 'post' | 'posts' | 'verify'
 type AdminSection = 'overview' | 'verifications'
 
 const JOBSEEKER_NAV: WorkspaceNavItem[] = [
-  { id: 'jobs', label: 'Find jobs', icon: '⌕' },
-  { id: 'applications', label: 'My applications', icon: '▤' },
-  { id: 'skillcard', label: 'My profile / skill card', icon: '◉' },
+  { id: 'jobs', label: 'Find jobs', icon: '⌕', short: 'Jobs' },
+  { id: 'applications', label: 'My applications', icon: '▤', short: 'Applied' },
+  { id: 'skillcard', label: 'My profile / skill card', icon: '◉', short: 'Profile' },
 ]
 
 const EMPLOYER_NAV: WorkspaceNavItem[] = [
-  { id: 'area', label: 'Business overview', icon: '▦' },
-  { id: 'people', label: 'People looking for work', icon: '◍' },
-  { id: 'post', label: 'Post a job', icon: '+' },
-  { id: 'posts', label: 'My job posts', icon: '▤' },
-  { id: 'verify', label: 'Business verification', icon: '✓' },
+  { id: 'area', label: 'Business overview', icon: '▦', short: 'Home' },
+  { id: 'people', label: 'People looking for work', icon: '◍', short: 'People' },
+  { id: 'post', label: 'Post a job', icon: '+', short: 'Post' },
+  { id: 'posts', label: 'My job posts', icon: '▤', short: 'Posts' },
+  { id: 'verify', label: 'Business verification', icon: '✓', short: 'Verify' },
 ]
 
 const ADMIN_NAV: WorkspaceNavItem[] = [
-  { id: 'overview', label: 'PESO overview', icon: '▦' },
-  { id: 'verifications', label: 'Verification review', icon: '✓' },
+  { id: 'overview', label: 'PESO overview', icon: '▦', short: 'Overview' },
+  { id: 'verifications', label: 'Verification review', icon: '✓', short: 'Review' },
 ]
 
 const NEW_USER = '__new__'
@@ -110,7 +110,10 @@ export default function App() {
     setJobseekerSection('jobs')
     setTutorial('app')
   }
-  const tourSteps = LOGIN_TOUR.length + JOBSEEKER_TOUR.length
+  // Phones and wider screens get their own version of some steps.
+  const loginSteps = forScreen(LOGIN_TOUR)
+  const appSteps = forScreen(JOBSEEKER_TOUR)
+  const tourSteps = loginSteps.length + appSteps.length
   const tutorialLayer =
     tutorial === 'welcome' ? (
       <WelcomeTutorial
@@ -122,9 +125,9 @@ export default function App() {
         }}
       />
     ) : tutorial === 'login' && !entered ? (
-      <GuidedTour steps={LOGIN_TOUR} numbering={{ before: 0, total: tourSteps }} onDone={finishTutorial} />
+      <GuidedTour steps={loginSteps} numbering={{ before: 0, total: tourSteps }} onDone={finishTutorial} />
     ) : tutorial === 'app' ? (
-      <GuidedTour steps={JOBSEEKER_TOUR} numbering={{ before: LOGIN_TOUR.length, total: tourSteps }} onDone={finishTutorial} />
+      <GuidedTour steps={appSteps} numbering={{ before: loginSteps.length, total: tourSteps }} onDone={finishTutorial} />
     ) : null
 
   if (!entered) {

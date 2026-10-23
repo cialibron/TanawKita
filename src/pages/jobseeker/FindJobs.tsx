@@ -294,6 +294,11 @@ export default function FindJobs({ view, onViewChange, navigation, activeNavigat
                 <span>{where}</span>
               </span>
 
+              {/* Phones show this plain line instead of the route graphic above. */}
+              <span className="job-row-plain">
+                {km !== null ? `${km < 10 ? km.toFixed(1) : Math.round(km)} km away${origin?.code === 'YOU' ? '' : ` from ${origin?.name}`}` : `${job.hoursPerWeek} hours a week`}
+              </span>
+
               <span className="job-row-meta">
                 <span>
                   {job.employerName} · {job.jobType}

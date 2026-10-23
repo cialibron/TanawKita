@@ -45,6 +45,17 @@ export interface TourStep {
   focusTarget?: boolean
   // The person has to do this step themselves (e.g. sign in); there is no Next button.
   waitForUser?: boolean
+  // Only on phones (the bottom tab bar layout) or only on wider screens (the left rail layout).
+  only?: 'phone' | 'desktop'
+}
+
+// The same breakpoint as the phone layout in index.css.
+export const isPhone = () => window.matchMedia('(max-width: 720px)').matches
+
+// The steps for the current screen size, checked when the tour starts.
+export function forScreen(steps: TourStep[]): TourStep[] {
+  const phone = isPhone()
+  return steps.filter((step) => !step.only || (step.only === 'phone') === phone)
 }
 
 const click = (selector: string) => () => document.querySelector<HTMLElement>(selector)?.click()
@@ -80,24 +91,49 @@ export const LOGIN_TOUR: TourStep[] = [
   },
 ]
 
-// Part 2, the jobseeker tour on the Find jobs screen, once signed in.
+// Part 2, the jobseeker tour on the Find jobs screen, once signed in. Phones and wider screens lay the app out
+// differently (bottom tab bar vs. left rail and map side by side), so some steps are for one or the other.
 export const JOBSEEKER_TOUR: TourStep[] = [
   {
+    only: 'desktop',
     target: '.dev-role-picker',
     title: 'Switch views',
     text: 'Developer view switches the demo between Jobseeker, Employer and PESO Admin. It is only here for the demo.',
   },
   {
+    only: 'desktop',
     target: '.workspace-rail .role-rail',
     title: 'Your tabs',
-    text: 'Find jobs, My applications and My profile live here. On a phone, they are in the bar along the bottom.',
+    text: 'Find jobs, My applications and My profile live here, on the left.',
+  },
+  {
+    only: 'phone',
+    target: '.workspace-rail .role-rail',
+    title: 'Your tabs',
+    text: 'Jobs, Applied and Profile are in the bar along the bottom. Tap one to open it.',
+  },
+  {
+    only: 'phone',
+    target: '.workspace-rail .rail-toggle',
+    title: 'Map or list',
+    text: 'Tap Map to see the jobs on a map, and List to come back to this list.',
+    nextLabel: 'Show the map',
+    onNext: click('.workspace-rail .rail-toggle'),
+  },
+  {
+    only: 'phone',
+    target: '.dev-role-picker',
+    title: 'Switch views',
+    text: 'On the map, Developer view switches the demo between Jobseeker, Employer and PESO Admin. It is only here for the demo.',
+    nextLabel: 'Back to the list',
+    onNext: click('.mapshell.menu-minimized .workspace-rail .rail-toggle'),
   },
   {
     // A job not applied for yet, so the next steps can show Apply now.
     target: '.job-rows .job-row:not(.applied)',
     scroll: true,
     title: 'Pick a job',
-    text: 'Each card shows the pay, how far the job is and how well it matches your skills. Tap a card, or a pin on the map, to open it.',
+    text: 'Each card shows the pay, how far away the job is and how well it matches your skills. Tap a card, or a pin on the map, to open it.',
     nextLabel: 'Open this job',
     onNext: click('.job-rows .job-row:not(.applied):not(.selected)'),
   },
@@ -111,6 +147,11 @@ export const JOBSEEKER_TOUR: TourStep[] = [
     scroll: true,
     title: 'Apply',
     text: 'Press Apply now to send your skill card to the employer. The job then shows ✓ Applied in the list and under My applications.',
+  },
+  {
+    target: '.workspace-rail .rail-eye',
+    title: 'Settings',
+    text: 'Settings has light or dark mode, bigger text, and this tour again.',
   },
   {
     title: 'You’re all set',

@@ -10,6 +10,8 @@ export interface WorkspaceNavItem {
   id: string
   label: string
   icon: string
+  // One or two words shown under the icon on the phone tab bar, e.g. "Applied".
+  short?: string
 }
 
 const VIEWS: { id: View; label: string }[] = [
@@ -55,6 +57,9 @@ export function WorkspaceRail({ view, navigation, activeNavigation, onNavigation
         >
           <span aria-hidden="true">{menu.open ? '‹' : '›'}</span>
           <span className="rail-label">Minimize menu</span>
+          {/* Phones: the menu covers the map, so this button switches between the two. */}
+          <span className="rail-phone-icon" aria-hidden="true">{menu.open ? '⌖' : '☰'}</span>
+          <span className="rail-short" aria-hidden="true">{menu.open ? 'Map' : 'List'}</span>
         </button>
       )}
       {fullScreen && (
@@ -89,6 +94,7 @@ export function WorkspaceRail({ view, navigation, activeNavigation, onNavigation
             }}
           >
             <span aria-hidden="true">{item.icon}</span>
+            <span className="rail-short" aria-hidden="true">{item.short ?? item.label}</span>
             {expanded ? <span className="rail-label">{item.label}</span> : <span className="role-tooltip" role="tooltip">{item.label}</span>}
           </button>
         ))}
@@ -146,6 +152,7 @@ function RailEyeMenu() {
         onClick={toggle}
       >
         <EyeIcon width={22} />
+        <span className="rail-short" aria-hidden="true">Settings</span>
       </button>
       {open && anchor && createPortal(
         <div ref={menu} className="rail-eye-menu" role="menu" aria-label="Settings and theme" style={{ left: anchor.left, bottom: anchor.bottom }}>
