@@ -262,6 +262,7 @@ export default function MyBusiness({ view, onViewChange, navigation, activeNavig
       onNavigationChange={onNavigationChange}
       panelFullScreen={fullScreen}
       onPanelFullScreenChange={setFullScreen}
+      detailIsSelection={Boolean(barangay)}
       detail={barangay ? (
         <BarangayDetail code={barangay} seekers={nearby} />
       ) : business ? (

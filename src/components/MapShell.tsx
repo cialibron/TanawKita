@@ -16,6 +16,9 @@ interface Props {
   panelOpen?: boolean
   onPanelOpenChange?: (open: boolean) => void
   detail?: ReactNode
+  // Whether `detail` is something the person picked (a job, a barangay). Only a pick pops up over a full-screen
+  // menu; a standing summary stays hidden there. Defaults to true.
+  detailIsSelection?: boolean
   // Full-screen menu, controlled by the page when it needs to know (otherwise kept here).
   panelFullScreen?: boolean
   onPanelFullScreenChange?: (on: boolean) => void
@@ -35,6 +38,7 @@ export default function MapShell({
   panelOpen,
   onPanelOpenChange,
   detail,
+  detailIsSelection = true,
   panelFullScreen,
   onPanelFullScreenChange,
 }: Props) {
@@ -84,18 +88,26 @@ export default function MapShell({
           </button>
         </div>
 
-        {detail && !mapFullScreen && !full && (
-          <section className={`workspace-detail${detailOpen ? ' detail-open' : ' detail-minimized'}${detailExpanded ? ' detail-expanded' : ''}`} aria-label="Selected item details">
-            <div className="workspace-detail-controls">
-              <button type="button" className="detail-expand-button" onClick={() => setDetailExpanded(!detailExpanded)}>
-                {detailExpanded ? 'Show less ↓' : 'Expand details ↑'}
-              </button>
-              <button type="button" className="detail-collapse-button" onClick={() => setDetailOpen(!detailOpen)} aria-label={detailOpen ? 'Minimize selected details' : 'Show selected details'}>
-                {detailOpen ? '⌄' : '⌃'}
-              </button>
-            </div>
-            {detailOpen && <div className="workspace-detail-content">{detail}</div>}
-          </section>
+        {/* Details pop up over the menu too, even when it is full screen or covers the map on a phone. */}
+        {detail && !mapFullScreen && (detailIsSelection || !full) && (
+          detailOpen ? (
+            <section className={`workspace-detail detail-open${detailExpanded ? ' detail-expanded' : ''}`} aria-label="Selected item details">
+              <div className="workspace-detail-controls">
+                <button type="button" className="detail-expand-button" onClick={() => setDetailExpanded(!detailExpanded)}>
+                  {detailExpanded ? 'Show less ↓' : 'Expand details ↑'}
+                </button>
+                <button type="button" className="detail-minimize-button" onClick={() => setDetailOpen(false)}>
+                  Minimize
+                </button>
+              </div>
+              <div className="workspace-detail-content">{detail}</div>
+            </section>
+          ) : (
+            // Minimized: a bar across the bottom of the map with a large up arrow; tapping it brings the details back.
+            <button type="button" className="workspace-detail-bar" onClick={() => setDetailOpen(true)} aria-label="Show selected details">
+              <span aria-hidden="true">▲</span>
+            </button>
+          )
         )}
       </section>
     </main>

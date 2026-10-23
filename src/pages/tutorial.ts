@@ -91,42 +91,22 @@ export const LOGIN_TOUR: TourStep[] = [
   },
 ]
 
-// Part 2, the jobseeker tour on the Find jobs screen, once signed in. Phones and wider screens lay the app out
-// differently (bottom tab bar vs. left rail and map side by side), so some steps are for one or the other.
+// Part 2, the jobseeker tour. It starts on the Find jobs tab with the menu full screen (where sign-in lands); the
+// job details pop up over the list, and full screen ends after Apply, before the steps that point at the map.
+// Phones and wider screens lay the app out differently (bottom tab bar vs. left rail beside the map), so some
+// steps are for one or the other.
 export const JOBSEEKER_TOUR: TourStep[] = [
   {
     only: 'desktop',
-    target: '.dev-role-picker',
-    title: 'Switch views',
-    text: 'Developer view switches the demo between Jobseeker, Employer and PESO Admin. It is only here for the demo.',
-  },
-  {
-    only: 'desktop',
     target: '.workspace-rail .role-rail',
     title: 'Your tabs',
-    text: 'Find jobs, My applications and My profile live here, on the left.',
+    text: 'You start on Find jobs, with the list full screen. My applications and My profile live here too, on the left.',
   },
   {
     only: 'phone',
     target: '.workspace-rail .role-rail',
     title: 'Your tabs',
-    text: 'Jobs, Applied and Profile are in the bar along the bottom. Tap one to open it.',
-  },
-  {
-    only: 'phone',
-    target: '.workspace-rail .rail-toggle',
-    title: 'Map or list',
-    text: 'Tap Map to see the jobs on a map, and List to come back to this list.',
-    nextLabel: 'Show the map',
-    onNext: click('.workspace-rail .rail-toggle'),
-  },
-  {
-    only: 'phone',
-    target: '.dev-role-picker',
-    title: 'Switch views',
-    text: 'On the map, Developer view switches the demo between Jobseeker, Employer and PESO Admin. It is only here for the demo.',
-    nextLabel: 'Back to the list',
-    onNext: click('.mapshell.menu-minimized .workspace-rail .rail-toggle'),
+    text: 'You start on Jobs. Applied and Profile are in the bar along the bottom too. Tap one to open it.',
   },
   {
     // A job not applied for yet, so the next steps can show Apply now.
@@ -147,6 +127,29 @@ export const JOBSEEKER_TOUR: TourStep[] = [
     scroll: true,
     title: 'Apply',
     text: 'Press Apply now to send your skill card to the employer. The job then shows ✓ Applied in the list and under My applications.',
+    onNext: click('.workspace-rail .rail-fullscreen[aria-pressed="true"]'),
+  },
+  {
+    only: 'desktop',
+    target: '.dev-role-picker',
+    title: 'Switch views',
+    text: 'Developer view switches the demo between Jobseeker, Employer and PESO Admin. It is only here for the demo.',
+  },
+  {
+    only: 'phone',
+    target: '.workspace-rail .rail-toggle',
+    title: 'Map or list',
+    text: 'Tap Map to see the jobs on a map, and List to come back to the list.',
+    nextLabel: 'Show the map',
+    onNext: click('.workspace-rail .rail-toggle'),
+  },
+  {
+    only: 'phone',
+    target: '.dev-role-picker',
+    title: 'Switch views',
+    text: 'On the map, Developer view switches the demo between Jobseeker, Employer and PESO Admin. It is only here for the demo.',
+    nextLabel: 'Back to the list',
+    onNext: click('.mapshell.menu-minimized .workspace-rail .rail-toggle'),
   },
   {
     target: '.workspace-rail .rail-eye',

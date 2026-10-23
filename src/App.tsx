@@ -89,6 +89,16 @@ export default function App() {
   const [jobseekerSection, setJobseekerSection] = useState<JobseekerSection>('jobs')
   const [employerSection, setEmployerSection] = useState<EmployerSection>('area')
   const [adminSection, setAdminSection] = useState<AdminSection>('overview')
+  // Find jobs opens with the menu full screen after every sign-in; picking a job or the rail button leaves it.
+  const [jobsFullScreen, setJobsFullScreen] = useState(false)
+  // After signing in (or Explore): the jobseeker Find jobs tab, menu full screen. A new employer account goes to
+  // its own workspace instead.
+  const startAtFindJobs = (role?: Role) => {
+    if (role === 'employer') return
+    dispatch({ type: 'setView', view: 'jobseeker' })
+    setJobseekerSection('jobs')
+    setJobsFullScreen(true)
+  }
   // Every visit starts at the landing page, even with a saved demo sign-in; a sign-in (or "Explore without an
   // account") opens the workspace.
   const [entered, setEntered] = useState(false)
@@ -103,11 +113,10 @@ export default function App() {
     markTutorialSeen()
     setTutorial(null)
   }
-  // Signed in (or exploring) during the sign-in tour: the app tour follows, on the jobseeker Find jobs screen.
+  // Signed in (or exploring) during the sign-in tour: the app tour follows, from the full-screen Find jobs tab.
   const continueTutorial = () => {
     if (tutorial !== 'login') return
-    dispatch({ type: 'setView', view: 'jobseeker' })
-    setJobseekerSection('jobs')
+    startAtFindJobs()
     setTutorial('app')
   }
   // Phones and wider screens get their own version of some steps.
@@ -136,6 +145,7 @@ export default function App() {
         <Landing
           onExplore={() => {
             setEntered(true)
+            startAtFindJobs()
             continueTutorial()
           }}
           onEnter={(_user, signup) => {
@@ -144,6 +154,7 @@ export default function App() {
               dispatch({ type: 'setView', view: signup.role })
             }
             setEntered(true)
+            startAtFindJobs(signup?.role)
             if (!getSetup(accountKey()).finished) setSetupRequest({ initialRole: signup?.role })
             continueTutorial()
           }}
@@ -191,6 +202,8 @@ export default function App() {
   } else if (state.view === 'jobseeker') {
     screen = (
       <FindJobs
+        panelFullScreen={jobsFullScreen}
+        onPanelFullScreenChange={setJobsFullScreen}
         view={state.view}
         onViewChange={changeView}
         navigation={JOBSEEKER_NAV}
