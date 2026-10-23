@@ -960,7 +960,7 @@ ul.error {
 }
 
 /* Detail-panel controls and MapLibre's map controls are excluded: they have their own navy styles below. */
-.mapshell button:not(.tab):not(.chip):not(.rail-toggle):not(.role-rail-button):not(.map-action-button):not(.detail-close):not(.detail-expand-button):not(.detail-collapse-button):not([class*='maplibregl-ctrl']):not([class*='dash-']):not([class*='skill-picker']):not(.rail-eye *) {
+.mapshell button:not(.tab):not(.chip):not(.rail-toggle):not(.role-rail-button):not(.map-action-button):not(.detail-close):not(.detail-expand-button):not(.detail-minimize-button):not([class*='maplibregl-ctrl']):not([class*='dash-']):not([class*='skill-picker']):not(.rail-eye *) {
   border-color: #293c78;
   background: #192852;
   color: #e8e9eb;
@@ -5297,6 +5297,7 @@ button.skill-picker-option.custom {
     .settings-switch,
     .job-row,
     .biz-callout,
+    .workspace-detail-bar,
     .landing-link:not(.landing-card-signup),
     .toggle-password,
     .active,
@@ -5322,6 +5323,7 @@ button.skill-picker-option.custom {
     .settings-switch,
     .job-row,
     .biz-callout,
+    .workspace-detail-bar,
     .landing-link:not(.landing-card-signup),
     .toggle-password,
     .active,
@@ -5914,4 +5916,62 @@ button.skill-picker-option.custom {
   box-sizing: border-box;
   padding: 0 14px;
   white-space: nowrap;
+}
+
+/* ===== Minimized details: a full-width bar along the bottom of the map with a clear up arrow ===== */
+.workspace-detail-bar {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1002;
+  display: grid;
+  place-items: center;
+  height: 48px;
+  min-height: 48px;
+  padding: 0;
+  border: 0;
+  border-top: 1px solid rgba(120, 190, 255, 0.45);
+  background: linear-gradient(180deg, rgba(19, 36, 90, 0.97), rgba(6, 18, 58, 0.98));
+  color: #ffffff;
+  box-shadow: 0 -6px 20px rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+  transition: left 180ms ease;
+}
+
+/* With the menu open, the bar starts beside it, like the details panel. */
+.mapshell.menu-open .workspace-detail-bar {
+  left: 360px;
+}
+
+.workspace-detail-bar span {
+  font-size: 22px;
+  line-height: 1;
+  text-shadow: 0 0 10px rgba(62, 232, 255, 0.7);
+}
+
+.workspace-detail-bar:hover span,
+.workspace-detail-bar:focus-visible span {
+  color: #3ee8ff;
+}
+
+@media (max-width: 720px) {
+  .mapshell.menu-open .workspace-detail-bar {
+    left: 0;
+  }
+}
+
+:root[data-theme='light'] .workspace-detail-bar {
+  border-top-color: var(--lt-line);
+  background: linear-gradient(180deg, rgba(51, 80, 143, 0.97), rgba(42, 68, 130, 0.98));
+}
+
+/* Keep the map credits readable above the minimized details bar. */
+.mapshell-map:has(.workspace-detail-bar) .maplibregl-ctrl-bottom-right .maplibregl-ctrl-attrib,
+.mapshell-map:has(.workspace-detail-bar) .maplibregl-ctrl-bottom-left {
+  margin-bottom: 54px;
+}
+
+.workspace-detail-bar {
+  z-index: 1003;
 }

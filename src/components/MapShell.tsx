@@ -85,17 +85,24 @@ export default function MapShell({
         </div>
 
         {detail && !mapFullScreen && !full && (
-          <section className={`workspace-detail${detailOpen ? ' detail-open' : ' detail-minimized'}${detailExpanded ? ' detail-expanded' : ''}`} aria-label="Selected item details">
-            <div className="workspace-detail-controls">
-              <button type="button" className="detail-expand-button" onClick={() => setDetailExpanded(!detailExpanded)}>
-                {detailExpanded ? 'Show less ↓' : 'Expand details ↑'}
-              </button>
-              <button type="button" className="detail-collapse-button" onClick={() => setDetailOpen(!detailOpen)} aria-label={detailOpen ? 'Minimize selected details' : 'Show selected details'}>
-                {detailOpen ? '⌄' : '⌃'}
-              </button>
-            </div>
-            {detailOpen && <div className="workspace-detail-content">{detail}</div>}
-          </section>
+          detailOpen ? (
+            <section className={`workspace-detail detail-open${detailExpanded ? ' detail-expanded' : ''}`} aria-label="Selected item details">
+              <div className="workspace-detail-controls">
+                <button type="button" className="detail-expand-button" onClick={() => setDetailExpanded(!detailExpanded)}>
+                  {detailExpanded ? 'Show less ↓' : 'Expand details ↑'}
+                </button>
+                <button type="button" className="detail-minimize-button" onClick={() => setDetailOpen(false)}>
+                  Minimize
+                </button>
+              </div>
+              <div className="workspace-detail-content">{detail}</div>
+            </section>
+          ) : (
+            // Minimized: a bar across the bottom of the map with a large up arrow; tapping it brings the details back.
+            <button type="button" className="workspace-detail-bar" onClick={() => setDetailOpen(true)} aria-label="Show selected details">
+              <span aria-hidden="true">▲</span>
+            </button>
+          )
         )}
       </section>
     </main>
