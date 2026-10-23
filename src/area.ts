@@ -1,77 +1,89 @@
 import { BARANGAY_CENTERS } from './data/barangayGeo'
-import { BARANGAY_LABOR, type BarangayLabor } from './data/labor'
+import { jobseekerSheet } from './data/simulation'
 import { distanceKm } from './rules'
+import type { SkillCard } from './types'
 
-// CBMS totals for the barangays whose centers fall within a radius. Approximate: whole barangays are in or out.
+// A jobseeker profile and the map point the employer side counts it at.
+export interface SeekerPin {
+  card: SkillCard
+  point: [number, number]
+}
+
+export interface NearbySeeker extends SeekerPin {
+  km: number
+}
+
+// Employment statuses used in the demo jobseeker sheet, grouped for the employer counts.
+const NOT_WORKING = new Set(['actively_seeking', 'unemployed', 'new_graduate', 'out_of_school_youth', 'returning_to_work'])
+const UNDEREMPLOYED = new Set(['underemployed', 'informal_daily_worker'])
+// Digital access values that mean no internet of their own: online posts may not reach them.
+const OFFLINE_ACCESS = new Set(['basic_phone_sms', 'shared_phone', 'no_phone'])
+
+export const isNotWorking = (card: SkillCard) => NOT_WORKING.has(card.employmentStatus ?? '')
+export const isUnderemployed = (card: SkillCard) => UNDEREMPLOYED.has(card.employmentStatus ?? '')
+export const isOffline = (card: SkillCard) => OFFLINE_ACCESS.has(card.digitalAccess ?? '')
+export const isTvetCertified = (card: SkillCard) => (card.certifications ?? []).some((c) => /TESDA|NC|TVET/i.test(c))
+// Youth 15 to 24 who are neither working nor studying.
+export const isIdleYouth = (card: SkillCard) => card.age >= 15 && card.age <= 24 && isNotWorking(card)
+export const wantsDailyPay = (card: SkillCard) => (card.expectedPayUnit ?? 'day') === 'day'
+
+// Every jobseeker profile in the system: the demo sheet (Viola, Ana and the background profiles) at their sheet points,
+// plus profiles made in the app, placed near their barangay center. An edited sheet profile keeps its point
+// unless its barangay changed.
+export function systemJobseekers(cards: Record<string, SkillCard>): SeekerPin[] {
+  const pins = new Map<string, SeekerPin>(jobseekerSheet.map(({ card, point }) => [card.userId, { card, point }]))
+  for (const card of Object.values(cards)) {
+    const sheet = pins.get(card.userId)
+    const point = sheet && sheet.card.barangay === card.barangay ? sheet.point : seekerPoint(card.userId, card.barangay)
+    if (point) pins.set(card.userId, { card, point })
+    else pins.delete(card.userId)
+  }
+  return [...pins.values()]
+}
+
+// Profiles whose point is within km of the center, by real distance, nearest first.
+export function seekersWithin(pins: SeekerPin[], center: [number, number], km: number): NearbySeeker[] {
+  return pins
+    .map((pin) => ({ ...pin, km: distanceKm(center, pin.point) }))
+    .filter((pin) => pin.km <= km)
+    .sort((a, b) => a.km - b.km)
+}
+
+// Counts over a set of demo jobseeker profiles (synthetic), not official statistics.
 export interface AreaStats {
+  // Barangays the profiles live in, most profiles first.
   barangays: string[]
-  households: number
-  jobseekerPool: number
-  neetYouth: number
-  tvetGrads: number
-  casualWorkers: number
+  lookingForWork: number
+  unemployed: number
+  underemployed: number
+  idleYouth: number
+  tvetCertified: number
   dailyPaid: number
-  microBusinesses: number
-  // Household-weighted average, in percent.
-  pctNoInternet: number
-  pctSmartphone: number
+  offline: number
 }
 
-export function barangaysWithin(center: [number, number], km: number): string[] {
-  return Object.entries(BARANGAY_CENTERS)
-    .filter(([, point]) => distanceKm(center, point) <= km)
-    .map(([code]) => code)
-}
+export type AreaCount = Exclude<keyof AreaStats, 'barangays'>
 
-export function areaStats(codes: string[]): AreaStats {
-  const rows = codes.map((c) => BARANGAY_LABOR[c]).filter((r): r is BarangayLabor => r !== undefined)
-  const sum = (key: keyof BarangayLabor) => rows.reduce((total, r) => total + r[key], 0)
-  const households = sum('households')
-  const weighted = (key: keyof BarangayLabor) =>
-    households > 0 ? rows.reduce((total, r) => total + r[key] * r.households, 0) / households : 0
+export function areaStats(pins: SeekerPin[]): AreaStats {
+  const cards = pins.map((pin) => pin.card)
+  const count = (test: (card: SkillCard) => boolean) => cards.filter(test).length
+  const perBarangay = new Map<string, number>()
+  for (const card of cards) perBarangay.set(card.barangay, (perBarangay.get(card.barangay) ?? 0) + 1)
   return {
-    barangays: codes,
-    households,
-    jobseekerPool: sum('jobseekerPool'),
-    neetYouth: sum('neetYouth'),
-    tvetGrads: sum('tvetGrads'),
-    casualWorkers: sum('casualWorkers'),
-    dailyPaid: sum('dailyPaid'),
-    microBusinesses: sum('microBusinesses'),
-    pctNoInternet: weighted('pctNoInternet'),
-    pctSmartphone: weighted('pctSmartphone'),
+    barangays: [...perBarangay.entries()].sort((a, b) => b[1] - a[1]).map(([code]) => code),
+    lookingForWork: cards.length,
+    unemployed: count(isNotWorking),
+    underemployed: count(isUnderemployed),
+    idleYouth: count(isIdleYouth),
+    tvetCertified: count(isTvetCertified),
+    dailyPaid: count(wantsDailyPay),
+    offline: count(isOffline),
   }
 }
 
-// One heat point stands for this many people looking for work.
-export const PEOPLE_PER_HEAT_POINT = 20
-
-// Seeded random numbers so the heatmap looks the same on every load.
-function seeded(seed: number) {
-  return () => {
-    seed = (seed * 1664525 + 1013904223) % 4294967296
-    return seed / 4294967296
-  }
-}
-
-// We have no barangay boundaries yet, so each barangay's jobseeker pool is spread as points around its center,
-// over a radius that grows with population. Denser areas get more points, which the heat layer turns into color.
-export function jobseekerHeat(): [number, number, number][] {
-  const points: [number, number, number][] = []
-  for (const [code, [lat, lng]] of Object.entries(BARANGAY_CENTERS)) {
-    const labor = BARANGAY_LABOR[code]
-    if (!labor) continue
-    const count = Math.max(1, Math.round(labor.jobseekerPool / PEOPLE_PER_HEAT_POINT))
-    const radiusKm = Math.min(2.5, 0.4 + Math.sqrt(labor.population) / 200)
-    const rand = seeded(Number(code) + 1)
-    for (let i = 0; i < count; i++) {
-      // sqrt keeps points evenly spread over the circle instead of bunching at the center.
-      const r = (radiusKm * Math.sqrt(rand())) / 111
-      const angle = rand() * 2 * Math.PI
-      points.push([lat + r * Math.sin(angle), lng + (r * Math.cos(angle)) / Math.cos((lat * Math.PI) / 180), 1])
-    }
-  }
-  return points
+// One heat point per jobseeker profile, at its map point.
+export function jobseekerHeat(pins: SeekerPin[]): [number, number, number][] {
+  return pins.map(({ point }) => [point[0], point[1], 1])
 }
 
 export function nearestBarangay(point: [number, number]): string | null {
@@ -87,7 +99,7 @@ export function nearestBarangay(point: [number, number]): string | null {
   return best
 }
 
-// Profiles only have a barangay, so place each one near its barangay center with a small fixed offset (about 500 m).
+// Profiles made in the app only have a barangay, so place each one near its barangay center with a small fixed offset (about 500 m).
 export function seekerPoint(userId: string, barangay: string): [number, number] | null {
   const center = BARANGAY_CENTERS[barangay]
   if (!center) return null

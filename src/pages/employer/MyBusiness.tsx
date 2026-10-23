@@ -3,9 +3,11 @@ import AreaMap from '../../components/AreaMap'
 import { BarangayDetail } from './BarangayRanking'
 import PeopleDashboard from './PeopleDashboard'
 import MapShell, { type WorkspaceNavItem } from '../../components/MapShell'
-import { areaStats, barangaysWithin, jobseekerHeat, nearestBarangay, seekerPoint } from '../../area'
+import { areaStats, jobseekerHeat, nearestBarangay, seekersWithin, systemJobseekers } from '../../area'
 import { barangayName } from '../../data/barangays'
-import { distanceKm, matchScore, SKILLS } from '../../rules'
+import { distanceKm, matchScore } from '../../rules'
+import SkillPicker from '../../components/SkillPicker'
+import { chosenSkills, matchGroups } from '../../components/skillCatalog'
 import { employerPlaces } from '../../businessDirectory'
 import { useSession, useStore } from '../../store'
 import type { View } from '../../types'
@@ -37,12 +39,14 @@ export default function MyBusiness({ view, onViewChange, navigation, activeNavig
   const [skill, setSkill] = useState(ANY)
   const [invited, setInvited] = useState<Set<string>>(new Set())
   const [selectedBarangay, setSelectedBarangay] = useState<string | null>(null)
-  // The heat layer guesses where people live inside each barangay, so it stays off unless asked for.
+  // The heat layer shows where the demo jobseeker profiles live; it stays off unless asked for.
   const [showHeat, setShowHeat] = useState(false)
   const [fullScreen, setFullScreen] = useState(false)
   const onMapTab = activeNavigation === 'area' || activeNavigation === 'people'
 
-  const heat = useMemo(() => jobseekerHeat(), [])
+  // Every jobseeker profile in the system: the demo sheet plus profiles made in the app.
+  const seekers = useMemo(() => systemJobseekers(state.skillCards), [state.skillCards])
+  const heat = useMemo(() => jobseekerHeat(seekers), [seekers])
   const [placeSelected, setPlaceSelected] = useState(false)
   // The business as a job-map callout, at its saved location. Only demo-sheet businesses have the profile it needs.
   const ownPlaces = useMemo(() => {
@@ -52,21 +56,18 @@ export default function MyBusiness({ view, onViewChange, navigation, activeNavig
   // As on the job map, jobs at the business are reached through its callout; jobs elsewhere get their own pay tag.
   const awayJobs = business ? myJobs.filter((j) => ownPlaces.length === 0 || distanceKm([j.lat, j.lng], [business.lat, business.lng]) > 0.15) : myJobs
   const here: [number, number] | null = business ? [business.lat, business.lng] : null
-  const stats = here ? areaStats(barangaysWithin(here, radiusKm)) : null
+  // Profiles inside the search radius, by real distance from the business, nearest first.
+  const nearby = useMemo(() => (business ? seekersWithin(seekers, [business.lat, business.lng], radiusKm) : []), [seekers, business, radiusKm])
+  const stats = here ? areaStats(nearby) : null
   const job = myJobs.find((j) => j.id === jobId)
   // Drop the selection once its barangay leaves the radius or another tab is open.
   const barangay = activeNavigation === 'people' && selectedBarangay && stats?.barangays.includes(selectedBarangay) ? selectedBarangay : null
 
   // Profiles within the radius, scored against the chosen job or skill.
   const profiles = here
-    ? Object.values(state.skillCards)
-        .map((card) => {
-          const point = seekerPoint(card.userId, card.barangay)
-          return { card, point, km: point ? distanceKm(here, point) : Infinity }
-        })
-        .filter((p) => p.km <= radiusKm)
+    ? nearby
         .filter((p) => !job || p.card.age >= 18 || job.minorsAllowed)
-        .filter((p) => job || !skill || p.card.skills.includes(skill))
+        .filter((p) => job || !skill || [skill, ...matchGroups([skill])].some((s) => p.card.skills.includes(s)))
         .map((p) => ({ ...p, fit: job ? matchScore(job, p.card, state.verifications[session.userId]?.status === 'verified') : null }))
         .sort((a, b) => (b.fit?.percent ?? 0) - (a.fit?.percent ?? 0) || a.km - b.km)
     : []
@@ -79,10 +80,10 @@ export default function MyBusiness({ view, onViewChange, navigation, activeNavig
   }
 
   const statTiles = stats && [
-    { label: 'Looking for work', value: stats.jobseekerPool, icon: '◍', tone: 'blue' },
-    { label: 'Youth not in school or work', value: stats.neetYouth, icon: '✦', tone: 'cyan' },
-    { label: 'TVET graduates', value: stats.tvetGrads, icon: '✎', tone: 'gold' },
-    { label: 'Casual workers', value: stats.casualWorkers, icon: '◷', tone: 'orange' },
+    { label: 'Looking for work', value: stats.lookingForWork, icon: '◍', tone: 'blue' },
+    { label: 'Youth 15–24 not in school or work', value: stats.idleYouth, icon: '✦', tone: 'cyan' },
+    { label: 'TVET certified', value: stats.tvetCertified, icon: '✎', tone: 'gold' },
+    { label: 'Want daily pay', value: stats.dailyPaid, icon: '◷', tone: 'orange' },
   ]
 
   const overview = (
@@ -120,7 +121,7 @@ export default function MyBusiness({ view, onViewChange, navigation, activeNavig
             <section className="bento-card bento-radius">
               <div>
                 <h2>Within {radiusKm} km</h2>
-                <p className="dash-note">From {stats.barangays.length} barangay(s) whose center is inside the circle. CBMS aggregates only, no personal records.</p>
+                <p className="dash-note">Demo jobseeker profiles (synthetic) living inside the circle, from {stats.barangays.length} barangay(s). Not real people.</p>
               </div>
               <div className="dash-capsules" role="group" aria-label="Search radius">
                 {RADII.map((r) => (
@@ -164,20 +165,19 @@ export default function MyBusiness({ view, onViewChange, navigation, activeNavig
               </select>
             </label>
             {!job && (
-              <label>
-                <span>Skill</span>
-                <select value={skill} onChange={(e) => setSkill(e.target.value)}>
-                  <option value={ANY}>Any skill</option>
-                  {SKILLS.map((s) => (
-                    <option key={s} value={s}>
-                      {s}
-                    </option>
-                  ))}
-                </select>
-              </label>
+              <div className="bento-skill-filter">
+                <SkillPicker
+                  single
+                  allowCustom={false}
+                  value={skill ? [skill] : []}
+                  onChange={(list) => setSkill(list[0] ?? ANY)}
+                  label="Skill"
+                  placeholder="Any skill · type to filter"
+                />
+              </div>
             )}
           </div>
-          <p className="dash-note">Sample profiles for testing.</p>
+          <p className="dash-note">Demo jobseeker profiles (synthetic) for testing · not real people.</p>
 
           {!business && <p className="dash-note">Set your business location to see profiles near you.</p>}
           <div className="bento-profiles">
@@ -204,7 +204,7 @@ export default function MyBusiness({ view, onViewChange, navigation, activeNavig
                 )}
                 {card.profileSummary && <p className="bento-profile-summary">{card.profileSummary}</p>}
                 <div className="dash-chips">
-                  {card.skills.map((s) => (
+                  {chosenSkills(card.skills).map((s) => (
                     <span key={s} className={`dash-chip${job?.skills.includes(s) || s === skill ? ' strong' : ''}`}>
                       {s}
                     </span>
@@ -235,9 +235,8 @@ export default function MyBusiness({ view, onViewChange, navigation, activeNavig
 
   const people = here && stats ? (
     <PeopleDashboard
-      here={here}
       radiusKm={radiusKm}
-      codes={stats.barangays}
+      seekers={nearby}
       selected={barangay}
       onSelect={setSelectedBarangay}
       fullScreen={fullScreen}
@@ -248,7 +247,7 @@ export default function MyBusiness({ view, onViewChange, navigation, activeNavig
         <div>
           <p className="dash-eyebrow">People looking for work</p>
           <h1>Set your business location first</h1>
-          <p className="dash-sub">The counts are for barangays around your business.</p>
+          <p className="dash-sub">The counts are for demo jobseeker profiles around your business.</p>
         </div>
       </header>
     </div>
@@ -262,15 +261,15 @@ export default function MyBusiness({ view, onViewChange, navigation, activeNavig
       panelFullScreen={fullScreen}
       onPanelFullScreenChange={setFullScreen}
       detail={barangay ? (
-        <BarangayDetail code={barangay} />
+        <BarangayDetail code={barangay} seekers={nearby} />
       ) : business ? (
         <div className="selected-business-detail">
           <div className="detail-kicker">CURRENT BUSINESS AREA</div>
           <h2>{business.name}</h2>
           <p className="muted">{barangayName(business.barangay)} · {radiusKm} km talent search radius</p>
           {stats && <div className="selected-job-metrics">
-            <div><span>Looking for work</span><strong>{stats.jobseekerPool.toLocaleString()}</strong></div>
-            <div><span>TVET graduates</span><strong>{stats.tvetGrads.toLocaleString()}</strong></div>
+            <div><span>Looking for work</span><strong>{stats.lookingForWork.toLocaleString()}</strong></div>
+            <div><span>TVET certified</span><strong>{stats.tvetCertified.toLocaleString()}</strong></div>
             <div><span>Nearby barangays</span><strong>{stats.barangays.length}</strong></div>
           </div>}
         </div>
@@ -308,7 +307,7 @@ export default function MyBusiness({ view, onViewChange, navigation, activeNavig
             </button>
             {activeNavigation === 'people' && (
               <button type="button" className={`chip${showHeat ? ' active' : ''}`} aria-pressed={showHeat} onClick={() => setShowHeat(!showHeat)}>
-                Rough spread
+                Profile heat
               </button>
             )}
           </div>
@@ -318,7 +317,7 @@ export default function MyBusiness({ view, onViewChange, navigation, activeNavig
             <div className="heat-legend">
               <span>Fewer</span>
               <span className="heat-bar" />
-              <span>More looking for work · spread inside each barangay is a guess</span>
+              <span>More demo jobseeker profiles (synthetic) · one point per profile</span>
             </div>
           )}
         </>

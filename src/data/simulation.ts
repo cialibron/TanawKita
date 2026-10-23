@@ -171,9 +171,20 @@ export const syntheticBusinesses: SyntheticBusiness[] = parseCsv(businessesCsv).
   return { id, name: row.business_name, business, verification: verificationFor(row, index), jobs: jobsFor(row, id, index) }
 })
 
+// Only these sheet profiles are demo accounts (Acting-as picker, demo sign-in). The rest of the sheet is background
+// data for the employer side: heat map, area counts and "Profiles near you".
+const SELECTABLE_JOBSEEKERS = new Set(['SYN-PER-00001', 'SYN-PER-00002'])
+
+export interface SheetJobseeker {
+  card: SkillCard
+  // Approximate simulation point inside a residential building, from the sheet.
+  point: [number, number]
+  selectable: boolean
+}
+
 const usedJobseekerIds = new Set<string>()
 
-export const syntheticJobseekers: SkillCard[] = parseCsv(jobseekersCsv).map((row) => {
+export const jobseekerSheet: SheetJobseeker[] = parseCsv(jobseekersCsv).map((row) => {
   const name = usedJobseekerIds.has(userIdFor('jobseeker', row.full_name))
     ? `${row.full_name} Sample ${row.person_id.slice(-4)}`
     : row.full_name
@@ -182,7 +193,7 @@ export const syntheticJobseekers: SkillCard[] = parseCsv(jobseekersCsv).map((row
   const age = asNumber(row.age, 18)
   const expectedPayUnit = row.expected_pay_unit as PayUnit
   const preferredJobTypes = split(row.preferred_job_types).filter((value): value is JobType => validJobTypes.includes(value as JobType))
-  return {
+  const card: SkillCard = {
     userId,
     name,
     age,
@@ -206,4 +217,9 @@ export const syntheticJobseekers: SkillCard[] = parseCsv(jobseekersCsv).map((row
     digitalAccess: row.digital_access,
     profileSummary: row.profile_summary,
   }
+  const point: [number, number] = [asNumber(row.latitude_approx, 7.0731), asNumber(row.longitude_approx, 125.6128)]
+  return { card, point, selectable: SELECTABLE_JOBSEEKERS.has(row.person_id) }
 })
+
+// Demo jobseeker accounts that go into the app state (Viola Co and Ana Reyes).
+export const syntheticJobseekers: SkillCard[] = jobseekerSheet.filter((entry) => entry.selectable).map((entry) => entry.card)

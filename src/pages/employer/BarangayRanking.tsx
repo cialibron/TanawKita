@@ -1,41 +1,46 @@
 import { useState } from 'react'
-import { BARANGAY_LABOR, type BarangayLabor } from '../../data/labor'
+import { areaStats, type AreaCount, type NearbySeeker } from '../../area'
 import { barangayName } from '../../data/barangays'
 
 const METRICS = [
-  { key: 'jobseekerPool', label: 'Looking for work' },
-  { key: 'neetYouth', label: 'Youth not in school or work' },
-  { key: 'tvetGrads', label: 'TVET graduates' },
-  { key: 'dailyPaid', label: 'Paid by the day' },
-] as const satisfies readonly { key: keyof BarangayLabor; label: string }[]
+  { key: 'lookingForWork', label: 'Looking for work' },
+  { key: 'idleYouth', label: 'Youth 15–24 not in school or work' },
+  { key: 'tvetCertified', label: 'TVET certified' },
+  { key: 'dailyPaid', label: 'Want daily pay' },
+] as const satisfies readonly { key: AreaCount; label: string }[]
 
 type MetricKey = (typeof METRICS)[number]['key']
 
 // Rows shown before "Show all".
 const TOP = 8
-// At or above this share of households without internet, the barangay is tagged "Mostly offline".
+// At or above this share of profiles without internet of their own, the barangay is tagged "Mostly offline".
 export const OFFLINE_PCT = 30
 
 interface Props {
-  codes: string[]
+  // Demo jobseeker profiles inside the search radius.
+  seekers: NearbySeeker[]
   selected: string | null
   onSelect: (code: string | null) => void
 }
 
-// Barangays inside the search radius, ranked by a CBMS count. One number per barangay, as CBMS reports it.
-export default function BarangayRanking({ codes, selected, onSelect }: Props) {
-  const [metric, setMetric] = useState<MetricKey>('jobseekerPool')
+const inBarangay = (seekers: NearbySeeker[], code: string) => seekers.filter((s) => s.card.barangay === code)
+
+// Barangays where the demo jobseeker profiles inside the search radius live, ranked by a count of those profiles.
+export default function BarangayRanking({ seekers, selected, onSelect }: Props) {
+  const [metric, setMetric] = useState<MetricKey>('lookingForWork')
   const [showAll, setShowAll] = useState(false)
 
-  const rows = codes
-    .filter((code) => BARANGAY_LABOR[code])
-    .map((code) => ({ code, value: BARANGAY_LABOR[code][metric], offline: BARANGAY_LABOR[code].pctNoInternet >= OFFLINE_PCT }))
+  const rows = areaStats(seekers).barangays
+    .map((code) => {
+      const stats = areaStats(inBarangay(seekers, code))
+      return { code, value: stats[metric], offline: (stats.offline / stats.lookingForWork) * 100 >= OFFLINE_PCT }
+    })
     .sort((a, b) => b.value - a.value)
   const max = rows[0]?.value || 1
   const visible = showAll ? rows : rows.slice(0, TOP)
   const label = METRICS.find((m) => m.key === metric)!.label
 
-  if (rows.length === 0) return <p className="dash-note">No barangay centers fall inside this radius. Try a wider one.</p>
+  if (rows.length === 0) return <p className="dash-note">No demo jobseeker profiles inside this radius. Try a wider one.</p>
 
   return (
     <div className="barangay-ranking">
@@ -82,27 +87,27 @@ export default function BarangayRanking({ codes, selected, onSelect }: Props) {
   )
 }
 
-// One barangay's CBMS numbers, with a plain hint on how to reach people there.
+// One barangay's demo jobseeker profiles inside the search radius, with a plain hint on how to reach them.
 // Used in the lower detail panel, and inline when the menu is full screen.
-export function BarangayDetail({ code }: { code: string }) {
-  const labor = BARANGAY_LABOR[code]
-  if (!labor) return null
-  const offline = labor.pctNoInternet >= OFFLINE_PCT
+export function BarangayDetail({ code, seekers }: { code: string; seekers: NearbySeeker[] }) {
+  const stats = areaStats(inBarangay(seekers, code))
+  if (stats.lookingForWork === 0) return null
+  const pctOffline = Math.round((stats.offline / stats.lookingForWork) * 100)
   return (
     <div className="selected-business-detail">
-      <div className="detail-kicker">BARANGAY · CBMS ESTIMATE</div>
+      <div className="detail-kicker">BARANGAY · DEMO JOBSEEKER PROFILES (SYNTHETIC)</div>
       <h2>{barangayName(code)}</h2>
-      <p className="muted">{labor.population.toLocaleString()} residents · {labor.households.toLocaleString()} households</p>
+      <p className="muted">{stats.lookingForWork} profile(s) inside your search radius · not real people</p>
       <div className="selected-job-metrics">
-        <div><span>Looking for work</span><strong>{labor.jobseekerPool.toLocaleString()}</strong></div>
-        <div><span>Unemployed</span><strong>{labor.unemployed.toLocaleString()}</strong></div>
-        <div><span>Underemployed</span><strong>{labor.underemployed.toLocaleString()}</strong></div>
-        <div><span>TVET graduates</span><strong>{labor.tvetGrads.toLocaleString()}</strong></div>
+        <div><span>Looking for work</span><strong>{stats.lookingForWork.toLocaleString()}</strong></div>
+        <div><span>Unemployed</span><strong>{stats.unemployed.toLocaleString()}</strong></div>
+        <div><span>Underemployed</span><strong>{stats.underemployed.toLocaleString()}</strong></div>
+        <div><span>TVET certified</span><strong>{stats.tvetCertified.toLocaleString()}</strong></div>
       </div>
       <p className="reach-hint">
-        {offline
-          ? `${Math.round(labor.pctNoInternet)}% of households have no internet. Post at the barangay hall and accept walk-ins too.`
-          : `${Math.round(labor.pctSmartphone)}% of households have a smartphone. Online posts should reach most people.`}
+        {pctOffline >= OFFLINE_PCT
+          ? `${pctOffline}% of these profiles have no internet of their own. Post at the barangay hall and accept walk-ins too.`
+          : `${100 - pctOffline}% of these profiles have their own phone with internet. Online posts should reach most of them.`}
       </p>
     </div>
   )

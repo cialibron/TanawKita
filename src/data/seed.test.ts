@@ -2,15 +2,16 @@ import { describe, expect, it } from 'vitest'
 import { checkWage } from '../rules'
 import { hasEmployerNumbers, validate } from '../verification'
 import { seedState } from './seed'
+import { syntheticBusinesses } from './simulation'
 
 // The mock data should follow the same rules the app enforces on real users.
 describe('seed data', () => {
   const jobs = seedState.jobs
 
-  it('has the five demo businesses, two jobseekers, their jobs and applications', () => {
-    expect(Object.keys(seedState.verifications).length).toBe(5)
+  it('has the 60 demo businesses, two selectable jobseekers, their jobs and applications', () => {
+    expect(Object.keys(seedState.verifications).length).toBe(60)
     expect(Object.values(seedState.skillCards).map((c) => c.name).sort()).toEqual(['Ana Reyes', 'Viola Co'])
-    expect(jobs.length).toBe(5)
+    expect(jobs.length).toBe(syntheticBusinesses.flatMap((business) => business.jobs).length)
     expect(seedState.applications.length).toBeGreaterThan(0)
   })
 
@@ -36,6 +37,10 @@ describe('seed data', () => {
 
   it('has complete verification records', () => {
     for (const v of Object.values(seedState.verifications)) expect(validate(v)).toEqual([])
+  })
+
+  it('gives every application a real date', () => {
+    for (const app of seedState.applications) expect(Number.isNaN(Date.parse(app.appliedAt))).toBe(false)
   })
 
   it('never has a minor applying to an adults-only job', () => {

@@ -960,7 +960,7 @@ ul.error {
 }
 
 /* Detail-panel controls and MapLibre's map controls are excluded: they have their own navy styles below. */
-.mapshell button:not(.tab):not(.chip):not(.rail-toggle):not(.role-rail-button):not(.map-action-button):not(.detail-close):not(.detail-expand-button):not(.detail-collapse-button):not([class*='maplibregl-ctrl']):not([class*='dash-']):not(.rail-eye *) {
+.mapshell button:not(.tab):not(.chip):not(.rail-toggle):not(.role-rail-button):not(.map-action-button):not(.detail-close):not(.detail-expand-button):not(.detail-collapse-button):not([class*='maplibregl-ctrl']):not([class*='dash-']):not([class*='skill-picker']):not(.rail-eye *) {
   border-color: #293c78;
   background: #192852;
   color: #e8e9eb;
@@ -4474,6 +4474,129 @@ ul.error {
   display: none;
 }
 
+/* Type-to-add skill picker (skill card, post a job, employer filter). Inherits each page's colors. */
+.skill-picker {
+  display: grid;
+  gap: 8px;
+  margin: 8px 0 12px;
+}
+
+.skill-picker > label {
+  font-weight: 600;
+}
+
+.skill-picker input {
+  width: 100%;
+  min-height: 44px;
+  box-sizing: border-box;
+}
+
+.skill-picker-chosen {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.skill-picker-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 4px 4px 12px;
+  border: 1px solid rgba(47, 116, 240, 0.45);
+  border-radius: 999px;
+  background: rgba(47, 116, 240, 0.16);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.skill-picker-chip.custom {
+  border-style: dashed;
+  background: transparent;
+}
+
+.skill-picker-chip small {
+  opacity: 0.7;
+  font-size: 11px;
+}
+
+button.skill-picker-remove {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  min-height: 30px;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: inherit;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+button.skill-picker-remove:hover {
+  background: rgba(127, 140, 170, 0.22);
+}
+
+.skill-picker-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+button.skill-picker-option {
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid rgba(127, 140, 170, 0.45);
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 13.5px;
+  cursor: pointer;
+}
+
+button.skill-picker-option:hover,
+button.skill-picker-option:focus-visible {
+  border-color: #2f74f0;
+  background: rgba(47, 116, 240, 0.12);
+}
+
+button.skill-picker-option.custom {
+  border-style: dashed;
+}
+
+.skill-picker-hint {
+  margin: 0;
+  opacity: 0.75;
+  font-size: 12.5px;
+}
+
+.bento-skill-filter {
+  flex: 1 1 100%;
+}
+
+.mapshell .dash .skill-picker input {
+  padding: 0 16px;
+  border: 1px solid #dde1ea;
+  border-radius: 999px;
+  background: #fff;
+  color: var(--dash-ink);
+  font: inherit;
+  font-size: 14px;
+}
+
+.mapshell .dash .skill-picker > label {
+  color: var(--dash-gray);
+  font-size: 12px;
+  font-weight: 500;
+}
+
 /* ---------- Find jobs: expanded detail fills the map, with more details and a location photo ---------- */
 
 /* Expanded: grow upward until the panel covers the whole map area, and scroll its content inside. */
@@ -5233,4 +5356,18 @@ ul.error {
 :root[data-theme='light'] .mapshell button.job-locate {
   border-color: var(--lt-line);
   background: var(--lt-card);
+}
+
+/* Map overlay (chips and hints) stops before the Developer view and Full map buttons and wraps instead of
+   running underneath them. */
+@media (min-width: 721px) {
+  .mapshell .map-overlay {
+    right: 400px;
+    flex-wrap: wrap;
+  }
+
+  /* With the menu open, start beside it (like the details panel) instead of underneath it. */
+  .mapshell.menu-open .map-overlay {
+    left: 376px;
+  }
 }
