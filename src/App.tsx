@@ -3,6 +3,8 @@ import MapShell, { type WorkspaceNavItem } from './components/MapShell'
 import JobMap from './components/JobMap'
 import { useSession, useStore } from './store'
 import { usernameFor } from './rules'
+import { clearSession, loadSession } from './auth'
+import Landing from './pages/Landing'
 import SkillCardForm from './pages/jobseeker/SkillCardForm'
 import FindJobs from './pages/jobseeker/FindJobs'
 import MyApplications from './pages/jobseeker/MyApplications'
@@ -88,13 +90,40 @@ export default function App() {
   const [competitorPlaces, setCompetitorPlaces] = useState<CompetitorPlace[]>([])
   const [selectedCompetitor, setSelectedCompetitor] = useState<CompetitorPlace | null>(null)
   const [competitorMode, setCompetitorMode] = useState<CompetitorSearchMode>('local')
+  // Landing page first; a demo sign-in (or "Explore without an account") opens the workspace.
+  const [entered, setEntered] = useState(() => loadSession() !== null)
   const changeView = (view: View) => dispatch({ type: 'setView', view })
+
+  if (!entered) {
+    return (
+      <Landing
+        onExplore={() => setEntered(true)}
+        onEnter={(_user, signup) => {
+          if (signup) {
+            dispatch({ type: 'actAs', role: signup.role, name: signup.name })
+            dispatch({ type: 'setView', view: signup.role })
+          }
+          setEntered(true)
+        }}
+      />
+    )
+  }
+
+  function signOut() {
+    clearSession()
+    setEntered(false)
+  }
 
   const shellHeader = (
     <div className="workspace-heading">
       <div className="header">
         <strong className="brand">TanawKita</strong>
-        <span className="badge">Demo</span>
+        <span className="row">
+          <span className="badge">Demo</span>
+          <button type="button" className="badge sign-out" onClick={signOut}>
+            Sign out
+          </button>
+        </span>
       </div>
       <p className="workspace-caption">Davao City · Local employment map</p>
     </div>
