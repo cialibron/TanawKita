@@ -7,9 +7,12 @@ import {
   type CompetitorSearchMode,
 } from '../../businessDirectory'
 import type { Business } from '../../types'
+import { CATEGORY_STYLE } from '../../components/businessCategoryStyle'
 
 const DAVAO_CENTER: [number, number] = [7.0731, 125.6128]
 const LOCAL_RADII = [1, 3, 5]
+const ALL = 'all'
+type CategoryChoice = BusinessCategoryId | typeof ALL
 export type MarketMode = 'franchise' | 'city'
 
 interface Props {
@@ -21,13 +24,14 @@ interface Props {
 }
 
 export default function MarketResearch({ mode, business, onPlacesChange, onSelectedPlaceChange, onMapModeChange }: Props) {
-  const [categoryId, setCategoryId] = useState<BusinessCategoryId>('cafe')
+  const [categoryId, setCategoryId] = useState<CategoryChoice>(ALL)
   const [radiusKm, setRadiusKm] = useState(3)
   const [places, setPlaces] = useState<CompetitorPlace[]>([])
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const category = BUSINESS_CATEGORIES.find((item) => item.id === categoryId) ?? BUSINESS_CATEGORIES[0]
+  const category = BUSINESS_CATEGORIES.find((item) => item.id === categoryId) ?? null
+  const categoryText = category ? category.label.toLowerCase() : 'businesses'
   const center: [number, number] = business ? [business.lat, business.lng] : DAVAO_CENTER
   const searchMode: CompetitorSearchMode = mode === 'city' ? 'city' : 'local'
   const selectedPlace = places.find((place) => place.id === selectedId) ?? null
@@ -44,7 +48,11 @@ export default function MarketResearch({ mode, business, onPlacesChange, onSelec
     setError('')
     setSelectedId(null)
     onSelectedPlaceChange(null)
-    searchCompetitors({ category, mode: searchMode, center, radiusKm })
+    const categories = category ? [category] : BUSINESS_CATEGORIES
+    Promise.all(categories.map((item) => searchCompetitors({ category: item, mode: searchMode, center, radiusKm })))
+      .then((groups) => groups.flat().sort((a, b) => searchMode === 'local'
+        ? (a.distanceKm ?? Infinity) - (b.distanceKm ?? Infinity)
+        : a.name.localeCompare(b.name)))
       .then((results) => {
         if (!active) return
         setPlaces(results)
@@ -88,7 +96,8 @@ export default function MarketResearch({ mode, business, onPlacesChange, onSelec
 
       <div className="advisor-filter-card">
         <label htmlFor="competitor-category">Business type</label>
-        <select id="competitor-category" value={categoryId} onChange={(event) => setCategoryId(event.target.value as BusinessCategoryId)}>
+        <select id="competitor-category" value={categoryId} onChange={(event) => setCategoryId(event.target.value as CategoryChoice)}>
+          <option value={ALL}>All business types</option>
           {BUSINESS_CATEGORIES.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}
         </select>
         {mode === 'franchise' && (
@@ -112,7 +121,7 @@ export default function MarketResearch({ mode, business, onPlacesChange, onSelec
       <div className="advisor-result-heading">
         <div>
           <h2>{mode === 'franchise' ? 'Nearby competition' : 'Davao-wide competitors'}</h2>
-          <p className="muted">{loading ? 'Loading simulation data…' : `${places.length.toLocaleString()} sample ${category.label.toLowerCase()}`}</p>
+          <p className="muted">{loading ? 'Loading simulation data…' : `${places.length.toLocaleString()} sample ${categoryText}`}</p>
         </div>
         <span className="simulation-source-pill">CSV simulation</span>
       </div>
@@ -131,7 +140,7 @@ export default function MarketResearch({ mode, business, onPlacesChange, onSelec
       {!loading && !error && places.length === 0 && (
         <div className="advisor-empty">
           <span aria-hidden="true">⌖</span>
-          <strong>No sample {category.label.toLowerCase()} found here</strong>
+          <strong>No sample {categoryText} found here</strong>
           <p>Try a larger radius or another category. This view only uses the clearly marked synthetic demo sheet.</p>
         </div>
       )}
@@ -141,10 +150,10 @@ export default function MarketResearch({ mode, business, onPlacesChange, onSelec
           <div className="advisor-place-list">
             {(mode === 'city' ? places.slice(0, 40) : places).map((place, index) => (
               <button key={place.id} type="button" className={`advisor-place${selectedId === place.id ? ' selected' : ''}`} onClick={() => selectPlace(place)}>
-                <span className="advisor-place-number">{String(index + 1).padStart(2, '0')}</span>
+                <span className="advisor-place-number" style={{ boxShadow: `inset 3px 0 ${CATEGORY_STYLE[place.category].color}` }}>{String(index + 1).padStart(2, '0')}</span>
                 <span className="advisor-place-copy">
                   <strong>{place.name}</strong>
-                  <small>{place.address || category.label}{place.distanceKm !== undefined ? ` · ${place.distanceKm.toFixed(1)} km` : ''}</small>
+                  <small>{CATEGORY_STYLE[place.category].short} · {place.address}{place.distanceKm !== undefined ? ` · ${place.distanceKm.toFixed(1)} km` : ''}</small>
                 </span>
                 <span className="advisor-place-marker" aria-hidden="true">↗</span>
               </button>
@@ -158,7 +167,7 @@ export default function MarketResearch({ mode, business, onPlacesChange, onSelec
         <div className="advisor-selected-place">
           <div className="detail-kicker">SELECTED SIMULATION BUSINESS</div>
           <strong>{selectedPlace.name}</strong>
-          <span>{selectedPlace.address || category.label}{selectedPlace.distanceKm !== undefined ? ` · ${selectedPlace.distanceKm.toFixed(1)} km away` : ''}</span>
+          <span>{CATEGORY_STYLE[selectedPlace.category].short} · {selectedPlace.address}{selectedPlace.distanceKm !== undefined ? ` · ${selectedPlace.distanceKm.toFixed(1)} km away` : ''}</span>
           <span className="advisor-synthetic-note">Approximate demo location · not an actual storefront</span>
         </div>
       )}
