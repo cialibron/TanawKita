@@ -1,14 +1,17 @@
-import { useMemo, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import JobMap from '../../components/JobMap'
 import MapShell, { type WorkspaceNavItem } from '../../components/MapShell'
 import { useSession, useStore } from '../../store'
 import EyeIcon from '../../components/EyeIcon'
 import JobDetail from '../../components/JobDetail'
-import { jobPins, payLabel } from '../../components/jobPins'
+import { jobPins } from '../../components/jobPins'
+import PayLabel from '../../components/PayLabel'
 import { barangayName } from '../../data/barangays'
 import { BARANGAY_CENTERS } from '../../data/barangayGeo'
 import { blockedReason, distanceKm, matchScore } from '../../rules'
-import type { JobPost, JobType, View } from '../../types'
+import { newId } from '../ids'
+import UndoToast from '../UndoToast'
+import type { Application, JobPost, JobType, View } from '../../types'
 import { VerificationBadge } from '../employer/Verify'
 import MyApplications from './MyApplications'
 import { STATUS_LABEL, appliedLabel } from './applicationLabels'
@@ -93,15 +96,26 @@ interface Props {
 
 const APPLICATIONS = 'applications'
 
+const nowISO = () => new Date().toISOString()
+
+// The same list for the same ids, so the map does not rebuild its callouts on every render.
+const labelIdsCache = new Map<string, string[]>()
+function labelIdsFor(key: string): string[] | undefined {
+  if (!key) return undefined
+  if (!labelIdsCache.has(key)) labelIdsCache.set(key, key.split('|'))
+  return labelIdsCache.get(key)
+}
+// Withdraw shows up where Apply now was, so the second tap of a double tap must not undo the apply.
+const justApplied = (application: Application) => Date.now() - Date.parse(application.appliedAt) < 1500
+
 // Full-screen map with floating search and a side panel (bottom sheet on phones).
 export default function FindJobs({ view, onViewChange, navigation, activeNavigation, onNavigationChange, panelHeader, panelContent, panelFullScreen, onPanelFullScreenChange }: Props) {
   const { state, dispatch } = useStore()
   const session = useSession('jobseeker')
   const card = state.skillCards[session.userId]
-  const isVerified = (employerId: string) => state.verifications[employerId]?.status === 'verified'
   const [query, setQuery] = useState('')
   const [type, setType] = useState<JobType | 'all'>('all')
-  const [moreHours, setMoreHours] = useState(false)
+  const [notFullTime, setNotFullTime] = useState(false)
   const [clusterId, setClusterId] = useState('')
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [me, setMe] = useState<[number, number] | null>(null)
@@ -117,24 +131,44 @@ export default function FindJobs({ view, onViewChange, navigation, activeNavigat
     )
   }
 
+  // Where distances are measured from: the device location once shared, else the skill card's barangay (an
+  // approximate starting point, labeled as such on the cards).
+  const origin: { point: [number, number]; name: string; code: string; exact: boolean } | null = me
+    ? { point: me, name: 'Your location', code: 'YOU', exact: true }
+    : card && BARANGAY_CENTERS[card.barangay]
+      ? { point: BARANGAY_CENTERS[card.barangay], name: place(card.barangay), code: placeCode(place(card.barangay)), exact: false }
+      : null
+
   const q = query.trim().toLowerCase()
   // Only verified employers' open jobs are shown to jobseekers; clusters are grouped from all of them.
-  const visibleJobs = state.jobs.filter((j) => j.status === 'open' && isVerified(j.employerId))
-  const clusters = jobClusters(visibleJobs)
+  const visibleJobs = useMemo(
+    () => state.jobs.filter((j) => j.status === 'open' && state.verifications[j.employerId]?.status === 'verified'),
+    [state.jobs, state.verifications],
+  )
+  const clusters = useMemo(() => jobClusters(visibleJobs), [visibleJobs])
   const cluster = clusters.find((c) => c.id === clusterId) ?? null
+  // Match scores only change when the jobs or the skill card change, not on every render.
+  const matches = useMemo(() => new Map(card ? visibleJobs.map((job) => [job.id, matchScore(job, card, true)]) : []), [visibleJobs, card])
+  const originKey = origin ? origin.point.join(',') : ''
   // Without a skill card the map and list still show, but there is no match score and no applying.
-  const jobs = visibleJobs
-    .filter((j) => !cluster || cluster.jobIds.has(j.id))
-    .filter((j) => type === 'all' || j.jobType === type)
-    .filter((j) => !moreHours || j.jobType !== 'full-time')
-    .filter((j) => !card || card.age >= 18 || j.minorsAllowed)
-    .filter(
-      (j) =>
-        !q ||
-        [j.title, j.employerName, barangayName(j.barangay), ...j.skills].some((t) => t.toLowerCase().includes(q)),
-    )
-    .map((job) => ({ job, match: card ? matchScore(job, card, true) : null }))
-    .sort((a, b) => (b.match?.percent ?? 0) - (a.match?.percent ?? 0))
+  // Order: best match first, then nearest, then the soonest start.
+  const clusterJobIds = cluster?.jobIds
+  const jobs = useMemo(() => {
+    const from = originKey ? (originKey.split(',').map(Number) as [number, number]) : null
+    return visibleJobs
+      .filter((j) => !clusterJobIds || clusterJobIds.has(j.id))
+      .filter((j) => type === 'all' || j.jobType === type)
+      .filter((j) => !notFullTime || j.jobType !== 'full-time')
+      .filter((j) => !card || card.age >= 18 || j.minorsAllowed)
+      .filter((j) => !q || [j.title, j.employerName, barangayName(j.barangay), ...j.skills].some((t) => t.toLowerCase().includes(q)))
+      .map((job) => ({ job, match: matches.get(job.id) ?? null, km: from ? distanceKm(from, [job.lat, job.lng]) : null }))
+      .sort(
+        (a, b) =>
+          (b.match?.percent ?? 0) - (a.match?.percent ?? 0) ||
+          (a.km ?? 0) - (b.km ?? 0) ||
+          a.job.startDate.localeCompare(b.job.startDate),
+      )
+  }, [visibleJobs, clusterJobIds, type, notFullTime, card, q, matches, originKey])
 
   // My applications: the map and detail panel show the jobs this jobseeker applied for, so they can recheck them.
   const showingApplications = activeNavigation === APPLICATIONS
@@ -148,7 +182,7 @@ export default function FindJobs({ view, onViewChange, navigation, activeNavigat
   // Callouts for a picked cluster (or, in My applications, every applied job) show at any zoom. Keyed by id so the
   // map does not rebuild them every render.
   const clusterLabelKey = cluster || showingApplications ? businessPlaces.map((p) => p.id).join('|') : ''
-  const clusterLabelIds = useMemo(() => (clusterLabelKey ? clusterLabelKey.split('|') : undefined), [clusterLabelKey])
+  const clusterLabelIds = labelIdsFor(clusterLabelKey)
   const selectBusiness = (placeId: string) => {
     const job = jobsAtBusiness.find((item) => item.employerId === placeId)
     if (job) select(job.id)
@@ -162,25 +196,28 @@ export default function FindJobs({ view, onViewChange, navigation, activeNavigat
     setTimeout(() => document.getElementById(`job-${id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' }))
   }
 
+  // Jobs with an Apply in flight, so a fast double tap sends one application (the store also refuses a second).
+  const applying = useRef(new Set<string>())
+  useEffect(() => {
+    // Once the store has the application, the guard is no longer needed (and a withdrawn job can be applied to again).
+    applying.current.clear()
+  }, [state.applications])
   function apply(job: JobPost) {
+    if (applying.current.has(job.id) || myApplications.some((a) => a.jobId === job.id)) return
+    applying.current.add(job.id)
     dispatch({
       type: 'apply',
-      application: {
-        id: `app-${Date.now()}`,
-        jobId: job.id,
-        userId: session.userId,
-        status: 'applied',
-        appliedAt: new Date().toISOString(),
-      },
+      application: { id: newId('app'), jobId: job.id, userId: session.userId, status: 'applied', appliedAt: nowISO() },
     })
   }
 
-  // Where the route on each job card starts: the device location, else the skill card's barangay.
-  const origin: { point: [number, number]; name: string; code: string } | null = me
-    ? { point: me, name: 'Your location', code: 'YOU' }
-    : card && BARANGAY_CENTERS[card.barangay]
-      ? { point: BARANGAY_CENTERS[card.barangay], name: place(card.barangay), code: placeCode(place(card.barangay)) }
-      : null
+  // Withdrawing happens at once, with 8 seconds to undo it instead of a confirmation box.
+  const [withdrawn, setWithdrawn] = useState<Application | null>(null)
+  function withdraw(application: Application) {
+    if (justApplied(application)) return
+    dispatch({ type: 'withdraw', applicationId: application.id })
+    setWithdrawn(application)
+  }
 
   const jobList = (
     <>
@@ -217,8 +254,8 @@ export default function FindJobs({ view, onViewChange, navigation, activeNavigat
             {c.label}
           </button>
         ))}
-        <button type="button" className={`chip${moreHours ? ' active' : ''}`} aria-pressed={moreHours} onClick={() => setMoreHours(!moreHours)}>
-          More hours
+        <button type="button" className={`chip${notFullTime ? ' active' : ''}`} aria-pressed={notFullTime} onClick={() => setNotFullTime(!notFullTime)}>
+          Not full-time
         </button>
       </div>
 
@@ -251,9 +288,11 @@ export default function FindJobs({ view, onViewChange, navigation, activeNavigat
       {jobs.length === 0 && <p className="muted">No jobs match. Try another search or filter.</p>}
 
       <div className="job-rows">
-        {jobs.map(({ job, match }) => {
+        {jobs.map(({ job, match, km }) => {
           const where = place(job.barangay)
-          const km = origin ? distanceKm(origin.point, [job.lat, job.lng]) : null
+          // Measured from the barangay center (no device location), the distance is only approximate.
+          const kmNumber = km === null ? '' : `${km < 10 ? km.toFixed(1) : Math.round(km)} km`
+          const kmText = origin?.exact ? kmNumber : `~${kmNumber}`
           // Applied jobs stay highlighted in the list, so the jobseeker can see what they already applied for.
           const applied = myApplications.some((a) => a.jobId === job.id)
           return (
@@ -266,14 +305,11 @@ export default function FindJobs({ view, onViewChange, navigation, activeNavigat
               onClick={() => select(selectedId === job.id ? null : job.id)}
             >
               <span className="job-row-top">
-                <span className="job-row-pay">{payLabel(job)}</span>
+                <span className="job-row-pay"><PayLabel job={job} /></span>
                 <span className="job-row-badges">
                   {applied && <span className="job-badge applied">✓ Applied</span>}
-                  {match ? (
-                    <span className={`job-badge ${matchTone(match.percent)}`}>{match.percent}% match</span>
-                  ) : (
-                    <span className="job-badge type">{job.jobType}</span>
-                  )}
+                  {/* No skill card, no score: the job type is already in the line below, so no badge here. */}
+                  {match && <span className={`job-badge ${matchTone(match.percent)}`}>{match.percent}% match</span>}
                 </span>
               </span>
 
@@ -283,7 +319,7 @@ export default function FindJobs({ view, onViewChange, navigation, activeNavigat
                 <span className="job-route-dots" />
                 <EyeIcon width={20} />
                 <span className="job-route-line" />
-                <span className="job-route-chip">{km !== null ? `${km < 10 ? km.toFixed(1) : Math.round(km)} km` : `${job.hoursPerWeek}h/wk`}</span>
+                <span className="job-route-chip">{km !== null ? kmText : `${job.hoursPerWeek}h/wk`}</span>
                 <span className="job-route-line arrow" />
                 <span className="job-route-code">{placeCode(where)}</span>
               </span>
@@ -295,7 +331,11 @@ export default function FindJobs({ view, onViewChange, navigation, activeNavigat
 
               {/* Phones show this plain line instead of the route graphic above. */}
               <span className="job-row-plain">
-                {km !== null ? `${km < 10 ? km.toFixed(1) : Math.round(km)} km away${origin?.code === 'YOU' ? '' : ` from ${origin?.name}`}` : `${job.hoursPerWeek} hours a week`}
+                {km === null
+                  ? `${job.hoursPerWeek} hours a week`
+                  : origin?.exact
+                    ? `${kmNumber} away`
+                    : `About ${kmNumber} from ${origin?.name}, your barangay`}
               </span>
 
               <span className="job-row-meta">
@@ -315,7 +355,7 @@ export default function FindJobs({ view, onViewChange, navigation, activeNavigat
 
   const selectedJob = shownJobs.find((job) => job.id === selectedId)
   const application = selectedJob && myApplications.find((a) => a.jobId === selectedJob.id)
-  const match = selectedJob && card ? matchScore(selectedJob, card, true) : null
+  const match = selectedJob && card ? (matches.get(selectedJob.id) ?? matchScore(selectedJob, card, true)) : null
   const blocked = selectedJob && card ? blockedReason(selectedJob, card) : null
   const selectedJobDetail = selectedJob && (
     <JobDetail
@@ -334,13 +374,31 @@ export default function FindJobs({ view, onViewChange, navigation, activeNavigat
             <span className="ok">✓ {STATUS_LABEL[application.status]}</span>
             <span className="muted">Applied {appliedLabel(application.appliedAt)}</span>
             {selectedJob.status !== 'open' && <span className="muted">This job is no longer open.</span>}
+            {application.status !== 'hired' && (
+              <button type="button" className="withdraw-button" onClick={() => withdraw(application)}>
+                Withdraw application
+              </button>
+            )}
           </>
         ) : !card ? (
           <button type="button" className="primary" onClick={() => onNavigationChange('skillcard')}>Create skill card</button>
         ) : (
           <>
-            <button type="button" className="primary" disabled={blocked !== null} onClick={() => apply(selectedJob)}>Apply now</button>
-            {blocked && <span className="error">{blocked}</span>}
+            <button
+              type="button"
+              className="primary"
+              disabled={blocked !== null}
+              aria-describedby={blocked ? 'apply-blocked' : undefined}
+              onClick={() => apply(selectedJob)}
+            >
+              Apply now
+            </button>
+            {/* A disabled Apply always says why, right under the button. */}
+            {blocked && (
+              <span id="apply-blocked" className="error apply-blocked">
+                Can’t apply: {blocked}
+              </span>
+            )}
           </>
         )
       }
@@ -372,9 +430,12 @@ export default function FindJobs({ view, onViewChange, navigation, activeNavigat
           alwaysLabelIds={clusterLabelIds}
           fitTo={
             showingApplications
-              ? appliedJobs.length > 0
-                ? { key: APPLICATIONS, points: appliedJobs.map((job): [number, number] => [job.lat, job.lng]) }
-                : null
+              ? selectedJob
+                ? // Tapping an application zooms the map to that job, so "where it is" shows straight away.
+                  { key: `${APPLICATIONS}:${selectedJob.id}`, points: [[selectedJob.lat, selectedJob.lng]] }
+                : appliedJobs.length > 0
+                  ? { key: APPLICATIONS, points: appliedJobs.map((job): [number, number] => [job.lat, job.lng]) }
+                  : null
               : cluster
                 ? { key: cluster.id, points: cluster.points }
                 : null
@@ -385,6 +446,17 @@ export default function FindJobs({ view, onViewChange, navigation, activeNavigat
         <>
           {panelHeader}
           {panelContent ?? (showingApplications ? <MyApplications selectedId={selectedId} onSelect={select} /> : jobList)}
+          {withdrawn && (
+            <UndoToast
+              key={withdrawn.id}
+              message="Application withdrawn."
+              onUndo={() => {
+                dispatch({ type: 'apply', application: withdrawn })
+                setWithdrawn(null)
+              }}
+              onDone={() => setWithdrawn(null)}
+            />
+          )}
         </>
       }
     />

@@ -6460,3 +6460,171 @@ button.skill-picker-option.custom {
     left: 0;
   }
 }
+
+/* ===== Undo toast: changes happen at once and can be undone for 8 seconds (theme tokens only) ===== */
+.undo-toast {
+  position: fixed;
+  bottom: calc(var(--tabbar-h, 0px) + env(safe-area-inset-bottom, 0px) + 16px);
+  left: 50%;
+  z-index: 3500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: max-content;
+  max-width: calc(100vw - 32px);
+  padding: 6px 6px 6px 16px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  font-family: 'Poppins', Inter, system-ui, sans-serif;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  transform: translateX(-50%);
+}
+
+:root .undo-toast button.undo-toast-button {
+  min-width: 64px;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 0;
+  background: var(--accent) !important;
+  color: var(--accent-text);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+:root .undo-toast button.undo-toast-close {
+  min-width: 44px;
+  min-height: 44px;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: var(--muted);
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+/* Shrinking bar along the bottom: how long Undo stays. */
+.undo-toast-timer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: var(--accent);
+  transform-origin: left;
+  animation: undo-timer linear forwards;
+}
+
+@keyframes undo-timer {
+  to {
+    transform: scaleX(0);
+  }
+}
+
+/* Withdraw an application: a plain secondary button under the status. */
+.selected-job-action .withdraw-button {
+  min-height: 44px;
+  padding: 0 14px;
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+}
+
+/* The reason a job cannot be applied for, right under the disabled Apply now. */
+.apply-blocked {
+  display: block;
+  max-width: 280px;
+  font-size: 0.9rem;
+}
+
+/* "+ New jobseeker/employer" form under the Acting as picker. */
+.acting-as-new {
+  display: grid;
+  gap: 8px;
+  margin: -4px 0 14px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  background: var(--card);
+}
+
+.acting-as-new label {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.acting-as-new input {
+  min-height: 44px;
+}
+
+.acting-as-new .error {
+  margin: 0;
+}
+
+.acting-as-new-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.acting-as-new-actions button {
+  min-height: 44px;
+  padding: 0 16px;
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+}
+
+/* PESO overview: city totals, pilot barangays and test tools as clearly separate sections. */
+.overview-section {
+  margin: 0 0 22px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+.overview-section:first-of-type {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.overview-section h2 {
+  margin: 0 0 2px;
+}
+
+.overview-caption {
+  margin: 0 0 12px;
+  font-size: 0.85rem;
+}
+
+/* Post a job before verification: the documents as a short list. */
+.verify-needs {
+  margin: 4px 0 14px;
+  padding-left: 20px;
+  color: var(--text);
+  line-height: 1.7;
+}
+
+/* Map zoom readout: room for its "Zoom" label on wide screens; hidden on phones, where pinch zoom is used. */
+.map-zoom-level {
+  width: auto !important;
+  min-width: 40px;
+  padding: 3px 6px !important;
+  white-space: nowrap;
+}
+
+@media (max-width: 720px) {
+  .map-zoom-level {
+    display: none !important;
+  }
+}
+
+/* Light mode: the toast sits outside the workspace, so it takes the light theme's navy tokens directly. */
+:root[data-theme='light'] .undo-toast {
+  border-color: var(--lt-line);
+  background: var(--lt-float);
+  color: var(--accent-text);
+}
+
+:root[data-theme='light'] .undo-toast button.undo-toast-close {
+  color: var(--lt-muted);
+}

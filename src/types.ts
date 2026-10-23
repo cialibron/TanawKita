@@ -101,4 +101,6 @@ export interface AppState {
   skillCards: Record<string, SkillCard>
   jobs: JobPost[]
   applications: Application[]
+  // Applications the jobseeker withdrew, so sample ones are not added back from the seed on the next load.
+  withdrawnApplicationIds?: string[]
 }

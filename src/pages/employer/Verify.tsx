@@ -210,7 +210,7 @@ export default function Verify() {
 
         <h2>{isBusiness ? '4' : '3'}. Employer numbers (needed for regular employees)</h2>
         <p className="muted">
-          Required before hiring part-time or full-time employees. Optional for short tasks (pakyaw).
+          Required before hiring part-time or full-time employees. Optional for short tasks (<span lang="fil">pakyaw</span>).
         </p>
         <label htmlFor="v-sss">SSS employer number</label>
         <input id="v-sss" inputMode="numeric" placeholder="00-0000000-0" value={draft.sss} onChange={(e) => set('sss', e.target.value)} />

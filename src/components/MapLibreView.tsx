@@ -720,8 +720,9 @@ export default function MapLibreView({
         maxPitch: 0,
         dragRotate: false,
         touchPitch: false,
-        // Scroll-wheel zoom needs Ctrl (Cmd on Mac); touch needs two fingers. Keeps page scrolling usable.
-        cooperativeGestures: true,
+        // A map that fills its area (every map in the app) zooms with a plain mouse wheel and pans with one finger.
+        // Only a map inside a scrolling page needs Ctrl+wheel / two fingers, so the page can still scroll past it.
+        cooperativeGestures: !fill,
       })
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Map could not be initialized')
@@ -791,7 +792,7 @@ export default function MapLibreView({
   useEffect(() => {
     if (!map) return
     const show = () => {
-      if (zoomLevel.current) zoomLevel.current.textContent = `${Math.round(2 ** (map.getZoom() - defaultZoom) * 100)}%`
+      if (zoomLevel.current) zoomLevel.current.textContent = `Zoom ${Math.round(2 ** (map.getZoom() - defaultZoom) * 100)}%`
     }
     show()
     map.on('zoom', show)
@@ -1132,7 +1133,7 @@ export default function MapLibreView({
       <div ref={container} className="maplibre-canvas" aria-label="Interactive map of Davao City" />
       {map && (
         <div className="map-view-controls">
-          <span ref={zoomLevel} className="map-zoom-level" role="status" aria-live="off" title="Zoom compared with the starting view" />
+          <span ref={zoomLevel} className="map-zoom-level" role="status" aria-live="off" title="How far in you are zoomed, compared with the starting view (100%)" />
           <button
             type="button"
             className={`map-dimension-toggle${is3d ? ' is-3d' : ''}`}

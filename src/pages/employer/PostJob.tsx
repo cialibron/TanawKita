@@ -1,4 +1,5 @@
-import { useState, type FormEvent } from 'react'
+import { useRef, useState, type FormEvent } from 'react'
+import { newId } from '../ids'
 import BarangaySelect from '../../components/BarangaySelect'
 import { DAVAO_CENTER } from '../../components/JobMap'
 import PinLocationPanel from '../../components/PinLocationPanel'
@@ -12,6 +13,17 @@ import { withMatchGroups } from '../../components/skillCatalog'
 import type { JobType, PayUnit } from '../../types'
 import { hasEmployerNumbers } from '../../verification'
 import { VerificationBadge } from './Verify'
+
+// Today in the person's own time zone, as yyyy-mm-dd (the date input's format).
+function todayISO(): string {
+  const now = new Date()
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+}
+
+// A whole number from a number field, or null when it is empty, negative, a decimal or not a number.
+function wholeNumber(value: string): number | null {
+  return /^\d+$/.test(value.trim()) ? Number(value) : null
+}
 
 interface Props {
   // Opens the Verification tab.
@@ -42,15 +54,24 @@ export default function PostJob({ onGetVerified }: Props) {
   const amount = Number(payAmount)
   const wage = payAmount === '' ? null : checkWage(amount, payUnit)
 
+  // Set while a post is being saved, so a fast double tap on "Post job" posts once.
+  const posting = useRef(false)
+
   function submit(e: FormEvent) {
     e.preventDefault()
+    if (posting.current) return
     setMessage('')
     setError('')
     if (!title.trim()) return setError('Enter a job title.')
     if (payAmount === '') return setError('Enter the pay amount.')
     if (wage && !wage.ok) return setError(wage.message)
+    const hours = wholeNumber(hoursPerWeek)
+    if (hours === null || hours < 1 || hours > 112) return setError('Hours per week must be a whole number from 1 to 112.')
+    const workersNeeded = wholeNumber(workers)
+    if (workersNeeded === null || workersNeeded < 1 || workersNeeded > 500) return setError('Workers needed must be a whole number from 1 to 500.')
     if (skills.length === 0) return setError('Pick at least one skill.')
     if (!startDate) return setError('Pick a start date.')
+    if (startDate < todayISO()) return setError('The start date has passed. Pick today or a later date.')
     if (!location) return setError('Open the map and pin where the work is.')
     if (isIndividual && jobType !== 'short-term') return setError('Individuals and households can post short-term jobs only.')
     if (jobType !== 'short-term' && verification && !hasEmployerNumbers(verification)) {
@@ -59,10 +80,12 @@ export default function PostJob({ onGetVerified }: Props) {
       )
     }
 
+    posting.current = true
+    window.setTimeout(() => (posting.current = false), 1000)
     dispatch({
       type: 'postJob',
       job: {
-        id: `job-${Date.now()}`,
+        id: newId('job'),
         employerId: session.userId,
         employerName: session.name,
         title: title.trim(),
@@ -70,9 +93,9 @@ export default function PostJob({ onGetVerified }: Props) {
         payAmount: amount,
         payUnit,
         jobType,
-        hoursPerWeek: Number(hoursPerWeek),
+        hoursPerWeek: hours,
         skills: withMatchGroups(skills),
-        workers: Number(workers),
+        workers: workersNeeded,
         startDate,
         minorsAllowed,
         status: 'open',
@@ -95,11 +118,20 @@ export default function PostJob({ onGetVerified }: Props) {
         <h1>Post a job</h1>
         <div className={`card status-card ${pending ? 'pending' : 'none'}`}>
           <strong>{pending ? 'Your verification is being reviewed' : 'Get verified before posting'}</strong>
-          <p className="muted">
-            {pending
-              ? 'PESO staff are checking your records. You can post jobs once you are approved.'
-              : 'To protect jobseekers, only employers with checked government records can post jobs. It takes about 5 minutes with your DTI/SEC/CDA registration, Mayor’s permit, barangay clearance, BIR 2303 and a valid ID.'}
-          </p>
+          {pending ? (
+            <p className="muted">PESO staff are checking your records. You can post jobs once you are approved.</p>
+          ) : (
+            <>
+              <p className="muted">To keep jobseekers safe, PESO checks every employer first. It takes about 5 minutes. Have these ready:</p>
+              <ul className="verify-needs">
+                <li>DTI, SEC or CDA registration</li>
+                <li>Mayor’s permit</li>
+                <li>Barangay clearance</li>
+                <li>BIR 2303</li>
+                <li>A valid ID</li>
+              </ul>
+            </>
+          )}
           <button type="button" className="primary" onClick={onGetVerified}>
             {pending ? 'See my verification' : 'Get verified'}
           </button>
@@ -109,7 +141,7 @@ export default function PostJob({ onGetVerified }: Props) {
   }
 
   return (
-    <form onSubmit={submit}>
+    <form noValidate onSubmit={submit}>
       <h1>Post a job</h1>
       <p>
         <VerificationBadge employerId={session.userId} />
@@ -166,13 +198,13 @@ export default function PostJob({ onGetVerified }: Props) {
       )}
 
       <label htmlFor="hours">Hours per week</label>
-      <input id="hours" type="number" min="1" max="112" value={hoursPerWeek} onChange={(e) => setHoursPerWeek(e.target.value)} />
+      <input id="hours" type="number" inputMode="numeric" min="1" max="112" step="1" value={hoursPerWeek} onChange={(e) => setHoursPerWeek(e.target.value)} />
 
       <label htmlFor="workers">Workers needed</label>
-      <input id="workers" type="number" min="1" value={workers} onChange={(e) => setWorkers(e.target.value)} />
+      <input id="workers" type="number" inputMode="numeric" min="1" max="500" step="1" value={workers} onChange={(e) => setWorkers(e.target.value)} />
 
       <label htmlFor="start">Start date</label>
-      <input id="start" type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+      <input id="start" type="date" min={todayISO()} value={startDate} onChange={(e) => setStartDate(e.target.value)} />
 
       <SkillPicker value={skills} onChange={setSkills} label="Skills wanted" placeholder="Type a skill, e.g. barista" />
 

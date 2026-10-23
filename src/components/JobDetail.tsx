@@ -1,7 +1,8 @@
 import type { ReactNode } from 'react'
 import LocationPhoto from './LocationPhoto'
 import { chosenSkills } from './skillCatalog'
-import { businessFor, payLabel } from './jobPins'
+import { businessFor } from './jobPins'
+import PayLabel from './PayLabel'
 import { barangayName } from '../data/barangays'
 import type { Business, JobPost } from '../types'
 
@@ -94,7 +95,7 @@ export default function JobDetail({ job, kicker, onClose, info, action }: Props)
         <button type="button" className="detail-close" aria-label="Clear selected job" onClick={onClose}>×</button>
       </div>
       <div className="selected-job-metrics">
-        <div><span>Pay</span><strong>{payLabel(job)}</strong></div>
+        <div><span>Pay</span><strong><PayLabel job={job} /></strong></div>
         <div><span>Schedule</span><strong>{job.hoursPerWeek} hrs / week</strong></div>
         <div><span>Workers</span><strong>{job.workers} needed</strong></div>
         <div><span>Start date</span><strong>{job.startDate}</strong></div>

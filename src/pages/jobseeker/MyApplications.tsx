@@ -1,5 +1,5 @@
 import { barangayName } from '../../data/barangays'
-import { payLabel } from '../../components/jobPins'
+import PayLabel from '../../components/PayLabel'
 import { useSession, useStore } from '../../store'
 import { STATUS_LABEL, STATUS_TONE, appliedLabel } from './applicationLabels'
 
@@ -18,7 +18,7 @@ export default function MyApplications({ selectedId, onSelect }: Props) {
     <>
       <h1>My applications</h1>
       {mine.length === 0 && <p className="muted">You have not applied to any job yet.</p>}
-      {mine.length > 0 && <p className="muted">Tap an application to see the job’s details and where it is.</p>}
+      {mine.length > 0 && <p className="muted">Tap an application to see the job’s details and where it is on the map, or to withdraw it.</p>}
       <div className="job-rows">
         {mine.map((a) => {
           const job = state.jobs.find((j) => j.id === a.jobId)
@@ -34,7 +34,7 @@ export default function MyApplications({ selectedId, onSelect }: Props) {
               onClick={() => onSelect(selected ? null : job.id)}
             >
               <span className="job-row-top">
-                <span className="job-row-pay">{payLabel(job)}</span>
+                <span className="job-row-pay"><PayLabel job={job} /></span>
                 <span className={`job-badge ${STATUS_TONE[a.status]}`}>{STATUS_LABEL[a.status]}</span>
               </span>
               <span className="job-row-places">

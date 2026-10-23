@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useState, type FormEvent, type ReactNode } from 'react'
 import { type WorkspaceNavItem } from './components/MapShell'
 import Logo from './components/Logo'
 import { useSession, useStore } from './store'
@@ -64,23 +64,70 @@ function ActingAs({ role }: { role: Role }) {
     return card ? `${card.age} yrs` : 'no skill card'
   }
 
+  // "+ New …" opens a small form here (not a browser prompt), with Add and Cancel.
+  const [adding, setAdding] = useState(false)
+  const [newName, setNewName] = useState('')
+  const [newError, setNewError] = useState('')
+  const nameLabel = role === 'jobseeker' ? 'New jobseeker’s full name' : 'New business name'
+
   function change(value: string) {
-    const name = value === NEW_USER ? prompt(role === 'jobseeker' ? 'Jobseeker full name' : 'Business name')?.trim() : state.names[value]
-    if (name) dispatch({ type: 'actAs', role, name })
+    if (value === NEW_USER) {
+      setAdding(true)
+      setNewName('')
+      setNewError('')
+      return
+    }
+    dispatch({ type: 'actAs', role, name: state.names[value] })
+  }
+
+  function add(e: FormEvent) {
+    e.preventDefault()
+    const name = newName.trim()
+    if (!name) return setNewError('Type a name first.')
+    dispatch({ type: 'actAs', role, name })
+    setAdding(false)
   }
 
   return (
-    <label className="acting-as">
-      <span className="muted">Acting as</span>
-      <select value={session.userId} onChange={(e) => change(e.target.value)}>
-        {people.map(([id, name]) => (
-          <option key={id} value={id}>
-            {name} · {usernameFor(id)} · {hint(id)}
-          </option>
-        ))}
-        <option value={NEW_USER}>+ New {role}…</option>
-      </select>
-    </label>
+    <>
+      <label className="acting-as">
+        <span className="muted">Acting as</span>
+        <select value={adding ? NEW_USER : session.userId} onChange={(e) => change(e.target.value)}>
+          {people.map(([id, name]) => (
+            <option key={id} value={id}>
+              {name} · {usernameFor(id)} · {hint(id)}
+            </option>
+          ))}
+          <option value={NEW_USER}>+ New {role}…</option>
+        </select>
+      </label>
+      {adding && (
+        <form className="acting-as-new" onSubmit={add} onKeyDown={(e) => e.key === 'Escape' && setAdding(false)}>
+          <label htmlFor={`new-${role}`}>{nameLabel}</label>
+          <input
+            id={`new-${role}`}
+            autoFocus
+            value={newName}
+            aria-invalid={Boolean(newError)}
+            aria-describedby={newError ? `new-${role}-error` : undefined}
+            onChange={(e) => setNewName(e.target.value)}
+          />
+          {newError && (
+            <p id={`new-${role}-error`} className="error">
+              {newError}
+            </p>
+          )}
+          <div className="acting-as-new-actions">
+            <button type="button" onClick={() => setAdding(false)}>
+              Cancel
+            </button>
+            <button type="submit" className="primary">
+              Add {role}
+            </button>
+          </div>
+        </form>
+      )}
+    </>
   )
 }
 

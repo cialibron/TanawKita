@@ -11,6 +11,8 @@ export type Action =
   | { type: 'setView'; view: View }
   | { type: 'actAs'; role: Role; name: string }
   | { type: 'reset' }
+  // Undo for a reset: puts back the data from just before it.
+  | { type: 'restore'; state: AppState }
   | { type: 'setBusiness'; employerId: string; business: Business }
   | { type: 'submitVerification'; employerId: string; verification: Verification }
   | { type: 'reviewVerification'; employerId: string; approve: boolean; reason?: string }
@@ -18,6 +20,7 @@ export type Action =
   | { type: 'postJob'; job: JobPost }
   | { type: 'updateJob'; jobId: string; status: JobStatus }
   | { type: 'apply'; application: Application }
+  | { type: 'withdraw'; applicationId: string }
   | { type: 'setStatus'; applicationId: string; status: ApplicationStatus }
 
 function reducer(state: AppState, action: Action): AppState {
@@ -33,6 +36,8 @@ function reducer(state: AppState, action: Action): AppState {
     }
     case 'reset':
       return seedState
+    case 'restore':
+      return action.state
     case 'setBusiness':
       return { ...state, businesses: { ...state.businesses, [action.employerId]: action.business } }
     case 'submitVerification':
@@ -51,14 +56,31 @@ function reducer(state: AppState, action: Action): AppState {
     case 'saveSkillCard':
       return { ...state, skillCards: { ...state.skillCards, [action.card.userId]: action.card } }
     case 'postJob':
+      // A double tap can send the same post twice; keep the first.
+      if (state.jobs.some((j) => j.id === action.job.id)) return state
       return { ...state, jobs: [action.job, ...state.jobs] }
     case 'updateJob':
       return {
         ...state,
         jobs: state.jobs.map((j) => (j.id === action.jobId ? { ...j, status: action.status } : j)),
       }
-    case 'apply':
-      return { ...state, applications: [action.application, ...state.applications] }
+    case 'apply': {
+      // One application per jobseeker per job, so a double tap on Apply now cannot add a second one.
+      const { id, jobId, userId } = action.application
+      if (state.applications.some((a) => a.id === id || (a.jobId === jobId && a.userId === userId))) return state
+      return {
+        ...state,
+        applications: [action.application, ...state.applications],
+        // Undo after a withdraw brings back the same application, so it must not stay marked as withdrawn.
+        withdrawnApplicationIds: state.withdrawnApplicationIds?.filter((w) => w !== id),
+      }
+    }
+    case 'withdraw':
+      return {
+        ...state,
+        applications: state.applications.filter((a) => a.id !== action.applicationId),
+        withdrawnApplicationIds: [...(state.withdrawnApplicationIds ?? []), action.applicationId],
+      }
     case 'setStatus':
       return {
         ...state,
@@ -91,7 +113,9 @@ function load(): AppState {
           verifications: { ...seedState.verifications, ...parsed.verifications },
           skillCards: { ...seedState.skillCards, ...parsed.skillCards },
           jobs: mergeById(seedState.jobs, parsed.jobs),
-          applications: mergeById(seedState.applications, parsed.applications),
+          applications: mergeById(seedState.applications, parsed.applications).filter(
+            (a) => !parsed.withdrawnApplicationIds?.includes(a.id),
+          ),
         }
       }
     }

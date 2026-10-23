@@ -49,7 +49,7 @@ function Group({ title, children }: { title: string; children: ReactNode }) {
 // User settings for this browser: how the site looks, the demo account, and the demo data saved on this device.
 export default function SettingsPanel({ onClose }: Props) {
   const prefs = usePreferences()
-  const { dispatch } = useStore()
+  const { state, dispatch } = useStore()
   const [confirmReset, setConfirmReset] = useState(false)
   const [resetDone, setResetDone] = useState(false)
   const closeRef = useRef<HTMLButtonElement>(null)
@@ -125,7 +125,7 @@ export default function SettingsPanel({ onClose }: Props) {
             ) : confirmReset ? (
               <div className="settings-confirm">
                 <span>Erase your changes and start over?</span>
-                <button type="button" className="settings-danger" onClick={() => { dispatch({ type: 'reset' }); setConfirmReset(false); setResetDone(true) }}>
+                <button type="button" className="settings-danger" onClick={() => { const view = state.view; dispatch({ type: 'reset' }); dispatch({ type: 'setView', view }); setConfirmReset(false); setResetDone(true) }}>
                   Yes, reset
                 </button>
                 <button type="button" className="settings-secondary" onClick={() => setConfirmReset(false)}>
