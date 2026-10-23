@@ -47,6 +47,8 @@ type AreaStyle = 'zoom-tiers' | 'pin-circle'
 // Pin circle radius on the ground; it never draws smaller than PIN_CIRCLE_MIN_PX on screen.
 const PIN_CIRCLE_METERS = 30
 const PIN_CIRCLE_MIN_PX = 12
+// The business's building is colored from the zoom buildings first appear on the map (the flat building layer).
+const PIN_BUILDING_MIN_ZOOM = 14
 // The colored 3D building is drawn this much wider and taller than the real one, so it covers it cleanly.
 const COLORED_BUILDING_GROW_METERS = 0.3
 // Estimated areas are drawn as stacked rings, each a little smaller, so the circle glows brighter toward the pin.
@@ -376,7 +378,7 @@ function businessAreas(map: LibreMap, places: CompetitorPlace[], selectedPlaceId
 // the business's own building is also returned, with its real height, so it can be colored in both 2D and 3D.
 function pinCircles(map: LibreMap, places: CompetitorPlace[], selectedPlaceId: string | null | undefined, buildingLayer: string) {
   const zoom = map.getZoom()
-  const colorBuildings = zoom >= BUILDING_MIN_ZOOM && Boolean(map.getLayer(buildingLayer))
+  const colorBuildings = zoom >= PIN_BUILDING_MIN_ZOOM && Boolean(map.getLayer(buildingLayer))
   // Flat and 3D building layers read the same tile features, so both carry render_height.
   const rendered = colorBuildings ? map.queryRenderedFeatures({ layers: [buildingLayer] }) : []
   const shapes = rendered.filter((feature) => feature.geometry.type === 'Polygon' || feature.geometry.type === 'MultiPolygon')

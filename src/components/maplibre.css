@@ -190,10 +190,11 @@
   position: absolute;
   left: 3px;
   bottom: 8px;
-  /* The marker is 0 px wide, so size the card to its content instead of shrinking it to its minimum. */
+  /* The marker is 0 px wide, so size the card to its words instead of shrinking it to its minimum.
+     It only wraps a name that would not fit on the screen. */
   width: max-content;
-  min-width: 220px;
-  max-width: 300px;
+  min-width: 200px;
+  max-width: calc(100vw - 48px);
   display: grid;
   gap: 5px;
   padding: 0 0 7px;
@@ -235,8 +236,7 @@
   min-width: 0;
   overflow: hidden;
   font: 500 17px/1.2 'Poppins', system-ui, sans-serif;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
 }
 
 /* Small hexagon badge in the business-type color, beside the name. */
