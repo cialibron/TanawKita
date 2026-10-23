@@ -1,6 +1,6 @@
 # Synthetic simulation sheets
 
-These CSVs are **new, separate demo sheets**. The app reads them as additive synthetic simulation records at startup; they do not replace the existing seed records. Existing saved records and user edits are preserved when the new rows are merged into local storage.
+These CSVs are the **only demo records** the app loads at startup.
 
 ## Files
 
@@ -32,4 +32,4 @@ These CSVs are **new, separate demo sheets**. The app reads them as additive syn
 - Context for richer simulations: `languages`, `commute_mode`, `digital_access`, `profile_summary`
 - Provenance: `data_origin`
 
-The runtime adapter is `src/data/simulation.ts`. It converts these CSV rows into the app's demo business, job, and skill-card records while keeping the original records intact. The competitor simulator reads the business sheet and labels all locations as synthetic approximate points. `mockEmployers.ts` and `mockSeekers.ts` remain unchanged.
+The runtime adapter is `src/data/simulation.ts`. It converts these CSV rows into the app's demo business, job, and skill-card records. These two sheets are the only demo businesses and jobseekers. The competitor simulator reads the business sheet and labels all locations as synthetic approximate points.
