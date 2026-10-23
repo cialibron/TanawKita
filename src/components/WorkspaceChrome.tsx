@@ -1,6 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import EyeIcon from './EyeIcon'
 import { BrandEmblem } from './Logo'
+import SettingsPanel from './SettingsPanel'
+import { setPreferences, usePreferences } from '../preferences'
 import type { View } from '../types'
 
 export interface WorkspaceNavItem {
@@ -91,8 +93,66 @@ export function WorkspaceRail({ view, navigation, activeNavigation, onNavigation
         ))}
       </div>
       <div className="rail-spacer" />
-      <div className="workspace-avatar tk-eye-avatar" title="TanawKita demo"><EyeIcon width={22} /></div>
+      <RailEyeMenu />
     </nav>
+  )
+}
+
+// The eye button at the bottom of the rail: opens a small menu with Settings and a dark/light mode switch.
+function RailEyeMenu() {
+  const { theme } = usePreferences()
+  const [open, setOpen] = useState(false)
+  const [settingsOpen, setSettingsOpen] = useState(false)
+  const wrap = useRef<HTMLDivElement>(null)
+
+  // Close the menu on a click outside it or on Escape.
+  useEffect(() => {
+    if (!open) return
+    const onPointer = (e: PointerEvent) => !wrap.current?.contains(e.target as Node) && setOpen(false)
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setOpen(false)
+    document.addEventListener('pointerdown', onPointer)
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.removeEventListener('pointerdown', onPointer)
+      document.removeEventListener('keydown', onKey)
+    }
+  }, [open])
+
+  const light = theme === 'light'
+  return (
+    <div className="rail-eye" ref={wrap}>
+      <button
+        type="button"
+        className={`workspace-avatar tk-eye-avatar rail-eye-button${open ? ' open' : ''}`}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        aria-label="Settings and theme"
+        title="Settings and theme"
+        onClick={() => setOpen(!open)}
+      >
+        <EyeIcon width={22} />
+      </button>
+      {open && (
+        <div className="rail-eye-menu" role="menu" aria-label="Settings and theme">
+          <button
+            type="button"
+            role="menuitem"
+            onClick={() => {
+              setOpen(false)
+              setSettingsOpen(true)
+            }}
+          >
+            <span aria-hidden="true" className="rail-eye-icon">⚙</span> Settings
+          </button>
+          <button type="button" role="menuitemcheckbox" aria-checked={light} onClick={() => setPreferences({ theme: light ? 'dark' : 'light' })}>
+            <span aria-hidden="true" className="rail-eye-icon">{light ? '☀' : '☾'}</span>
+            Light mode
+            <span aria-hidden="true" className={`settings-switch small${light ? ' on' : ''}`}><span /></span>
+          </button>
+        </div>
+      )}
+      {settingsOpen && <SettingsPanel onClose={() => setSettingsOpen(false)} />}
+    </div>
   )
 }
 

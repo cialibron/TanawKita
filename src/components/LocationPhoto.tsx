@@ -1,8 +1,9 @@
 // Aerial photo of a map point, built from free Esri World Imagery tiles (no API key), with a link to open the
 // same point in Google Maps. Demo points are approximate, so the caption says so instead of naming a storefront.
+const ZOOM = 18
 const TILE = 256
-const TILE_URL = (zoom: number, x: number, y: number) =>
-  `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${zoom}/${y}/${x}`
+const TILE_URL = (x: number, y: number) =>
+  `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${ZOOM}/${y}/${x}`
 
 function googleMapsUrl(lat: number, lng: number): string {
   return `https://www.google.com/maps/search/?api=1&query=${lat.toFixed(6)},${lng.toFixed(6)}`
@@ -12,14 +13,11 @@ interface Props {
   lat: number
   lng: number
   label: string
-  // 18 shows the spot itself; lower zooms show the surrounding area.
-  zoom?: number
-  caption?: string
 }
 
-export default function LocationPhoto({ lat, lng, label, zoom = 18, caption = 'Aerial view · approximate demo location' }: Props) {
+export default function LocationPhoto({ lat, lng, label }: Props) {
   // Fractional tile position of the point (Web Mercator).
-  const n = 2 ** zoom
+  const n = 2 ** ZOOM
   const fx = ((lng + 180) / 360) * n
   const latRad = (lat * Math.PI) / 180
   const fy = ((1 - Math.log(Math.tan(latRad) + 1 / Math.cos(latRad)) / Math.PI) / 2) * n
@@ -38,7 +36,7 @@ export default function LocationPhoto({ lat, lng, label, zoom = 18, caption = 'A
           {tiles.map((t) => (
             <img
               key={`${t.x}-${t.y}`}
-              src={TILE_URL(zoom, t.x, t.y)}
+              src={TILE_URL(t.x, t.y)}
               alt=""
               width={TILE}
               height={TILE}
@@ -50,7 +48,7 @@ export default function LocationPhoto({ lat, lng, label, zoom = 18, caption = 'A
         <span className="location-photo-pin" aria-hidden="true" />
       </a>
       <figcaption>
-        <span>{caption}</span>
+        <span>Aerial view · approximate demo location</span>
         <a href={mapsUrl} target="_blank" rel="noopener noreferrer" className="location-photo-link">
           View on Google Maps <span aria-hidden="true">↗</span>
         </a>

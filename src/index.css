@@ -960,7 +960,7 @@ ul.error {
 }
 
 /* Detail-panel controls and MapLibre's map controls are excluded: they have their own navy styles below. */
-.mapshell button:not(.tab):not(.chip):not(.rail-toggle):not(.role-rail-button):not(.map-action-button):not(.detail-close):not(.detail-expand-button):not(.detail-collapse-button):not([class*='maplibregl-ctrl']):not([class*='dash-']) {
+.mapshell button:not(.tab):not(.chip):not(.rail-toggle):not(.role-rail-button):not(.map-action-button):not(.detail-close):not(.detail-expand-button):not(.detail-collapse-button):not([class*='maplibregl-ctrl']):not([class*='dash-']):not(.rail-eye *) {
   border-color: #293c78;
   background: #192852;
   color: #e8e9eb;
@@ -4568,15 +4568,7 @@ ul.error {
   line-height: 1.45;
 }
 
-/* Spot and area photos side by side; stacked on narrow screens. */
-.location-photos {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 12px;
-}
-
 .location-photo {
-  min-width: 0;
   margin: 0;
 }
 
@@ -4658,4 +4650,825 @@ ul.error {
   color: var(--muted);
   font-weight: 400;
   opacity: 0.85;
+}
+
+/* ===== Rail eye menu: Settings and the dark/light switch ===== */
+.rail-eye {
+  position: relative;
+}
+
+.workspace-avatar.rail-eye-button {
+  width: 38px;
+  height: 38px;
+  min-height: 38px;
+  padding: 0;
+  cursor: pointer;
+}
+
+.workspace-avatar.rail-eye-button:hover,
+.workspace-avatar.rail-eye-button.open {
+  border-color: #38e3fa;
+  background: rgba(59, 130, 255, 0.32);
+}
+
+.rail-eye-menu {
+  position: absolute;
+  bottom: 0;
+  left: calc(100% + 12px);
+  z-index: 1010;
+  display: grid;
+  min-width: 200px;
+  padding: 6px;
+  border: 1px solid #293d7a;
+  background: #111d44;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
+}
+
+.workspace-rail .rail-eye-menu button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #eef3ff;
+  font: 600 14px/1.2 'Poppins', Inter, system-ui, sans-serif;
+  text-align: left;
+  cursor: pointer;
+}
+
+.workspace-rail .rail-eye-menu button:hover,
+.workspace-rail .rail-eye-menu button:focus-visible {
+  background: #1d2f66;
+}
+
+.rail-eye-icon {
+  width: 20px;
+  text-align: center;
+  font-size: 16px;
+}
+
+.rail-eye-menu .settings-switch {
+  margin-left: auto;
+}
+
+/* On/off switch, shared by the rail menu and the Settings panel. */
+.settings-switch {
+  position: relative;
+  flex-shrink: 0;
+  width: 44px;
+  height: 26px;
+  min-height: 26px;
+  padding: 0;
+  border: 1px solid rgba(120, 190, 255, 0.45);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+  transition: background-color 160ms ease;
+}
+
+.settings-switch > span {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #cfd8ee;
+  transition: transform 160ms ease;
+}
+
+.settings-switch.on {
+  border-color: #ffc94a;
+  background: #ffc94a;
+}
+
+.settings-switch.on > span {
+  background: #111b39;
+  transform: translateX(18px);
+}
+
+.settings-switch.small {
+  width: 36px;
+  height: 22px;
+  min-height: 22px;
+}
+
+.settings-switch.small > span {
+  width: 14px;
+  height: 14px;
+}
+
+.settings-switch.small.on > span {
+  transform: translateX(14px);
+}
+
+/* ===== Settings panel ===== */
+.settings-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  display: flex;
+  justify-content: flex-start;
+  background: rgba(4, 10, 30, 0.55);
+  animation: settings-fade 160ms ease-out both;
+}
+
+.settings-panel {
+  display: flex;
+  flex-direction: column;
+  width: min(420px, 100vw);
+  height: 100%;
+  margin-left: 58px;
+  border-right: 1px solid #293d7a;
+  background: linear-gradient(180deg, #0f1c48 0%, #0a1433 100%);
+  color: #eef3ff;
+  font-family: 'Poppins', Inter, system-ui, sans-serif;
+  box-shadow: 12px 0 40px rgba(0, 0, 0, 0.45);
+  animation: settings-slide 200ms ease-out both;
+}
+
+.settings-panel > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px;
+  border-bottom: 1px solid rgba(120, 190, 255, 0.22);
+}
+
+.settings-panel h2 {
+  margin: 0;
+  color: inherit;
+  font-size: 1.2rem;
+}
+
+.settings-close {
+  width: 44px;
+  height: 44px;
+  min-height: 44px;
+  padding: 0;
+  border: 1px solid rgba(120, 190, 255, 0.4);
+  background: transparent;
+  color: inherit;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.settings-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 20px 28px;
+}
+
+.settings-group {
+  padding: 16px 0;
+  border-bottom: 1px solid rgba(120, 190, 255, 0.16);
+}
+
+.settings-group:last-child {
+  border-bottom: 0;
+}
+
+.settings-group h3 {
+  margin: 0 0 10px;
+  color: #56e8fb;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 52px;
+}
+
+.settings-row-label {
+  display: block;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.settings-row-hint {
+  display: block;
+  margin-top: 2px;
+  color: #a9bcdc;
+  font-size: 12px;
+}
+
+.settings-segmented {
+  display: flex;
+  padding: 3px;
+  border: 1px solid rgba(120, 190, 255, 0.4);
+}
+
+.settings-segmented button {
+  min-width: 70px;
+  min-height: 38px;
+  padding: 0 12px;
+  border: 0;
+  background: transparent;
+  color: #a9bcdc;
+  font: 700 13px/1 'Poppins', Inter, system-ui, sans-serif;
+  cursor: pointer;
+}
+
+.settings-segmented button.active {
+  background: #ffc94a;
+  color: #111b39;
+}
+
+.settings-note {
+  margin: 0 0 12px;
+  color: #a9bcdc;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.settings-secondary,
+.settings-danger {
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid rgba(120, 190, 255, 0.5);
+  background: rgba(72, 169, 245, 0.12);
+  color: inherit;
+  font: 600 14px/1 'Poppins', Inter, system-ui, sans-serif;
+  cursor: pointer;
+}
+
+.settings-danger {
+  border-color: #f0756c;
+  background: #c8372d;
+  color: #fff;
+}
+
+.settings-confirm {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.settings-confirm > span {
+  flex-basis: 100%;
+  font-size: 14px;
+}
+
+.settings-done {
+  margin: 0;
+  color: #7ee2a0;
+  font-weight: 600;
+}
+
+@keyframes settings-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes settings-slide {
+  from {
+    transform: translateX(-24px);
+    opacity: 0;
+  }
+}
+
+@media (max-width: 720px) {
+  .settings-panel {
+    width: calc(100vw - 50px);
+    margin-left: 50px;
+  }
+}
+
+/* ===== Text size: larger text in the menu, detail panel, profile and setup pages ===== */
+:root[data-text-size='large'] :is(.mapshell-panel .panel-body, .workspace-detail-content, .profile-main, .setup-page, .settings-body) {
+  zoom: 1.15;
+}
+
+/* ===== Reduce motion: turn off animations and transitions everywhere ===== */
+:root[data-motion='reduce'] *,
+:root[data-motion='reduce'] *::before,
+:root[data-motion='reduce'] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* =====================================================================================================
+   Light mode (Settings → Theme, or the rail eye menu). The workspace is designed dark; these rules
+   repaint its surfaces in light brand colors. Prefixed with :root[data-theme='light'] so they win.
+   ===================================================================================================== */
+:root[data-theme='light'] :is(.mapshell, .profile-shell, .setup-page) {
+  --bg: #eef3fb;
+  --card: #ffffff;
+  --text: #13203f;
+  --muted: #56627f;
+  --border: #d3ddef;
+  --accent: #1f5fd6;
+  --accent-text: #fff;
+  --ok: #1a7f37;
+  --error: #b42318;
+  --line: rgba(31, 95, 214, 0.16);
+  --hover: rgba(31, 95, 214, 0.06);
+  color: var(--text);
+}
+
+:root[data-theme='light'] .mapshell,
+:root[data-theme='light'] .mapshell-map {
+  background: #eef3fb;
+}
+
+/* Rail */
+:root[data-theme='light'] .workspace-rail {
+  border-right-color: #d3ddef;
+  background: linear-gradient(180deg, #ffffff 0%, #eef3fb 100%);
+}
+
+:root[data-theme='light'] .workspace-avatar {
+  border-color: #c5d4f0;
+  background: #e5edfc;
+  color: #1f5fd6;
+}
+
+:root[data-theme='light'] .rail-toggle,
+:root[data-theme='light'] .role-rail-button {
+  color: #4a5878;
+}
+
+:root[data-theme='light'] .rail-toggle:hover,
+:root[data-theme='light'] .role-rail-button:hover,
+:root[data-theme='light'] .role-rail-button.active {
+  border-color: #c5d4f0;
+  background: #e3ecfb;
+  color: #0b1c48;
+}
+
+:root[data-theme='light'] .role-rail-button.active {
+  box-shadow: inset 3px 0 #1f5fd6;
+}
+
+:root[data-theme='light'] .role-tooltip {
+  border-color: #c5d4f0;
+  background: #fff;
+  color: #13203f;
+}
+
+:root[data-theme='light'] .rail-divider {
+  background: #d3ddef;
+}
+
+/* Left menu panel */
+:root[data-theme='light'] .mapshell-panel {
+  border-right-color: #d3ddef;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(244, 248, 255, 0.97));
+  box-shadow: 8px 0 24px rgba(19, 32, 63, 0.08);
+}
+
+:root[data-theme='light'] .workspace-heading .brand,
+:root[data-theme='light'] .mapshell h2 {
+  color: #13203f;
+}
+
+:root[data-theme='light'] .mapshell .badge {
+  border-color: #c5d4f0;
+  background: #eef3fb;
+  color: #3d4a68;
+}
+
+:root[data-theme='light'] .mapshell .acting-as select,
+:root[data-theme='light'] .mapshell input,
+:root[data-theme='light'] .mapshell select,
+:root[data-theme='light'] .mapshell textarea {
+  border-color: #c5d4f0;
+  background: #fff;
+  color: #13203f;
+}
+
+:root[data-theme='light'] .mapshell .card {
+  border-color: #d3ddef;
+  background: #fff;
+  color: #13203f;
+}
+
+:root[data-theme='light'] .mapshell button:not(.tab):not(.chip):not(.rail-toggle):not(.role-rail-button):not(.map-action-button):not(.detail-close):not(.detail-expand-button):not(.detail-collapse-button):not([class*='maplibregl-ctrl']):not([class*='dash-']):not(.rail-eye *):not(.primary):not(.job-row) {
+  border-color: #c5d4f0;
+  background: #fff;
+  color: #13203f;
+}
+
+:root[data-theme='light'] .mapshell button.primary {
+  border-color: #1f5fd6;
+  background: #1f5fd6;
+  color: #fff;
+}
+
+:root[data-theme='light'] .mapshell button.chip {
+  border-color: #d3ddef;
+  background: #fff;
+  color: #3d4a68;
+}
+
+:root[data-theme='light'] .mapshell button.chip.active,
+:root[data-theme='light'] .mapshell .job-chips button.chip.active {
+  border-color: #13203f;
+  background: #13203f;
+  color: #fff;
+}
+
+:root[data-theme='light'] .mapshell .job-chips button.chip {
+  background: #e8eef9;
+  color: #3d4a68;
+}
+
+/* Find jobs list */
+:root[data-theme='light'] .job-count {
+  background: #e8eef9;
+  color: #3d4a68;
+}
+
+:root[data-theme='light'] .mapshell button.job-locate {
+  color: #13203f;
+}
+
+:root[data-theme='light'] .job-search {
+  border-color: #c5d4f0;
+  background: #fff;
+  color: #56627f;
+}
+
+:root[data-theme='light'] .job-search input {
+  color: #13203f;
+}
+
+/* !important: the workspace's generic dark button rule is far more specific than this one. */
+:root[data-theme='light'] .mapshell button.job-row {
+  border-color: #d3ddef !important;
+  background: #fff !important;
+  color: #13203f !important;
+  box-shadow: 0 1px 3px rgba(19, 32, 63, 0.06);
+}
+
+:root[data-theme='light'] .mapshell button.job-row:hover {
+  border-color: #a9bfe6 !important;
+  background: #f7faff !important;
+}
+
+:root[data-theme='light'] .mapshell button.job-row.selected {
+  border-color: #1f5fd6 !important;
+  background: #eef4ff !important;
+  box-shadow: 0 0 0 1px rgba(31, 95, 214, 0.35);
+}
+
+:root[data-theme='light'] .job-route,
+:root[data-theme='light'] .job-row-meta,
+:root[data-theme='light'] .job-row-label {
+  color: #56627f;
+}
+
+:root[data-theme='light'] .job-row-meta span:last-child {
+  color: #13203f;
+}
+
+:root[data-theme='light'] .job-route-dots,
+:root[data-theme='light'] .job-route-line,
+:root[data-theme='light'] .job-route-line.arrow::after {
+  border-color: #1f5fd6;
+}
+
+:root[data-theme='light'] .job-route-chip {
+  background: #e3ecfb;
+  color: #1a3a80;
+}
+
+:root[data-theme='light'] .job-badge.good {
+  background: #dcf3e4;
+  color: #17663a;
+}
+
+:root[data-theme='light'] .job-badge.fair {
+  background: #dfeafc;
+  color: #1a4fae;
+}
+
+:root[data-theme='light'] .job-badge.low {
+  background: #fdf0d2;
+  color: #8a5a00;
+}
+
+:root[data-theme='light'] .job-badge.type {
+  background: #e3ecfb;
+  color: #1a3a80;
+}
+
+:root[data-theme='light'] .job-note {
+  color: #3d4a68;
+}
+
+/* Map buttons */
+:root[data-theme='light'] .map-action-button,
+:root[data-theme='light'] .map-zoom-reset,
+:root[data-theme='light'] .map-dimension-toggle {
+  border-color: #c5d4f0;
+  background: rgba(255, 255, 255, 0.96);
+  color: #13203f;
+  box-shadow: 0 2px 10px rgba(19, 32, 63, 0.14);
+}
+
+:root[data-theme='light'] .map-action-button:hover {
+  background: #eef3fb;
+}
+
+:root[data-theme='light'] .map-dimension-toggle span {
+  color: #56627f;
+}
+
+:root[data-theme='light'] .dev-role-menu {
+  border-color: #c5d4f0;
+  background: #fff;
+}
+
+:root[data-theme='light'] .dev-role-menu button {
+  color: #13203f;
+}
+
+:root[data-theme='light'] .dev-role-menu button:hover,
+:root[data-theme='light'] .dev-role-menu button.active {
+  background: #e3ecfb;
+  color: #0b1c48;
+}
+
+:root[data-theme='light'] .maplibre-wrap .maplibregl-ctrl-group button {
+  border-color: #c5d4f0;
+  background: #fff;
+  box-shadow: 0 2px 10px rgba(19, 32, 63, 0.14);
+}
+
+:root[data-theme='light'] .maplibre-wrap .maplibregl-ctrl-group button:hover {
+  background: #eef3fb;
+}
+
+:root[data-theme='light'] .maplibre-wrap .maplibregl-ctrl-group .maplibregl-ctrl-icon {
+  filter: none;
+}
+
+/* The base map is drawn dark; light mode flips its lightness and keeps its hues. */
+:root[data-theme='light'] .maplibre-wrap .maplibregl-canvas {
+  filter: invert(1) hue-rotate(180deg) saturate(0.7) brightness(1.04);
+}
+
+/* Selected job detail panel */
+:root[data-theme='light'] .workspace-detail {
+  border-color: #c5d4f0;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.98), rgba(240, 245, 254, 0.98));
+  color: #13203f;
+  box-shadow: 0 8px 28px rgba(19, 32, 63, 0.18);
+}
+
+:root[data-theme='light'] .workspace-detail-controls button,
+:root[data-theme='light'] .detail-close {
+  border-color: #c5d4f0;
+  background: #fff;
+  color: #13203f;
+}
+
+:root[data-theme='light'] .selected-job-heading h2,
+:root[data-theme='light'] .selected-business-detail h2,
+:root[data-theme='light'] .selected-job-metrics strong,
+:root[data-theme='light'] .job-more-facts dd,
+:root[data-theme='light'] .job-more-list dd {
+  color: #13203f;
+}
+
+:root[data-theme='light'] .detail-kicker,
+:root[data-theme='light'] .settings-group h3 {
+  color: #0b6f8f;
+}
+
+:root[data-theme='light'] .workspace-detail .selected-job-metrics > div,
+:root[data-theme='light'] .job-more-facts > div {
+  border-color: #d3ddef;
+  background: #f5f8fe;
+}
+
+:root[data-theme='light'] .selected-job-metrics span,
+:root[data-theme='light'] .job-more-facts dt,
+:root[data-theme='light'] .job-more-list dt,
+:root[data-theme='light'] .location-photo figcaption {
+  color: #56627f;
+}
+
+:root[data-theme='light'] .selected-job-more {
+  border-top-color: #d3ddef;
+}
+
+:root[data-theme='light'] .mockup-tag {
+  border-color: #c98a00;
+  color: #8a5a00;
+}
+
+:root[data-theme='light'] .location-photo-link {
+  border-color: #1f5fd6;
+  background: #e3ecfb;
+  color: #1a3a80;
+}
+
+/* Profile and account setup pages */
+:root[data-theme='light'] .profile-shell,
+:root[data-theme='light'] .setup-page {
+  background: #eef3fb;
+}
+
+:root[data-theme='light'] .profile-panel {
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 18px 50px rgba(19, 32, 63, 0.12);
+}
+
+:root[data-theme='light'] .profile-sections button:hover {
+  background: #eef3fb;
+}
+
+:root[data-theme='light'] .profile-sections button.active {
+  background: #e3ecfb;
+  color: #1a4fae;
+}
+
+:root[data-theme='light'] .profile-topbar .badge {
+  color: #1a4fae;
+}
+
+/* Rail eye menu and Settings panel */
+:root[data-theme='light'] .rail-eye-menu {
+  border-color: #c5d4f0;
+  background: #fff;
+  box-shadow: 0 10px 28px rgba(19, 32, 63, 0.18);
+}
+
+:root[data-theme='light'] .workspace-rail .rail-eye-menu button {
+  color: #13203f;
+}
+
+:root[data-theme='light'] .workspace-rail .rail-eye-menu button:hover,
+:root[data-theme='light'] .workspace-rail .rail-eye-menu button:focus-visible {
+  background: #e3ecfb;
+}
+
+:root[data-theme='light'] .settings-switch {
+  border-color: #a9bfe6;
+  background: #e3ecfb;
+}
+
+:root[data-theme='light'] .settings-switch > span {
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(19, 32, 63, 0.3);
+}
+
+:root[data-theme='light'] .settings-switch.on {
+  border-color: #1f5fd6;
+  background: #1f5fd6;
+}
+
+:root[data-theme='light'] .settings-backdrop {
+  background: rgba(19, 32, 63, 0.3);
+}
+
+:root[data-theme='light'] .settings-panel {
+  border-right-color: #d3ddef;
+  background: #fff;
+  color: #13203f;
+  box-shadow: 12px 0 40px rgba(19, 32, 63, 0.18);
+}
+
+:root[data-theme='light'] .settings-panel > header,
+:root[data-theme='light'] .settings-group {
+  border-color: #e1e8f5;
+}
+
+:root[data-theme='light'] .settings-close,
+:root[data-theme='light'] .settings-segmented {
+  border-color: #c5d4f0;
+}
+
+:root[data-theme='light'] .settings-segmented button {
+  color: #56627f;
+}
+
+:root[data-theme='light'] .settings-segmented button.active {
+  background: #1f5fd6;
+  color: #fff;
+}
+
+:root[data-theme='light'] .settings-note,
+:root[data-theme='light'] .settings-row-hint {
+  color: #56627f;
+}
+
+:root[data-theme='light'] .settings-secondary {
+  border-color: #a9bfe6;
+  background: #eef3fb;
+}
+
+:root[data-theme='light'] .settings-done {
+  color: #1a7f37;
+}
+
+:root[data-theme='light'] .mapshell button.job-locate {
+  border-color: transparent;
+  background: transparent;
+}
+
+:root[data-theme='light'] .mapshell button.job-locate:hover {
+  border-color: #c5d4f0;
+  background: #eef3fb;
+}
+
+/* Logo word: dark ink on light backgrounds. */
+:root[data-theme='light'] :is(.mapshell, .profile-shell, .setup-page) .tk-logo-tanaw {
+  background: linear-gradient(91.18deg, #0b1c48 14.77%, #1f5fd6 37.81%, #1f5fd6 64.44%, #0b1c48 89.64%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  filter: none;
+}
+
+:root[data-theme='light'] :is(.mapshell, .profile-shell, .setup-page) .tk-logo-kita {
+  color: #0b1c48;
+}
+
+/* The eye's white is invisible on light surfaces; outline it in navy. */
+:root[data-theme='light'] :is(.mapshell, .profile-shell, .setup-page) .tk-eye-icon img:first-child {
+  filter: drop-shadow(0 0 0.7px #0b1c48) drop-shadow(0 0 0.7px #0b1c48);
+}
+
+/* Profile backdrop: the brand image is set inline, so it needs !important; the faint map is flipped light. */
+:root[data-theme='light'] .profile-shell {
+  background: #eef3fb !important;
+}
+
+:root[data-theme='light'] .profile-shell .landing-map .maplibregl-canvas {
+  filter: invert(1) hue-rotate(180deg) saturate(0.6);
+  opacity: 0.55;
+}
+
+:root[data-theme='light'] .profile-topbar {
+  border-bottom-color: #d3ddef;
+  background: rgba(255, 255, 255, 0.7);
+}
+
+:root[data-theme='light'] .profile-add {
+  border-color: #1f5fd6;
+  background: #e3ecfb;
+  color: #1a3a80;
+}
+
+:root[data-theme='light'] .profile-add:hover {
+  background: #d3e2fa;
+}
+
+/* Account setup page accents in light mode. */
+:root[data-theme='light'] .setup-topbar .badge {
+  border-color: #a9bfe6;
+  background: #e3ecfb;
+  color: #1a4fae;
+}
+
+:root[data-theme='light'] .setup-kicker {
+  color: #0b6f8f;
+}
+
+:root[data-theme='light'] .setup-progress li.current {
+  border-color: #1f5fd6;
+  background: #e3ecfb;
+  color: #0b1c48;
+}
+
+:root[data-theme='light'] .setup-progress li.current span,
+:root[data-theme='light'] .setup-progress li.past span {
+  background: #1f5fd6;
+}
+
+:root[data-theme='light'] .setup-next {
+  background: #1f5fd6;
+  color: #fff;
+}
+
+:root[data-theme='light'] .setup-next:hover {
+  background: #194fb4;
+}
+
+:root[data-theme='light'] .setup-links a {
+  color: #1a4fae;
+}
+
+:root[data-theme='light'] .setup-summary .skipped {
+  color: #8a5a00;
+}
+
+:root[data-theme='light'] .setup-error {
+  color: #b42318;
 }
