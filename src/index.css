@@ -5568,3 +5568,330 @@ button.skill-picker-option.custom {
     margin-left: 0;
   }
 }
+
+/* ===== Post a job: "Open map to pin location" opens this panel over the workspace ===== */
+.pin-open {
+  width: 100%;
+  min-height: 44px;
+  color: inherit;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pin-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(4, 10, 30, 0.6);
+  animation: settings-fade 160ms ease-out both;
+}
+
+.pin-panel {
+  display: flex;
+  flex-direction: column;
+  width: min(960px, 100%);
+  height: min(720px, 100%);
+  border: 1px solid #293d7a;
+  background: linear-gradient(180deg, #0f1c48 0%, #0a1433 100%);
+  color: #eef3ff;
+  font-family: 'Poppins', Inter, system-ui, sans-serif;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.pin-panel > header,
+.pin-panel > footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+}
+
+.pin-panel > header {
+  border-bottom: 1px solid #293d7a;
+}
+
+.pin-panel > header h2 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.pin-panel > header p {
+  margin: 4px 0 0;
+  color: #a9bcdc;
+  font-size: 0.9rem;
+}
+
+.pin-panel > footer {
+  border-top: 1px solid #293d7a;
+}
+
+.pin-panel > footer .muted {
+  color: #a9bcdc;
+}
+
+.pin-map {
+  flex: 1;
+  min-height: 0;
+}
+
+/* Same control layout as the main map: zoom buttons top-right with the 2D/3D switch under them. */
+.pin-map .maplibregl-ctrl-bottom-right {
+  top: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.pin-map .maplibregl-ctrl-bottom-right .maplibregl-ctrl-attrib {
+  order: 1;
+  margin-top: auto;
+}
+
+.pin-map .map-view-controls {
+  top: 154px;
+  right: 10px;
+  bottom: auto;
+}
+
+.pin-map .maplibre-wrap:has(.map-dimension-toggle.is-3d) .map-view-controls {
+  top: 204px;
+}
+
+.pin-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.pin-actions button {
+  min-height: 44px;
+  padding: 0 16px;
+  color: #eef3ff;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pin-actions button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (max-width: 720px) {
+  .pin-backdrop {
+    padding: 0;
+  }
+
+  .pin-panel {
+    height: 100%;
+    border: 0;
+  }
+}
+
+:root[data-theme='light'] .pin-backdrop {
+  background: rgba(15, 28, 64, 0.35);
+}
+
+:root[data-theme='light'] .pin-panel {
+  border-color: var(--lt-line);
+  background: linear-gradient(180deg, #304d8e 0%, #2a4482 100%);
+}
+
+:root[data-theme='light'] .pin-panel > :is(header, footer) {
+  border-color: var(--lt-line);
+}
+
+:root[data-theme='light'] .pin-panel :is(header p, footer .muted) {
+  color: var(--lt-muted);
+}
+
+/* Dark mode: every tab's panel background is a near-black navy, with a small glow of brighter navy at the
+   top-left corner. Light mode keeps its own backgrounds. */
+:root:not([data-theme='light']) .mapshell {
+  --tab-bg:
+    radial-gradient(ellipse 85% 24% at 0% 0%, rgba(44, 88, 210, 0.45), transparent 75%),
+    #050a18;
+}
+
+:root:not([data-theme='light']) .mapshell-panel {
+  background:
+    radial-gradient(ellipse 85% 24% at 0% 0%, rgba(44, 88, 210, 0.45), transparent 75%),
+    linear-gradient(180deg, rgba(5, 10, 24, 0.96), rgba(3, 7, 18, 0.98)),
+    url('./assets/brand/bg-4.svg') center / cover;
+}
+
+/* =====================================================================================================
+   Employer dashboards (Business overview, People looking for work) in dark mode: the same layout on the
+   workspace navy. The light canvas above is kept for light mode only.
+   ===================================================================================================== */
+:root:not([data-theme='light']) .mapshell .dash {
+  --dash-ink: #f1f2f3;
+  --dash-gray: #a9bcdc;
+  --dash-blue: #8cc4ff;
+  --dash-navy: #286ce3;
+  background: var(--tab-bg);
+}
+
+:root:not([data-theme='light']) .mapshell button.dash-pill {
+  border-color: #31447a;
+}
+
+:root:not([data-theme='light']) .mapshell button.dash-pill.primary {
+  border-color: #286ce3;
+  background: #286ce3;
+}
+
+:root:not([data-theme='light']) .dash-capsules,
+:root:not([data-theme='light']) .dash-glass .dash-capsules {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+:root:not([data-theme='light']) .mapshell button.dash-capsule {
+  color: #a9bcdc;
+}
+
+:root:not([data-theme='light']) .mapshell button.dash-capsule.active {
+  background: #286ce3;
+  color: #fff;
+  box-shadow: none;
+}
+
+:root:not([data-theme='light']) .dash-badge { background: rgba(255, 255, 255, 0.08); }
+:root:not([data-theme='light']) .dash-badge.blue { background: rgba(77, 141, 255, 0.2); color: #9cc2ff; }
+:root:not([data-theme='light']) .dash-badge.cyan { background: rgba(62, 232, 255, 0.16); color: #7eeaff; }
+:root:not([data-theme='light']) .dash-badge.gold { background: rgba(255, 201, 74, 0.18); color: #ffd36e; }
+:root:not([data-theme='light']) .dash-badge.orange { background: rgba(255, 138, 61, 0.18); color: #ffb07a; }
+
+:root:not([data-theme='light']) .dash-chip {
+  background: rgba(255, 255, 255, 0.08);
+  color: #d3dcef;
+}
+
+:root:not([data-theme='light']) .dash-chip.strong,
+:root:not([data-theme='light']) .dash-tag {
+  background: rgba(77, 141, 255, 0.2);
+  color: #b8d4ff;
+}
+
+:root:not([data-theme='light']) .dash-tag.online,
+:root:not([data-theme='light']) .dash-tag.ok { background: rgba(87, 184, 121, 0.2); color: #8fe0ad; }
+:root:not([data-theme='light']) .dash-tag.warn { background: rgba(255, 201, 74, 0.2); color: #ffd98a; }
+
+:root:not([data-theme='light']) .bento-card {
+  border-color: #213367;
+  background: #152144;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+}
+
+:root:not([data-theme='light']) .bento-cta {
+  border-color: #2d4a95;
+  background: linear-gradient(120deg, #12307f, #1d4fb8);
+}
+
+:root:not([data-theme='light']) .mapshell .dash select,
+:root:not([data-theme='light']) .mapshell .dash .skill-picker input {
+  border-color: #31447a;
+  background: #17254b;
+  color: var(--dash-ink);
+}
+
+:root:not([data-theme='light']) .bento-profile {
+  border-color: #213367;
+  background: #111c3b;
+}
+
+:root:not([data-theme='light']) .bento-profile-summary {
+  color: #c9d3e6;
+}
+
+:root:not([data-theme='light']) .mapshell .dash-glass {
+  background: var(--tab-bg);
+}
+
+:root:not([data-theme='light']) .dash-metric {
+  border-color: rgba(140, 196, 255, 0.18);
+  background: rgba(21, 33, 68, 0.75);
+  box-shadow: none;
+}
+
+:root:not([data-theme='light']) .glass-card {
+  border-color: rgba(140, 196, 255, 0.16);
+  background: rgba(21, 33, 68, 0.72);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 12px 30px rgba(0, 0, 0, 0.25);
+}
+
+:root:not([data-theme='light']) .reach-line { stroke: #4d8dff; }
+:root:not([data-theme='light']) .reach-grid { stroke: rgba(255, 255, 255, 0.08); }
+:root:not([data-theme='light']) .reach-cross { stroke: rgba(255, 255, 255, 0.35); }
+
+:root:not([data-theme='light']) .reach-dot {
+  border-color: #0f1832;
+  background: #4d8dff;
+}
+
+:root:not([data-theme='light']) .reach-tip {
+  border-color: #31447a;
+  background: rgba(21, 33, 68, 0.96);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+}
+
+:root:not([data-theme='light']) .mapshell button.dash-row.active {
+  border-color: #4d8dff;
+  background: rgba(77, 141, 255, 0.18);
+}
+
+:root:not([data-theme='light']) .ranking-bar {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+:root:not([data-theme='light']) .mapshell button.dash-link,
+:root:not([data-theme='light']) .dash-selected .detail-kicker {
+  color: #8cc4ff;
+}
+
+:root:not([data-theme='light']) .dash-selected .selected-job-metrics > div {
+  border-color: #213367;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Dark mode: boxes inside the tabs are only a shade lighter than the near-black panel background. Job cards
+   need !important: the workspace's generic button rule is far more specific. */
+:root:not([data-theme='light']) .mapshell {
+  --box-bg: #0a1329;
+  --box-hover: #0f1b38;
+  --box-selected: #142347;
+}
+
+:root:not([data-theme='light']) .mapshell button.job-row {
+  background: var(--box-bg) !important;
+}
+
+:root:not([data-theme='light']) .mapshell button.job-row:hover {
+  background: var(--box-hover) !important;
+}
+
+:root:not([data-theme='light']) .mapshell button.job-row.selected {
+  background: var(--box-selected) !important;
+}
+
+:root:not([data-theme='light']) .mapshell-panel .card,
+:root:not([data-theme='light']) .bento-card,
+:root:not([data-theme='light']) .glass-card,
+:root:not([data-theme='light']) .dash-metric {
+  background: var(--box-bg);
+}
+
+:root:not([data-theme='light']) .bento-profile {
+  background: #070e20;
+}
+
+/* The call-to-action banner keeps its blue gradient. */
+:root:not([data-theme='light']) .bento-card.bento-cta {
+  background: linear-gradient(120deg, #12307f, #1d4fb8);
+}

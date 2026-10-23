@@ -1,6 +1,10 @@
 import { useState, type FormEvent } from 'react'
 import BarangaySelect from '../../components/BarangaySelect'
-import JobMap from '../../components/JobMap'
+import { DAVAO_CENTER } from '../../components/JobMap'
+import PinLocationPanel from '../../components/PinLocationPanel'
+import { nearestBarangay } from '../../area'
+import { barangayName } from '../../data/barangays'
+import { BARANGAY_CENTERS } from '../../data/barangayGeo'
 import { useSession, useStore } from '../../store'
 import { checkWage } from '../../rules'
 import SkillPicker from '../../components/SkillPicker'
@@ -31,6 +35,7 @@ export default function PostJob({ onGetVerified }: Props) {
   const [startDate, setStartDate] = useState('')
   const [minorsAllowed, setMinorsAllowed] = useState(false)
   const [location, setLocation] = useState<[number, number] | null>(null)
+  const [pinning, setPinning] = useState(false)
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
 
@@ -46,7 +51,7 @@ export default function PostJob({ onGetVerified }: Props) {
     if (wage && !wage.ok) return setError(wage.message)
     if (skills.length === 0) return setError('Pick at least one skill.')
     if (!startDate) return setError('Pick a start date.')
-    if (!location) return setError('Tap the map to mark where the work is.')
+    if (!location) return setError('Open the map and pin where the work is.')
     if (isIndividual && jobType !== 'short-term') return setError('Individuals and households can post short-term jobs only.')
     if (jobType !== 'short-term' && verification && !hasEmployerNumbers(verification)) {
       return setError(
@@ -116,8 +121,24 @@ export default function PostJob({ onGetVerified }: Props) {
       <label htmlFor="barangay">Barangay</label>
       <BarangaySelect id="barangay" value={barangay} onChange={setBarangay} />
 
-      <label>Work location (tap the map)</label>
-      <JobMap picked={location} onPick={setLocation} height={240} />
+      <label>Work location</label>
+      <button type="button" className="pin-open" onClick={() => setPinning(true)}>
+        Open map to pin location
+      </button>
+      <p className={location ? 'ok' : 'muted'}>
+        {location ? `✓ Pinned near ${barangayName(nearestBarangay(location) ?? barangay)}` : 'No location pinned yet.'}
+      </p>
+      {pinning && (
+        <PinLocationPanel
+          picked={location}
+          center={BARANGAY_CENTERS[barangay] ?? DAVAO_CENTER}
+          onDone={(point) => {
+            setLocation(point)
+            setPinning(false)
+          }}
+          onClose={() => setPinning(false)}
+        />
+      )}
 
       <label htmlFor="pay">Pay (₱)</label>
       <input id="pay" type="number" min="0" value={payAmount} onChange={(e) => setPayAmount(e.target.value)} />

@@ -22,6 +22,8 @@ interface Props {
   labelMinZoom?: number
   alwaysLabelIds?: string[]
   fitTo?: { key: string; points: [number, number][] } | null
+  // Where the map opens, instead of the Davao City center.
+  view?: { center: [number, number]; zoom: number }
 }
 
 export default function JobMap(props: Props) {
