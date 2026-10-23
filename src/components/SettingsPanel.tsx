@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { clearSession } from '../pages/demoAuth'
 import { setPreferences, usePreferences } from '../preferences'
 import { useStore } from '../store'
+import { replayTutorial } from '../pages/tutorial'
 
 interface Props {
   onClose: () => void
@@ -101,6 +102,20 @@ export default function SettingsPanel({ onClose }: Props) {
               onChange={(textSize) => setPreferences({ textSize })}
             />
             <Switch label="Reduce motion" hint="Turns off panel and button animations." on={prefs.reduceMotion} onChange={(reduceMotion) => setPreferences({ reduceMotion })} />
+          </Group>
+
+          <Group title="Getting started">
+            <p className="settings-note">See the welcome screen and the step-by-step tour of Find jobs again.</p>
+            <button
+              type="button"
+              className="settings-secondary"
+              onClick={() => {
+                onClose()
+                replayTutorial()
+              }}
+            >
+              Show the tour again
+            </button>
           </Group>
 
           <Group title="Demo data on this device">

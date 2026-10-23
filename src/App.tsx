@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { type WorkspaceNavItem } from './components/MapShell'
 import Logo from './components/Logo'
 import { useSession, useStore } from './store'
@@ -6,6 +6,9 @@ import { usernameFor } from './rules'
 import { clearSession, loadSession } from './pages/demoAuth'
 import Landing from './pages/Landing'
 import SetupPanel from './pages/SetupPanel'
+import WelcomeTutorial from './pages/WelcomeTutorial'
+import GuidedTour from './pages/GuidedTour'
+import { JOBSEEKER_TOUR, LOGIN_TOUR, markTutorialSeen, onReplayTutorial, tutorialSeen } from './pages/tutorial'
 import { accountKey, getSetup, type SetupStep } from './onboarding'
 import ProfilePage from './pages/jobseeker/ProfilePage'
 import FindJobs from './pages/jobseeker/FindJobs'
@@ -92,20 +95,58 @@ export default function App() {
   // Account setup panel: opened after sign-in, or for one step from a profile "Add" button.
   const [setupRequest, setSetupRequest] = useState<{ initialRole?: Role; startAt?: SetupStep; single?: boolean } | null>(null)
   const changeView = (view: View) => dispatch({ type: 'setView', view })
+  // First visit in this browser: the welcome screen, then (on Continue) a tour of signing in on the landing page,
+  // then, once signed in, a tour of Find jobs. Settings can open it again.
+  const [tutorial, setTutorial] = useState<'welcome' | 'login' | 'app' | null>(() => (tutorialSeen() ? null : 'welcome'))
+  useEffect(() => onReplayTutorial(() => setTutorial('welcome')), [])
+  const finishTutorial = () => {
+    markTutorialSeen()
+    setTutorial(null)
+  }
+  // Signed in (or exploring) during the sign-in tour: the app tour follows, on the jobseeker Find jobs screen.
+  const continueTutorial = () => {
+    if (tutorial !== 'login') return
+    dispatch({ type: 'setView', view: 'jobseeker' })
+    setJobseekerSection('jobs')
+    setTutorial('app')
+  }
+  const tourSteps = LOGIN_TOUR.length + JOBSEEKER_TOUR.length
+  const tutorialLayer =
+    tutorial === 'welcome' ? (
+      <WelcomeTutorial
+        onContinue={() => {
+          // From Settings the person is already in the app; the tour starts again from the landing page.
+          setSetupRequest(null)
+          setEntered(false)
+          setTutorial('login')
+        }}
+      />
+    ) : tutorial === 'login' && !entered ? (
+      <GuidedTour steps={LOGIN_TOUR} numbering={{ before: 0, total: tourSteps }} onDone={finishTutorial} />
+    ) : tutorial === 'app' ? (
+      <GuidedTour steps={JOBSEEKER_TOUR} numbering={{ before: LOGIN_TOUR.length, total: tourSteps }} onDone={finishTutorial} />
+    ) : null
 
   if (!entered) {
     return (
-      <Landing
-        onExplore={() => setEntered(true)}
-        onEnter={(_user, signup) => {
-          if (signup) {
-            dispatch({ type: 'actAs', role: signup.role, name: signup.name })
-            dispatch({ type: 'setView', view: signup.role })
-          }
-          setEntered(true)
-          if (!getSetup(accountKey()).finished) setSetupRequest({ initialRole: signup?.role })
-        }}
-      />
+      <>
+        <Landing
+          onExplore={() => {
+            setEntered(true)
+            continueTutorial()
+          }}
+          onEnter={(_user, signup) => {
+            if (signup) {
+              dispatch({ type: 'actAs', role: signup.role, name: signup.name })
+              dispatch({ type: 'setView', view: signup.role })
+            }
+            setEntered(true)
+            if (!getSetup(accountKey()).finished) setSetupRequest({ initialRole: signup?.role })
+            continueTutorial()
+          }}
+        />
+        {tutorialLayer}
+      </>
     )
   }
 
@@ -219,5 +260,10 @@ export default function App() {
     )
   }
 
-  return screen
+  return (
+    <>
+      {screen}
+      {tutorialLayer}
+    </>
+  )
 }

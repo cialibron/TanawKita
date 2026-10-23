@@ -255,22 +255,27 @@ export default function FindJobs({ view, onViewChange, navigation, activeNavigat
         {jobs.map(({ job, match }) => {
           const where = place(job.barangay)
           const km = origin ? distanceKm(origin.point, [job.lat, job.lng]) : null
+          // Applied jobs stay highlighted in the list, so the jobseeker can see what they already applied for.
+          const applied = myApplications.some((a) => a.jobId === job.id)
           return (
             <button
               type="button"
               key={job.id}
               id={`job-${job.id}`}
-              className={`job-row${selectedId === job.id ? ' selected' : ''}`}
+              className={`job-row${selectedId === job.id ? ' selected' : ''}${applied ? ' applied' : ''}`}
               aria-pressed={selectedId === job.id}
               onClick={() => select(selectedId === job.id ? null : job.id)}
             >
               <span className="job-row-top">
                 <span className="job-row-pay">{payLabel(job)}</span>
-                {match ? (
-                  <span className={`job-badge ${matchTone(match.percent)}`}>{match.percent}% match</span>
-                ) : (
-                  <span className="job-badge type">{job.jobType}</span>
-                )}
+                <span className="job-row-badges">
+                  {applied && <span className="job-badge applied">✓ Applied</span>}
+                  {match ? (
+                    <span className={`job-badge ${matchTone(match.percent)}`}>{match.percent}% match</span>
+                  ) : (
+                    <span className="job-badge type">{job.jobType}</span>
+                  )}
+                </span>
               </span>
 
               {/* Route from the jobseeker to the job, with the brand eye where a plane would be. */}
