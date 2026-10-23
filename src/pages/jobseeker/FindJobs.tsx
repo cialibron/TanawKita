@@ -3,11 +3,12 @@ import JobMap from '../../components/JobMap'
 import MapShell, { type WorkspaceNavItem } from '../../components/MapShell'
 import { useSession, useStore } from '../../store'
 import EyeIcon from '../../components/EyeIcon'
+import LocationPhoto from '../../components/LocationPhoto'
 import { barangayName } from '../../data/barangays'
 import { BARANGAY_CENTERS } from '../../data/barangayGeo'
 import { employerPlaces, type CompetitorPlace } from '../../businessDirectory'
 import { blockedReason, distanceKm, matchScore } from '../../rules'
-import type { JobPost, JobType, View } from '../../types'
+import type { Business, JobPost, JobType, View } from '../../types'
 import { VerificationBadge } from '../employer/Verify'
 
 function payLabel(job: JobPost): string {
@@ -27,6 +28,72 @@ function startLabel(date: string): string {
   return Number.isNaN(parsed.getTime())
     ? date
     : parsed.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).toUpperCase()
+}
+
+// Extra details shown only when the detail panel is expanded. "About the business" comes from the simulation
+// sheet; the "Sample job details" list is a design mock-up and is labeled as such on screen.
+function MoreJobDetails({ job, business }: { job: JobPost; business?: Business }) {
+  const facts: [string, string | undefined][] = business
+    ? [
+        ['Type', business.category],
+        ['Sector', business.sector],
+        ['Hours', business.businessHours?.replace('-', ' – ')],
+        ['Years open', business.yearsOperating != null ? `${business.yearsOperating} ${business.yearsOperating === 1 ? 'year' : 'years'}` : undefined],
+        ['Staff', business.employeeCountRange && `${business.employeeCountRange} people`],
+        ['Branches in Davao', business.branchesInDavao != null ? String(business.branchesInDavao) : undefined],
+      ]
+    : []
+  const shown = facts.filter((f): f is [string, string] => Boolean(f[1]))
+  return (
+    <div className="selected-job-more">
+      {shown.length > 0 && (
+        <section>
+          <div className="detail-kicker">ABOUT THE BUSINESS</div>
+          <dl className="job-more-facts">
+            {shown.map(([label, value]) => (
+              <div key={label}>
+                <dt>{label}</dt>
+                <dd>{value}</dd>
+              </div>
+            ))}
+          </dl>
+        </section>
+      )}
+
+      <section>
+        <div className="detail-kicker">
+          SAMPLE JOB DETAILS <span className="mockup-tag">Mock-up</span>
+        </div>
+        <dl className="job-more-list">
+          <div>
+            <dt>What you’ll do</dt>
+            <dd>Work as {job.title.toLowerCase()} at {job.employerName}, using {job.skills.join(', ').toLowerCase() || 'your skills'}.</dd>
+          </div>
+          <div>
+            <dt>Who can apply</dt>
+            <dd>{job.minorsAllowed ? 'Open to all ages, including workers under 18.' : 'Workers 18 years old and above.'}</dd>
+          </div>
+          <div>
+            <dt>What to bring</dt>
+            <dd>A valid ID. A resume is optional.</dd>
+          </div>
+          <div>
+            <dt>Training</dt>
+            <dd>Short on-the-job training on the first day.</dd>
+          </div>
+          <div>
+            <dt>How to apply</dt>
+            <dd>Tap Apply now. The employer sees your skill card and replies here.</dd>
+          </div>
+        </dl>
+      </section>
+
+      <section>
+        <div className="detail-kicker">LOCATION</div>
+        <LocationPhoto lat={job.lat} lng={job.lng} label={`${job.employerName}, ${barangayName(job.barangay)}`} />
+      </section>
+    </div>
+  )
 }
 
 function matchTone(percent: number): string {
@@ -280,6 +347,7 @@ export default function FindJobs({ view, onViewChange, navigation, activeNavigat
           {card && blockedReason(selectedEntry.job, card) && <span className="error">{blockedReason(selectedEntry.job, card)}</span>}
         </div>
       </div>
+      <MoreJobDetails job={selectedEntry.job} business={places.find((item) => item.id === selectedEntry.job.employerId)?.profile} />
     </div>
   )
 

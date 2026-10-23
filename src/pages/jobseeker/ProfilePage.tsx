@@ -71,7 +71,7 @@ function Chips({ items }: { items?: string[] }) {
 }
 
 // One row of the account setup card: its value, or "Not set up" with an Add button.
-function SetupRow({ label, value, onAdd }: { label: string; value: ReactNode; onAdd: () => void }) {
+function SetupRow({ label, value, onAdd }: { label: ReactNode; value: ReactNode; onAdd: () => void }) {
   return (
     <div className="setup-row">
       <div>
@@ -133,7 +133,7 @@ export default function ProfilePage({ view, onViewChange, navigation, activeNavi
           onAdd={() => onOpenSetup('id')}
         />
         <SetupRow
-          label="Resume"
+          label={<>Resume <span className="optional-label">(Optional)</span></>}
           value={
             setup.resume && (
               <Chips items={[...setup.resume.files.map((f) => f.fileName), ...setup.resume.links.map(linkLabel)]} />
