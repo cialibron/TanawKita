@@ -4458,7 +4458,7 @@ ul.error {
   display: contents;
 }
 
-.area-map.has-callout .biz-pin {
+.area-map.has-callout .business-pin {
   display: none;
 }
 
@@ -5894,4 +5894,24 @@ button.skill-picker-option.custom {
 /* The call-to-action banner keeps its blue gradient. */
 :root:not([data-theme='light']) .bento-card.bento-cta {
   background: linear-gradient(120deg, #12307f, #1d4fb8);
+}
+
+/* "My posts" and other card rows that are one big button: space the text inside the hover/focus outline. */
+.card button.link {
+  box-sizing: border-box;
+  padding: 10px 12px;
+}
+
+/* Landing: "Create an account" keeps clear of its outline, and drops under the heading when space is tight. */
+.landing-card-head {
+  flex-wrap: wrap;
+}
+
+/* `.landing .landing-link` resets all spacing, so this needs the same weight to add it back. */
+.landing .landing-link.landing-card-signup {
+  display: inline-flex;
+  align-items: center;
+  box-sizing: border-box;
+  padding: 0 14px;
+  white-space: nowrap;
 }

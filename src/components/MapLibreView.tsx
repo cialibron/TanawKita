@@ -113,10 +113,14 @@ function layoutCallouts(map: LibreMap, entries: { place: CompetitorPlace; elemen
     const card = element.querySelector<HTMLElement>('.biz-callout-card')
     if (!button || !card) continue
     button.classList.toggle('pin-only', pinOnly)
+    button.classList.remove('covered')
     if (pinOnly) {
-      // Just the pin, standing on its point: no card to place around the others.
+      // Just the pin, standing on its point: no card to place around the others. Hidden if under a control.
       button.classList.remove('flip')
       button.style.setProperty('--lift', '0px')
+      const at = map.project([place.lng, place.lat])
+      const tip = { left: at.x - 16 * scale, right: at.x + 16 * scale, top: at.y - 40 * scale, bottom: at.y }
+      button.classList.toggle('covered', covers.some((other) => overlap(tip, other) > 0))
       continue
     }
     button.classList.toggle('compact', compact)
@@ -142,6 +146,17 @@ function layoutCallouts(map: LibreMap, entries: { place: CompetitorPlace; elemen
       }
     }
     if (!best) continue
+    // No visible spot (only under a panel or button, or off the map): show just the pin, unless it is selected.
+    const hidden = covers.reduce((sum, other) => sum + overlap(best.box, other), 0) + offscreen(best.box) > 0
+    if (hidden && !button.classList.contains('selected')) {
+      button.classList.add('pin-only')
+      // A point under a panel or button would draw its pin over that control's text, so hide it entirely.
+      const tip = { left: point.x - 16 * scale, right: point.x + 16 * scale, top: point.y - 40 * scale, bottom: point.y }
+      button.classList.toggle('covered', covers.some((other) => overlap(tip, other) > 0))
+      button.classList.remove('flip')
+      button.style.setProperty('--lift', '0px')
+      continue
+    }
     button.classList.toggle('flip', best.flip)
     button.style.setProperty('--lift', `${best.lift}px`)
     placed.push(best.box)
@@ -574,6 +589,26 @@ function brandPinElement(): HTMLSpanElement {
   return art
 }
 
+// A plain TanawKita eye pin (the callout's pin, without a card), its tip on the point. With a label, the name
+// shows in a small tag beside it. Used for a picked location and for a business without a demo profile.
+function brandPinMarker(className: string, label: string): HTMLDivElement {
+  const container = document.createElement('div')
+  container.className = 'tanawkita-map-marker'
+  const pin = document.createElement('div')
+  pin.className = `brand-pin ${className}`
+  pin.setAttribute('role', 'img')
+  pin.setAttribute('aria-label', label)
+  const art = document.createElement('span')
+  art.className = 'brand-pin-art'
+  art.append(brandPinElement())
+  const tag = document.createElement('span')
+  tag.className = 'brand-pin-label'
+  tag.textContent = label
+  pin.append(art, tag)
+  container.append(pin)
+  return container
+}
+
 // Map callout for one business: the TanawKita pin above a card with the business name, type, and the year it
 // opened with its age. The tab marks it as demo data, since these businesses are fictional.
 function businessCallout(place: CompetitorPlace, selected: boolean, onClick?: () => void): HTMLDivElement {
@@ -794,7 +829,7 @@ export default function MapLibreView({
 
   useEffect(() => {
     if (!map || !focus || view) return
-    map.flyTo({ center: [focus[1], focus[0]], zoom: Math.max(map.getZoom(), 15), duration: 700 })
+    map.flyTo({ center: [focus[1], focus[0]], zoom: Math.max(map.getZoom(), selectedJob ? 15 : 14), duration: 700 })
   }, [map, focus?.[0], focus?.[1], view])
 
   useEffect(() => {
@@ -1077,11 +1112,11 @@ export default function MapLibreView({
       markers.push(marker)
     }
 
-    if (picked) markers.push(new LibreMarker({ element: markerElement('picked-pin', '📍'), anchor: 'bottom' }).setLngLat([picked[1], picked[0]]).addTo(map))
+    if (picked) markers.push(new LibreMarker({ element: brandPinMarker('picked-pin', 'Pinned location'), anchor: 'bottom' }).setLngLat([picked[1], picked[0]]).addTo(map))
     if (me) markers.push(new LibreMarker({ element: markerElement('user-position-dot'), anchor: 'center' }).setLngLat([me[1], me[0]]).addTo(map))
     if (business) {
       markers.push(
-        new LibreMarker({ element: markerElement('biz-pin', `🏪 ${business.name}`), anchor: 'bottom' })
+        new LibreMarker({ element: brandPinMarker('business-pin', business.name), anchor: 'bottom' })
           .setLngLat([business.lng, business.lat])
           .addTo(map),
       )
