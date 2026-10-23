@@ -190,8 +190,10 @@
   position: absolute;
   left: 3px;
   bottom: 8px;
-  min-width: 200px;
-  max-width: 240px;
+  /* The marker is 0 px wide, so size the card to its content instead of shrinking it to its minimum. */
+  width: max-content;
+  min-width: 220px;
+  max-width: 300px;
   display: grid;
   gap: 5px;
   padding: 0 0 7px;

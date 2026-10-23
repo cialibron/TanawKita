@@ -24,6 +24,7 @@ const RADIUS_SOURCE = 'tanawkita-business-radius'
 const COMPETITOR_SOURCE = 'tanawkita-competitors'
 const COMPETITOR_AREA_SOURCE = 'tanawkita-competitor-areas'
 const COLORED_BUILDING_LAYER = 'tanawkita-business-building-3d'
+const COLORED_BUILDING_FLAT_LAYER = 'tanawkita-business-building-2d'
 // Business callouts show from city zoom, nearest to the map center first, capped to keep phones fast.
 const LABEL_ZOOM = 11
 const MAX_LABELS = 24
@@ -36,7 +37,7 @@ type MapMode = '2d' | '3d'
 // Business highlights (circles and matched buildings) lie flat on the ground in both modes; only the base
 // buildings change between flat blocks and 3D extrusions.
 const MODE_LAYERS: Record<MapMode, string[]> = {
-  '2d': [FLAT_BUILDINGS_LAYER],
+  '2d': [FLAT_BUILDINGS_LAYER, COLORED_BUILDING_FLAT_LAYER],
   '3d': [BUILDINGS_3D_LAYER, COLORED_BUILDING_LAYER],
 }
 // 'zoom-tiers': circle, then team-size circle, then the matched building outline as you zoom in (competitor map).
@@ -253,14 +254,26 @@ function addDataLayers(map: LibreMap) {
     },
     labelsStart,
   )
-  // The business's own building in 3D, at its real height, in the business-type color (pin-circle style only).
+  // The business's own building in the business-type color (pin-circle style only): flat in 2D and raised to its
+  // real height in 3D, the same outline and color in both, so switching modes only lifts the building.
+  map.addLayer(
+    {
+      id: COLORED_BUILDING_FLAT_LAYER,
+      type: 'fill',
+      source: COMPETITOR_AREA_SOURCE,
+      minzoom: 13,
+      filter: ['==', ['get', 'tier'], 'business-building'],
+      paint: { 'fill-color': ['get', 'color'], 'fill-opacity': 0.95 },
+    },
+    labelsStart,
+  )
   map.addLayer(
     {
       id: COLORED_BUILDING_LAYER,
       type: 'fill-extrusion',
       source: COMPETITOR_AREA_SOURCE,
       minzoom: 13,
-      filter: ['==', ['get', 'tier'], 'building-3d'],
+      filter: ['==', ['get', 'tier'], 'business-building'],
       layout: { visibility: 'none' },
       paint: {
         'fill-extrusion-color': ['get', 'color'],
@@ -359,15 +372,16 @@ function businessAreas(map: LibreMap, places: CompetitorPlace[], selectedPlaceId
   return { features, signature: signature.join('|') }
 }
 
-// Job-map areas: one glowing circle centered on each business pin, the same shape at every zoom. In 3D the
-// business's own building is also returned, at its real height, so it can be drawn in the business-type color.
+// Job-map areas: one glowing circle centered on each business pin, the same shape at every zoom. From street zoom
+// the business's own building is also returned, with its real height, so it can be colored in both 2D and 3D.
 function pinCircles(map: LibreMap, places: CompetitorPlace[], selectedPlaceId: string | null | undefined, buildingLayer: string) {
   const zoom = map.getZoom()
-  const colorBuildings = buildingLayer === BUILDINGS_3D_LAYER && zoom >= BUILDING_MIN_ZOOM
-  const rendered = colorBuildings ? map.queryRenderedFeatures({ layers: [BUILDINGS_3D_LAYER] }) : []
+  const colorBuildings = zoom >= BUILDING_MIN_ZOOM && Boolean(map.getLayer(buildingLayer))
+  // Flat and 3D building layers read the same tile features, so both carry render_height.
+  const rendered = colorBuildings ? map.queryRenderedFeatures({ layers: [buildingLayer] }) : []
   const shapes = rendered.filter((feature) => feature.geometry.type === 'Polygon' || feature.geometry.type === 'MultiPolygon')
   const buildings = splitBuildings(shapes.map((feature) => feature.geometry as AreaShape), shapes.map((feature) => Number(feature.properties?.render_height) || undefined))
-  const signature: string[] = [zoom.toFixed(2), colorBuildings ? '3d' : '2d']
+  const signature: string[] = [zoom.toFixed(2), buildingLayer]
   const features = places.flatMap((place): Feature<Polygon | MultiPolygon>[] => {
     const properties = { category: place.category, color: CATEGORY_STYLE[place.category].color, selected: place.id === selectedPlaceId }
     const radiusKm = Math.max(PIN_CIRCLE_METERS, PIN_CIRCLE_MIN_PX * metersPerPixel(place.lat, zoom)) / 1000
@@ -377,7 +391,7 @@ function pinCircles(map: LibreMap, places: CompetitorPlace[], selectedPlaceId: s
     if (!building) return circle
     const colored: Feature<Polygon> = {
       type: 'Feature',
-      properties: { ...properties, tier: 'building-3d', height: building.height ?? 8 },
+      properties: { ...properties, tier: 'business-building', height: building.height ?? 8 },
       geometry: { type: 'Polygon', coordinates: growOutline(building.coordinates, COLORED_BUILDING_GROW_METERS) },
     }
     return [...circle, colored]
