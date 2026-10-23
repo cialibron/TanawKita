@@ -1,6 +1,5 @@
 import { useState, type ReactNode } from 'react'
-import MapShell, { type WorkspaceNavItem } from './components/MapShell'
-import JobMap from './components/JobMap'
+import { type WorkspaceNavItem } from './components/MapShell'
 import Logo from './components/Logo'
 import { useSession, useStore } from './store'
 import { usernameFor } from './rules'
@@ -10,11 +9,11 @@ import SetupPanel from './pages/SetupPanel'
 import { accountKey, getSetup, type SetupStep } from './onboarding'
 import ProfilePage from './pages/jobseeker/ProfilePage'
 import FindJobs from './pages/jobseeker/FindJobs'
-import MyApplications from './pages/jobseeker/MyApplications'
 import PostJob from './pages/employer/PostJob'
 import MyPosts from './pages/employer/MyPosts'
 import Overview from './pages/admin/Overview'
 import Verifications from './pages/admin/Verifications'
+import PesoWorkspace from './pages/admin/PesoWorkspace'
 import MyBusiness from './pages/employer/MyBusiness'
 import Verify from './pages/employer/Verify'
 import type { Role, View } from './types'
@@ -158,9 +157,6 @@ export default function App() {
             <ActingAs role="jobseeker" />
           </>
         }
-        panelContent={
-          jobseekerSection === 'applications' ? <MyApplications /> : undefined
-        }
       />
     )
   } else if (state.view === 'employer') {
@@ -191,13 +187,12 @@ export default function App() {
     )
   } else {
     screen = (
-      <MapShell
+      <PesoWorkspace
         navigation={ADMIN_NAV}
         activeNavigation={adminSection}
         onNavigationChange={(id) => setAdminSection(id as AdminSection)}
         view={state.view}
         onViewChange={changeView}
-        map={<JobMap fill jobs={state.jobs.filter((job) => job.status === 'open')} />}
         panel={
           <>
             {shellHeader}
