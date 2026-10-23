@@ -86,12 +86,15 @@ interface Props {
   panelHeader: ReactNode
   // Content for the other jobseeker tabs; when set it replaces the job list.
   panelContent?: ReactNode
+  // Full-screen menu, held by the app so sign-in can open Find jobs full screen.
+  panelFullScreen?: boolean
+  onPanelFullScreenChange?: (on: boolean) => void
 }
 
 const APPLICATIONS = 'applications'
 
 // Full-screen map with floating search and a side panel (bottom sheet on phones).
-export default function FindJobs({ view, onViewChange, navigation, activeNavigation, onNavigationChange, panelHeader, panelContent }: Props) {
+export default function FindJobs({ view, onViewChange, navigation, activeNavigation, onNavigationChange, panelHeader, panelContent, panelFullScreen, onPanelFullScreenChange }: Props) {
   const { state, dispatch } = useStore()
   const session = useSession('jobseeker')
   const card = state.skillCards[session.userId]
@@ -154,6 +157,8 @@ export default function FindJobs({ view, onViewChange, navigation, activeNavigat
   function select(id: string | null) {
     setSelectedId(id)
     if (!id) return
+    // Leave the full-screen menu so the map and the job's details (hidden behind it) come into view.
+    onPanelFullScreenChange?.(false)
     // Phones: close the menu so the map (zooming to the job's pin) and its details are in view.
     if (window.matchMedia('(max-width: 720px)').matches) {
       setPanelOpen(false)
@@ -345,6 +350,8 @@ export default function FindJobs({ view, onViewChange, navigation, activeNavigat
 
   return (
     <MapShell
+      panelFullScreen={panelFullScreen}
+      onPanelFullScreenChange={onPanelFullScreenChange}
       navigation={navigation}
       activeNavigation={activeNavigation}
       onNavigationChange={onNavigationChange}

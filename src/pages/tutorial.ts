@@ -80,17 +80,13 @@ export const LOGIN_TOUR: TourStep[] = [
   },
 ]
 
-// Part 2, the jobseeker tour on the Find jobs screen, once signed in.
+// Part 2, the jobseeker tour. It starts on the Find jobs tab with the menu full screen (where sign-in lands);
+// opening a job leaves full screen, so the later steps can point at the details and the map controls.
 export const JOBSEEKER_TOUR: TourStep[] = [
-  {
-    target: '.dev-role-picker',
-    title: 'Switch views',
-    text: 'Developer view switches the demo between Jobseeker, Employer and PESO Admin. It is only here for the demo.',
-  },
   {
     target: '.workspace-rail .role-rail',
     title: 'Your tabs',
-    text: 'Find jobs, My applications and My profile live here. On a phone, they are in the bar along the bottom.',
+    text: 'You start on Find jobs, with the list full screen. My applications and My profile live here too. On a phone, they are in the bar along the bottom.',
   },
   {
     // A job not applied for yet, so the next steps can show Apply now.
@@ -111,6 +107,11 @@ export const JOBSEEKER_TOUR: TourStep[] = [
     scroll: true,
     title: 'Apply',
     text: 'Press Apply now to send your skill card to the employer. The job then shows ✓ Applied in the list and under My applications.',
+  },
+  {
+    target: '.dev-role-picker',
+    title: 'Switch views',
+    text: 'Developer view switches the demo between Jobseeker, Employer and PESO Admin. It is only here for the demo.',
   },
   {
     title: 'You’re all set',
