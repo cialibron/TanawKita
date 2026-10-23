@@ -1,5 +1,7 @@
 import { barangayName } from './data/barangays'
 import { syntheticBusinesses } from './data/simulation'
+import type { Business } from './types'
+import type { VerificationStatus } from './verification'
 
 export type BusinessCategoryId =
   | 'cafe'
@@ -33,6 +35,9 @@ export interface CompetitorPlace {
   address: string
   distanceKm?: number
   source: 'synthetic-simulation'
+  // Full synthetic profile behind the pin, for map labels and the detail card.
+  profile: Business
+  verificationStatus: VerificationStatus
 }
 
 export const BUSINESS_CATEGORIES: BusinessCategory[] = [
@@ -89,6 +94,8 @@ export async function searchCompetitors({
         address: barangayName(entry.business.barangay),
         ...(mode === 'local' ? { distanceKm: distance } : {}),
         source: 'synthetic-simulation' as const,
+        profile: entry.business,
+        verificationStatus: entry.verification.status,
       }
     })
     .filter((place) => mode === 'city' || (place.distanceKm ?? Infinity) <= radiusKm)
