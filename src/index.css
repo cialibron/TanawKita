@@ -793,10 +793,17 @@ ul.error {
   transition: opacity 120ms ease, transform 120ms ease;
 }
 
-.role-rail-button:hover .role-tooltip,
 .role-rail-button:focus-visible .role-tooltip {
   opacity: 1;
   transform: translateX(0);
+}
+
+/* Touch screens keep :hover after a tap, which would leave the tooltip covering the menu. */
+@media (hover: hover) {
+  .role-rail-button:hover .role-tooltip {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 .rail-divider {
@@ -1048,6 +1055,7 @@ ul.error {
     z-index: 1003;
     width: min(360px, calc(100vw - 50px));
     max-width: calc(100vw - 50px);
+    height: auto;
     flex-basis: auto;
     box-shadow: 8px 0 24px rgba(0, 0, 0, 0.45);
   }
@@ -1362,6 +1370,7 @@ ul.error {
   }
 
   .selected-job-heading {
+    padding-top: 30px;
     padding-left: 34px;
     padding-right: 0;
   }
@@ -1779,5 +1788,29 @@ ul.error {
 @media (max-width: 720px) {
   .advisor-place-list {
     max-height: 35vh;
+  }
+}
+
+/* Touch screens of any width, including phones in landscape. */
+@media (pointer: coarse) {
+  .workspace-detail-controls button,
+  .detail-close {
+    min-width: 40px;
+    min-height: 40px;
+  }
+
+  /* Start every detail view below the larger controls instead of beside them. */
+  .workspace-detail-content {
+    padding-top: 56px;
+  }
+
+  .selected-job-heading {
+    padding-top: 0;
+    padding-right: 0;
+  }
+
+  /* iOS Safari zooms the page when a field under 16px is focused. */
+  .advisor-filter-card select {
+    font-size: 16px;
   }
 }
