@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Map as LibreMap, Marker as LibreMarker, NavigationControl, Popup, setWorkerUrl, type GeoJSONSource, type MapLayerMouseEvent, type MapMouseEvent } from 'maplibre-gl'
+import { Map as LibreMap, Marker as LibreMarker, NavigationControl, Popup, setWorkerUrl, type ExpressionSpecification, type GeoJSONSource, type MapLayerMouseEvent, type MapMouseEvent } from 'maplibre-gl'
 import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?url'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import './maplibre.css'
@@ -28,10 +28,15 @@ const MIN_PITCH_3D = 40
 const MAX_PITCH_3D = 70
 type MapMode = '2d' | '3d'
 // Layers that belong to only one mode. Everything else (heatmap, radius, pins) shows in both.
+// The estimated-area circles lie flat on the ground in both modes; only a matched building changes between them.
 const MODE_LAYERS: Record<MapMode, string[]> = {
   '2d': [FLAT_BUILDINGS_LAYER, 'tanawkita-competitor-area-fill', 'tanawkita-competitor-area-glow', 'tanawkita-competitor-area-outline'],
   '3d': [BUILDINGS_3D_LAYER, AREA_3D_LAYER],
 }
+// Estimated areas are drawn as stacked rings, each a little smaller, so the circle glows brighter toward the pin.
+const CIRCLE_RINGS = [1, 0.72, 0.46, 0.22]
+const isBuilding: ExpressionSpecification = ['==', ['get', 'tier'], 'building']
+const isCircle: ExpressionSpecification = ['!=', ['get', 'tier'], 'building']
 // Shaded business areas start at this zoom, the same zoom building tiles start.
 const AREA_MIN_ZOOM = 13
 // Building outlines are looked up from this zoom; before it, store-sized buildings are under ~10 px.
@@ -87,21 +92,6 @@ function circleFeature(lat: number, lng: number, radiusKm: number): Feature<Poly
     coordinates.push([(destLng * 180) / Math.PI, (destLat * 180) / Math.PI])
   }
   return { type: 'Feature', properties: {}, geometry: { type: 'Polygon', coordinates: [coordinates] } }
-}
-
-// Square around a point, `sideMeters` wide, used for the estimated store area.
-function squareFeature(lat: number, lng: number, sideMeters: number, properties: Record<string, unknown>): Feature<Polygon> {
-  const half = sideMeters / 2
-  const dLat = half / 111320
-  const dLng = half / (111320 * Math.cos((lat * Math.PI) / 180))
-  return {
-    type: 'Feature',
-    properties,
-    geometry: {
-      type: 'Polygon',
-      coordinates: [[[lng - dLng, lat - dLat], [lng + dLng, lat - dLat], [lng + dLng, lat + dLat], [lng - dLng, lat + dLat], [lng - dLng, lat - dLat]]],
-    },
-  }
 }
 
 // Adds TanawKita's data layers on top of the base city plan, below its labels.
@@ -173,23 +163,55 @@ function addDataLayers(map: LibreMap) {
     type: 'geojson',
     data: { type: 'FeatureCollection', features: [] },
   })
+  // Estimated area: a translucent circle flat on the ground, brighter toward the pin, with a soft edge ring.
+  // Fill layers always lie on the map surface, so the circle stays on the floor when the map is tilted in 3D.
+  map.addLayer(
+    {
+      id: 'tanawkita-competitor-circle-fill',
+      type: 'fill',
+      source: COMPETITOR_AREA_SOURCE,
+      minzoom: 13,
+      filter: isCircle,
+      paint: { 'fill-color': ['get', 'color'], 'fill-opacity': ['case', ['get', 'selected'], 0.17, 0.11], 'fill-antialias': false },
+    },
+    labelsStart,
+  )
+  map.addLayer(
+    {
+      id: 'tanawkita-competitor-circle-edge',
+      type: 'line',
+      source: COMPETITOR_AREA_SOURCE,
+      minzoom: 13,
+      filter: ['all', isCircle, ['==', ['get', 'ring'], 0]],
+      paint: {
+        'line-color': ['get', 'color'],
+        'line-width': ['case', ['get', 'selected'], 2.5, 1.5],
+        'line-blur': 1,
+        'line-opacity': ['case', ['get', 'selected'], 0.75, 0.5],
+      },
+    },
+    labelsStart,
+  )
+  // Matched building in 2D: a solid glowing shape.
   map.addLayer(
     {
       id: 'tanawkita-competitor-area-fill',
       type: 'fill',
       source: COMPETITOR_AREA_SOURCE,
       minzoom: 13,
+      filter: isBuilding,
       paint: { 'fill-color': ['get', 'color'], 'fill-opacity': ['case', ['get', 'selected'], 0.9, 0.65] },
     },
     labelsStart,
   )
-  // Soft glow around the shaded area, like a lit-up building on a city plan.
+  // Soft glow around the matched building, like a lit-up building on a city plan.
   map.addLayer(
     {
       id: 'tanawkita-competitor-area-glow',
       type: 'line',
       source: COMPETITOR_AREA_SOURCE,
       minzoom: 13,
+      filter: isBuilding,
       paint: {
         'line-color': ['get', 'color'],
         'line-width': ['case', ['get', 'selected'], 14, 8],
@@ -205,21 +227,23 @@ function addDataLayers(map: LibreMap) {
       type: 'line',
       source: COMPETITOR_AREA_SOURCE,
       minzoom: 13,
+      filter: isBuilding,
       paint: { 'line-color': '#ffe2c4', 'line-width': ['case', ['get', 'selected'], 1.5, 0.8], 'line-opacity': 0.8 },
     },
     labelsStart,
   )
-  // 3D version of the shaded areas: a raised block in the category color, taller once matched to a building.
+  // Matched building in 3D: raised in the category color.
   map.addLayer(
     {
       id: AREA_3D_LAYER,
       type: 'fill-extrusion',
       source: COMPETITOR_AREA_SOURCE,
       minzoom: 13,
+      filter: isBuilding,
       layout: { visibility: 'none' },
       paint: {
         'fill-extrusion-color': ['get', 'color'],
-        'fill-extrusion-height': ['match', ['get', 'tier'], 'building', 10, 'estimate', 6, 1.5],
+        'fill-extrusion-height': 10,
         'fill-extrusion-opacity': 0.9,
       },
     },
@@ -276,7 +300,7 @@ function addDataLayers(map: LibreMap) {
   )
 }
 
-// Shaded area for each business, as precise as the zoom allows: a soft circle when zoomed out, a square sized
+// Shaded area for each business, as precise as the zoom allows: a soft circle when zoomed out, a circle sized
 // from team size in between, and the outline of the mapped building nearest the pin once it is big enough to see.
 // The businesses are fictional, so a matched building is a visual guide only, not the business's real storefront.
 // Returns the features plus a short signature, so callers can skip updates when nothing changed.
@@ -292,7 +316,7 @@ function businessAreas(map: LibreMap, places: CompetitorPlace[], selectedPlaceId
       .filter((geometry): geometry is AreaShape => geometry.type === 'Polygon' || geometry.type === 'MultiPolygon'))
     : []
   const signature: string[] = [zoom.toFixed(2)]
-  const features = places.map((place): Feature<Polygon | MultiPolygon> => {
+  const features = places.flatMap((place): Feature<Polygon | MultiPolygon>[] => {
     const properties = { category: place.category, color: CATEGORY_STYLE[place.category].color, selected: place.id === selectedPlaceId }
     const mpp = metersPerPixel(place.lat, zoom)
     const footprint = estimatedFootprintMeters(place.profile.employeeCountRange)
@@ -305,9 +329,10 @@ function businessAreas(map: LibreMap, places: CompetitorPlace[], selectedPlaceId
       estimateSidePx: footprint / mpp,
     })
     signature.push(`${place.id}:${tier}:${properties.selected ? 1 : 0}:${building ? `${building.minLng},${building.minLat}` : ''}`)
-    if (tier === 'building' && building) return { type: 'Feature', properties: { ...properties, tier }, geometry: { type: 'Polygon', coordinates: building.coordinates } }
-    if (tier === 'estimate') return squareFeature(place.lat, place.lng, footprint, { ...properties, tier })
-    return { ...circleFeature(place.lat, place.lng, (APPROX_RADIUS_PX * mpp) / 1000), properties: { ...properties, tier } }
+    if (tier === 'building' && building) return [{ type: 'Feature', properties: { ...properties, tier }, geometry: { type: 'Polygon', coordinates: building.coordinates } }]
+    // An estimate circle covers about the same ground as the team-size footprint square it replaces.
+    const radiusKm = tier === 'estimate' ? (footprint * 0.6) / 1000 : (APPROX_RADIUS_PX * mpp) / 1000
+    return CIRCLE_RINGS.map((scale, ring) => ({ ...circleFeature(place.lat, place.lng, radiusKm * scale), properties: { ...properties, tier, ring } }))
   })
   return { features, signature: signature.join('|') }
 }
