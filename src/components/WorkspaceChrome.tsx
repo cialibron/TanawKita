@@ -112,7 +112,10 @@ function RailEyeMenu() {
 
   function toggle() {
     const box = wrap.current?.getBoundingClientRect()
-    if (box) setAnchor({ left: box.right + 12, bottom: window.innerHeight - box.bottom })
+    // Beside the rail on wide screens; above the button on phones, where the rail is a bottom bar.
+    const phone = window.matchMedia('(max-width: 720px)').matches
+    if (box && phone) setAnchor({ left: Math.max(8, Math.min(box.left, window.innerWidth - 228)), bottom: window.innerHeight - box.top + 8 })
+    else if (box) setAnchor({ left: box.right + 12, bottom: window.innerHeight - box.bottom })
     setOpen(!open)
   }
 

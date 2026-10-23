@@ -147,9 +147,6 @@ function jobClusters(jobs: JobPost[]): JobCluster[] {
     .sort((a, b) => b.jobIds.size - a.jobIds.size || a.name.localeCompare(b.name))
 }
 
-// Callouts show over their dots from about 3x closer than the map's starting zoom (14 + log2(3)).
-const CALLOUT_ZOOM = 14 + Math.log2(3)
-
 const TYPE_CHIPS: { id: JobType | 'all'; label: string }[] = [
   { id: 'all', label: 'All jobs' },
   { id: 'short-term', label: 'Short-term' },
@@ -237,10 +234,14 @@ export default function FindJobs({ view, onViewChange, navigation, activeNavigat
 
   function select(id: string | null) {
     setSelectedId(id)
-    if (id) {
-      setPanelOpen(true)
-      setTimeout(() => document.getElementById(`job-${id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' }))
+    if (!id) return
+    // Phones: close the menu so the map (zooming to the job's pin) and its details are in view.
+    if (window.matchMedia('(max-width: 720px)').matches) {
+      setPanelOpen(false)
+      return
     }
+    setPanelOpen(true)
+    setTimeout(() => document.getElementById(`job-${id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' }))
   }
 
   function apply(job: JobPost) {
@@ -443,7 +444,6 @@ export default function FindJobs({ view, onViewChange, navigation, activeNavigat
           places={businessPlaces}
           selectedPlaceId={selectedEmployerId}
           onPlaceSelect={selectBusiness}
-          labelMinZoom={CALLOUT_ZOOM}
           alwaysLabelIds={clusterLabelIds}
           fitTo={cluster ? { key: cluster.id, points: cluster.points } : null}
         />

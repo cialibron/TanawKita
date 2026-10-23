@@ -378,3 +378,51 @@
   font-size: 22px;
   line-height: 1;
 }
+
+/* ===== Callout size and placement (set by layoutCallouts in MapLibreView) =====
+   --pin-scale: smaller when zoomed out (set on the map container). --lift: how far the card is raised on a
+   longer leader line to clear its neighbours. .flip: card on the left of its point. .compact: name and Demo
+   tag only, used below street zoom. The card scales around the business point, so the point never moves. */
+.biz-callout-card {
+  bottom: calc(8px + var(--lift, 0px));
+  transform: scale(var(--pin-scale, 1));
+  transform-origin: -3px calc(100% + 8px + var(--lift, 0px));
+}
+
+.biz-callout-line {
+  bottom: calc(-8px - var(--lift, 0px));
+}
+
+.biz-callout.flip .biz-callout-card {
+  left: auto;
+  right: 3px;
+  transform-origin: calc(100% + 3px) calc(100% + 8px + var(--lift, 0px));
+}
+
+.biz-callout.flip .biz-callout-line {
+  left: auto;
+  right: -4px;
+}
+
+.biz-callout.flip .biz-callout-pin {
+  left: auto;
+  right: -19px;
+}
+
+.biz-callout.compact .biz-callout-card {
+  min-width: 0;
+  padding-bottom: 0;
+}
+
+.biz-callout.compact .biz-callout-row {
+  display: none;
+}
+
+/* Pay tags shrink with the same scale as the callouts. */
+.maplibre-wrap .pay-pin {
+  zoom: var(--pin-scale, 1);
+}
+
+.biz-callout.compact .biz-callout-head {
+  padding: 10px 10px 8px;
+}

@@ -1,6 +1,5 @@
 import { useState, type ReactNode } from 'react'
 import MapShell, { type WorkspaceNavItem } from './components/MapShell'
-import JobMap from './components/JobMap'
 import Logo from './components/Logo'
 import { useSession, useStore } from './store'
 import { usernameFor } from './rules'
@@ -15,6 +14,7 @@ import PostJob from './pages/employer/PostJob'
 import MyPosts from './pages/employer/MyPosts'
 import Overview from './pages/admin/Overview'
 import Verifications from './pages/admin/Verifications'
+import AdminMap from './pages/admin/AdminMap'
 import MyBusiness from './pages/employer/MyBusiness'
 import Verify from './pages/employer/Verify'
 import type { Role, View } from './types'
@@ -197,7 +197,7 @@ export default function App() {
         onNavigationChange={(id) => setAdminSection(id as AdminSection)}
         view={state.view}
         onViewChange={changeView}
-        map={<JobMap fill jobs={state.jobs.filter((job) => job.status === 'open')} />}
+        map={<AdminMap jobs={state.jobs.filter((job) => job.status === 'open')} />}
         panel={
           <>
             {shellHeader}

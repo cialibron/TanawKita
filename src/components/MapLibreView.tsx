@@ -56,9 +56,87 @@ const COMPETITOR_SOURCE = 'tanawkita-competitors'
 const COMPETITOR_AREA_SOURCE = 'tanawkita-competitor-areas'
 const COLORED_BUILDING_LAYER = 'tanawkita-business-building-3d'
 const COLORED_BUILDING_FLAT_LAYER = 'tanawkita-business-building-2d'
-// Business callouts show from city zoom, nearest to the map center first, capped to keep phones fast.
-const LABEL_ZOOM = 11
-const MAX_LABELS = 24
+// Business callouts show at every zoom (pages can raise this), nearest to the map center first, capped to keep
+// phones fast. Zoomed out they get smaller, and below COMPACT_ZOOM they show only the name and Demo tag.
+const LABEL_ZOOM = 0
+const MAX_LABELS = 80
+const COMPACT_ZOOM = 14
+const MIN_PIN_SCALE = 0.62
+
+// Size of map pins (callouts and pay tags) at a zoom: full size at street level, down to MIN_PIN_SCALE zoomed out.
+function pinScale(zoom: number): number {
+  return Math.max(MIN_PIN_SCALE, Math.min(1, MIN_PIN_SCALE + (zoom - 12) * 0.13))
+}
+
+interface Box {
+  left: number
+  top: number
+  right: number
+  bottom: number
+}
+
+const overlap = (a: Box, b: Box) =>
+  Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left)) * Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top))
+
+// Places callout cards so they do not cover each other: each card tries its usual spot (up and to the right of
+// its point), then flipped to the left, then lifted higher on a longer leader line, and takes the first free spot
+// (or the least-covered one). Being under a panel or off the map counts against a spot. Earlier entries win,
+// so pass the selected business first.
+// Panels and buttons drawn over the map, which a card should not sit under.
+const MAP_COVERS = ['.mapshell.menu-open .mapshell-panel', '.map-actions', '.maplibregl-ctrl-bottom-right .maplibregl-ctrl-group', '.map-view-controls', '.workspace-detail', '.map-overlay > *']
+
+function coveredAreas(map: LibreMap): Box[] {
+  const origin = map.getContainer().getBoundingClientRect()
+  return [...document.querySelectorAll<HTMLElement>(MAP_COVERS.join(', '))].flatMap((element) => {
+    const box = element.getBoundingClientRect()
+    if (!box.width || !box.height) return []
+    return [{ left: box.left - origin.left, right: box.right - origin.left, top: box.top - origin.top, bottom: box.bottom - origin.top }]
+  })
+}
+
+function layoutCallouts(map: LibreMap, entries: { place: CompetitorPlace; element: HTMLElement }[]) {
+  const zoom = map.getZoom()
+  const scale = pinScale(zoom)
+  const compact = zoom < COMPACT_ZOOM
+  const placed: Box[] = []
+  const covers = coveredAreas(map)
+  const { clientWidth: viewWidth, clientHeight: viewHeight } = map.getContainer()
+  // Area of a box that falls outside the map, where the card could not be seen.
+  const offscreen = (box: Box) =>
+    (box.right - box.left) * (box.bottom - box.top) -
+    overlap(box, { left: 0, top: 0, right: viewWidth, bottom: viewHeight })
+  for (const { place, element } of entries) {
+    const button = element.querySelector<HTMLElement>('.biz-callout')
+    const card = element.querySelector<HTMLElement>('.biz-callout-card')
+    if (!button || !card) continue
+    button.classList.toggle('compact', compact)
+    // Unscaled card size (transforms do not change offset sizes); the pin adds ~34 px above the card.
+    const width = card.offsetWidth
+    const height = card.offsetHeight + 34
+    const point = map.project([place.lng, place.lat])
+    const step = height + 6
+    let best: { box: Box; lift: number; flip: boolean; cover: number } | null = null
+    search: for (let level = 0; level <= 5; level++) {
+      for (const flip of [false, true]) {
+        const lift = level * step
+        const left = flip ? point.x - (3 + width) * scale : point.x + 3 * scale
+        const bottom = point.y - (8 + lift) * scale
+        const box = { left, right: left + width * scale, top: bottom - height * scale, bottom }
+        // Being under a panel or button counts double: the card would be hidden, not just crowded.
+        const cover =
+          placed.reduce((sum, other) => sum + overlap(box, other), 0) +
+          covers.reduce((sum, other) => sum + 2 * overlap(box, other), 0) +
+          2 * offscreen(box)
+        if (!best || cover < best.cover) best = { box, lift, flip, cover }
+        if (cover === 0) break search
+      }
+    }
+    if (!best) continue
+    button.classList.toggle('flip', best.flip)
+    button.style.setProperty('--lift', `${best.lift}px`)
+    placed.push(best.box)
+  }
+}
 // 3D keeps a tilt between these angles so it never flattens back into 2D; 2D is locked flat and north-up.
 const PITCH_3D = 55
 const MIN_PITCH_3D = 40
@@ -656,6 +734,25 @@ export default function MapLibreView({
     map?.easeTo({ zoom: defaultZoom, duration: 600 })
   }
 
+  // Pins shrink as the map zooms out: callouts and pay tags read this size from the map container.
+  useEffect(() => {
+    if (!map) return
+    const resize = () => map.getContainer().style.setProperty('--pin-scale', pinScale(map.getZoom()).toFixed(3))
+    resize()
+    map.on('zoom', resize)
+    return () => {
+      map.off('zoom', resize)
+    }
+  }, [map])
+
+  // With callouts on, each business already has its own card and point, so the counted cluster circles are hidden.
+  useEffect(() => {
+    if (!map) return
+    for (const id of ['tanawkita-competitor-clusters', 'tanawkita-competitor-cluster-count']) {
+      if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', placeLabels ? 'none' : 'visible')
+    }
+  }, [map, placeLabels])
+
   // Default Davao view: the page's own view when it sets one, otherwise the city center at the default zoom.
   useEffect(() => {
     homeRef.current = () => {
@@ -666,7 +763,7 @@ export default function MapLibreView({
 
   useEffect(() => {
     if (!map || !focus || view) return
-    map.flyTo({ center: [focus[1], focus[0]], zoom: Math.max(map.getZoom(), 14), duration: 700 })
+    map.flyTo({ center: [focus[1], focus[0]], zoom: Math.max(map.getZoom(), 15), duration: 700 })
   }, [map, focus?.[0], focus?.[1], view])
 
   useEffect(() => {
@@ -861,6 +958,16 @@ export default function MapLibreView({
         if (selected) element.style.zIndex = '5'
         markers.set(id, new LibreMarker({ element, anchor: 'bottom' }).setLngLat([place.lng, place.lat]).addTo(map))
       }
+      // Selected business first, so it keeps its usual spot and the others move around it.
+      const order = [...wanted].sort((a, b) => Number(b === selectedPlaceId) - Number(a === selectedPlaceId))
+      layoutCallouts(
+        map,
+        order.flatMap((id) => {
+          const place = byId.get(id)
+          const marker = markers.get(id)
+          return place && marker ? [{ place, element: marker.getElement() }] : []
+        }),
+      )
     }
     render()
     map.on('moveend', render)

@@ -5281,24 +5281,10 @@ button.skill-picker-option.custom {
 }
 
 /* =====================================================================================================
-   Brand rule: a button with a text label has no filled box, only thin light-blue corner marks. The full
-   box appears on hover or keyboard focus. Icon-only buttons, job cards, map markers and inline text links
-   are left as they are, and a selected chip or tab keeps its fill to show which one is on.
+   Brand rule: a button with a text label has no filled box, just a translucent light-blue outline and a soft
+   drop shadow. Hover or keyboard focus adds a light fill. Icon-only buttons, job cards, map markers and inline
+   text links are left as they are, and a selected chip or tab keeps its fill to show which one is on.
    ===================================================================================================== */
-:root {
-  --corner: #8cc4ff;
-  --corner-len: 7px;
-  --corner-marks:
-    linear-gradient(var(--corner), var(--corner)) left top / var(--corner-len) 1px no-repeat,
-    linear-gradient(var(--corner), var(--corner)) left top / 1px var(--corner-len) no-repeat,
-    linear-gradient(var(--corner), var(--corner)) right top / var(--corner-len) 1px no-repeat,
-    linear-gradient(var(--corner), var(--corner)) right top / 1px var(--corner-len) no-repeat,
-    linear-gradient(var(--corner), var(--corner)) left bottom / var(--corner-len) 1px no-repeat,
-    linear-gradient(var(--corner), var(--corner)) left bottom / 1px var(--corner-len) no-repeat,
-    linear-gradient(var(--corner), var(--corner)) right bottom / var(--corner-len) 1px no-repeat,
-    linear-gradient(var(--corner), var(--corner)) right bottom / 1px var(--corner-len) no-repeat;
-}
-
 :is(button, .location-photo-link):not(
     .rail-toggle,
     .role-rail-button,
@@ -5319,8 +5305,8 @@ button.skill-picker-option.custom {
     :disabled
   ) {
   border-color: transparent !important;
-  background: var(--corner-marks) !important;
-  box-shadow: none !important;
+  background: transparent !important;
+  box-shadow: inset 0 0 0 1px rgba(140, 196, 255, 0.4), 0 3px 10px rgba(0, 0, 0, 0.32) !important;
   backdrop-filter: none !important;
 }
 
@@ -5343,8 +5329,8 @@ button.skill-picker-option.custom {
     [aria-checked='true'],
     :disabled
   ):is(:hover, :focus-visible) {
-  background: var(--corner-marks), rgba(120, 190, 255, 0.14) !important;
-  box-shadow: inset 0 0 0 1px #6fa8ee !important;
+  background: rgba(120, 190, 255, 0.14) !important;
+  box-shadow: inset 0 0 0 1px rgba(140, 196, 255, 0.75), 0 4px 14px rgba(0, 0, 0, 0.4) !important;
 }
 
 /* Labels that were dark ink on a white button need light ink once the box is hidden. */
@@ -5463,4 +5449,122 @@ button.skill-picker-option.custom {
   font: inherit;
   font-size: 13px;
   cursor: pointer;
+}
+
+/* =====================================================================================================
+   Phones: the left rail becomes a tab bar along the bottom, within easy reach of a thumb. The menu panel
+   and map sit above it. Expanded job details cover the whole screen.
+   ===================================================================================================== */
+@media (max-width: 720px) {
+  :root {
+    --tabbar-h: 60px;
+  }
+
+  .mapshell,
+  .profile-shell {
+    box-sizing: border-box;
+    padding-bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px));
+  }
+
+  .mapshell .workspace-rail,
+  .profile-shell .workspace-rail,
+  .mapshell .workspace-rail.expanded {
+    position: fixed;
+    top: auto;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1500;
+    width: 100%;
+    height: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px));
+    flex: none;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-around;
+    gap: 4px;
+    padding: 0 8px env(safe-area-inset-bottom, 0px);
+    border-top: 1px solid var(--line, rgba(120, 190, 255, 0.28));
+    border-right: 0;
+  }
+
+  /* The bar keeps only what you tap: the menu toggle, the role tabs and the eye (Settings and theme). */
+  .workspace-rail .workspace-mark,
+  .workspace-rail .rail-divider,
+  .workspace-rail .rail-spacer,
+  .workspace-rail .rail-fullscreen,
+  .workspace-rail .role-tooltip,
+  .workspace-rail .rail-label {
+    display: none !important;
+  }
+
+  .workspace-rail .role-rail {
+    display: flex;
+    flex: 1;
+    flex-direction: row;
+    justify-content: space-around;
+    gap: 4px;
+  }
+
+  .workspace-rail .rail-toggle,
+  .workspace-rail .role-rail-button,
+  .workspace-rail.expanded .rail-toggle,
+  .workspace-rail.expanded .role-rail-button {
+    width: 48px;
+    height: 48px;
+    min-height: 48px;
+    justify-content: center;
+    padding: 0;
+  }
+
+  /* On the bottom bar the menu toggle points up (open the menu) or down (close it). */
+  .workspace-rail .rail-toggle > span:first-child {
+    display: inline-block;
+    transform: rotate(-90deg);
+  }
+
+  .role-rail-button.active {
+    box-shadow: inset 0 3px #3ee8ff;
+  }
+
+  /* The menu panel fills the screen above the tab bar. */
+  .mapshell-panel,
+  .mapshell.menu-minimized .mapshell-panel,
+  .mapshell.panel-fullscreen .mapshell-panel {
+    top: 0;
+    bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px));
+    left: 0;
+    width: 100vw;
+    max-width: 100vw;
+  }
+
+  .mapshell-panel .panel-body,
+  .mapshell.panel-fullscreen .mapshell-panel .panel-body {
+    width: 100vw;
+    max-width: 100vw;
+  }
+
+  .mapshell.menu-open .map-overlay,
+  .mapshell.menu-open .workspace-detail {
+    left: 10px;
+  }
+
+  /* Expanded job details: the whole screen, above the tab bar, scrolling inside. */
+  .workspace-detail.detail-expanded {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    max-height: none;
+    border: 0;
+  }
+
+  .workspace-detail.detail-expanded .workspace-detail-content {
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+  }
+
+  /* Settings slides up from the bottom bar instead of beside the rail. */
+  .settings-panel {
+    width: 100vw;
+    height: calc(100% - var(--tabbar-h) - env(safe-area-inset-bottom, 0px));
+    margin-left: 0;
+  }
 }
