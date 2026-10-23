@@ -10,7 +10,7 @@ describe('seed data', () => {
   it('has the five demo businesses, two jobseekers, their jobs and applications', () => {
     expect(Object.keys(seedState.verifications).length).toBe(5)
     expect(Object.values(seedState.skillCards).map((c) => c.name).sort()).toEqual(['Ana Reyes', 'Viola Co'])
-    expect(jobs.length).toBeGreaterThanOrEqual(9)
+    expect(jobs.length).toBe(5)
     expect(seedState.applications.length).toBeGreaterThan(0)
   })
 

@@ -18,7 +18,8 @@ describe('CSV-backed synthetic simulation data', () => {
 
   it('creates diverse jobs and keeps richer jobseeker context', () => {
     const jobs = syntheticBusinesses.flatMap((business) => business.jobs)
-    expect(jobs.length).toBeGreaterThanOrEqual(9)
+    // One job offer per business.
+    expect(jobs.length).toBe(5)
     expect(new Set(jobs.map((job) => job.jobType)).size).toBeGreaterThan(1)
         expect(syntheticJobseekers.some((person) => person.preferredRoles?.length)).toBe(true)
   })

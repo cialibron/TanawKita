@@ -80,12 +80,13 @@ export default function FindJobs({ view, onViewChange, navigation, activeNavigat
     .map((job) => ({ job, match: card ? matchScore(job, card, true) : null }))
     .sort((a, b) => (b.match?.percent ?? 0) - (a.match?.percent ?? 0))
 
-  // Hiring businesses for the map, drawn like the competitor map. A job posted at its business (within 150 m)
-  // is pinned on that business so its pay tag sits right above the glowing area.
+  // Hiring businesses for the map. Demo-sheet jobs always sit on their business, so the pay tag points at its
+  // circle even if saved data holds an older location; other jobs snap only when posted within 150 m of it.
   const places = placesFor(jobs.map(({ job }) => job.employerId))
   const mapJobs = jobs.map(({ job }) => {
     const place = places.find((item) => item.id === job.employerId)
-    return place && distanceKm([job.lat, job.lng], [place.lat, place.lng]) <= 0.15 ? { ...job, lat: place.lat, lng: place.lng } : job
+    const atBusiness = place && (job.id.startsWith('SYN-JOB-') || distanceKm([job.lat, job.lng], [place.lat, place.lng]) <= 0.15)
+    return place && atBusiness ? { ...job, lat: place.lat, lng: place.lng } : job
   })
   const selectedEmployerId = jobs.find(({ job }) => job.id === selectedId)?.job.employerId ?? null
 
