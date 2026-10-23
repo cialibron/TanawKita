@@ -1,6 +1,5 @@
-import type { AppState, Business } from '../types'
+import type { AppState, Application, ApplicationStatus, Business } from '../types'
 import type { Verification } from '../verification'
-import { mockApplications } from './mockEmployers'
 import { syntheticBusinesses, syntheticJobseekers } from './simulation'
 
 // Demo records for local testing only, all read from simulation-data/. Five fictional businesses
@@ -15,6 +14,20 @@ for (const e of syntheticBusinesses) {
 const jobs = syntheticBusinesses.flatMap((e) => e.jobs)
 const cards = syntheticJobseekers
 
+// Each jobseeker has applied to the jobs that match their skills and age, with a mix of statuses.
+const STATUSES: ApplicationStatus[] = ['applied', 'shortlisted', 'applied', 'hired']
+const applications: Application[] = cards.flatMap((card) =>
+  jobs
+    .filter((job) => card.skills.some((skill) => job.skills.includes(skill)) && (card.age >= 18 || job.minorsAllowed))
+    .map((job, k) => ({
+      id: `app-${job.id}-${card.userId}`,
+      jobId: job.id,
+      userId: card.userId,
+      status: STATUSES[k % STATUSES.length],
+      appliedAt: `2026-10-${String(10 + k).padStart(2, '0')}T10:00:00.000Z`,
+    })),
+)
+
 export const seedState: AppState = {
   view: 'jobseeker',
   jobseekerId: cards[0].userId,
@@ -27,5 +40,5 @@ export const seedState: AppState = {
   businesses,
   verifications,
   jobs,
-  applications: mockApplications(jobs, cards),
+  applications,
 }

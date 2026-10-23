@@ -4,7 +4,8 @@ import { seedState } from './data/seed'
 import type { Verification } from './verification'
 import type { AppState, Application, ApplicationStatus, Business, JobPost, JobStatus, Role, Session, SkillCard, View } from './types'
 
-const STORAGE_KEY = 'tanawkita:v6'
+// v7: demo data cut to 5 businesses and 2 jobseekers; older saved data is ignored.
+const STORAGE_KEY = 'tanawkita:v7'
 
 export type Action =
   | { type: 'setView'; view: View }
