@@ -1967,47 +1967,8 @@ ul.error {
 .tanawkita-map-marker:has(.pay-pin):nth-of-type(8n + 7) { --hl: #8ff3ff; }
 .tanawkita-map-marker:has(.pay-pin):nth-of-type(8n + 8) { --hl: #ffe08f; }
 
-/* Hatched ground highlight under each pinned location (drawn flat, like a lot on the map). */
-.tanawkita-map-marker:has(.pay-pin)::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 26px;
-  height: 26px;
-  border: 1px solid var(--hl);
-  background: repeating-linear-gradient(90deg, var(--hl) 0 2px, transparent 2px 5px);
-  box-shadow: 0 0 14px var(--hl);
-  pointer-events: none;
-  /* Hidden when zoomed out; scales up and fades in once the map reaches street level. */
-  opacity: 0;
-  transform: translate(-50%, -50%) scaleY(0.55) rotate(45deg) scale(0.3);
-  transition:
-    opacity 320ms ease,
-    transform 420ms cubic-bezier(0.2, 0.9, 0.3, 1.25);
-}
-
-.map-zoomed-in .tanawkita-map-marker:has(.pay-pin)::before {
-  opacity: 0.55;
-  transform: translate(-50%, -50%) scaleY(0.55) rotate(45deg) scale(1);
-}
-
 .tanawkita-map-marker:has(.pay-pin.selected) {
   --hl: #ffc94a;
-}
-
-.tanawkita-map-marker:has(.pay-pin.selected)::before {
-  width: 36px;
-  height: 36px;
-}
-
-.map-zoomed-in .tanawkita-map-marker:has(.pay-pin.selected)::before {
-  opacity: 0.8;
-}
-
-/* Wrapper for the zoom sampler; it must not affect the map's layout. */
-.job-map-layer {
-  display: contents;
 }
 
 .mapshell .pay-pin,
@@ -2064,14 +2025,12 @@ ul.error {
 }
 
 /* Extra roles at the same business stack above the first tag; only the bottom tag points at the ground. */
-.tanawkita-map-marker.stacked::before,
 .mapshell .tanawkita-map-marker.stacked .pay-pin::after {
   display: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .mapshell .pay-pin,
-  .tanawkita-map-marker:has(.pay-pin)::before {
+  .mapshell .pay-pin {
     transition: none;
   }
 }

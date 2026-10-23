@@ -7,7 +7,7 @@ import type { JobPost } from '../types'
 import type { Feature, MultiPolygon, Polygon } from 'geojson'
 import type { CompetitorPlace } from '../businessDirectory'
 import { CATEGORY_STYLE, categoryLabel, estimatedFootprintMeters, yearsInBusinessLabel } from './businessCategoryStyle'
-import { APPROX_RADIUS_PX, areaSquareMeters, areaTier, metersPerPixel, pickBuilding, sizeMeters, splitBuildings, type AreaShape } from './buildingHighlight'
+import { APPROX_RADIUS_PX, areaSquareMeters, areaTier, growOutline, metersPerPixel, pickBuilding, sizeMeters, splitBuildings, type AreaShape } from './buildingHighlight'
 import { BUILDINGS_3D_LAYER, FLAT_BUILDINGS_LAYER, TANAWKITA_MAP_STYLE } from './tanawkitaMapStyle'
 
 const DAVAO_CENTER: [number, number] = [7.0731, 125.6128]
@@ -18,6 +18,7 @@ const HEAT_SOURCE = 'tanawkita-seeker-heat'
 const RADIUS_SOURCE = 'tanawkita-business-radius'
 const COMPETITOR_SOURCE = 'tanawkita-competitors'
 const COMPETITOR_AREA_SOURCE = 'tanawkita-competitor-areas'
+const COLORED_BUILDING_LAYER = 'tanawkita-business-building-3d'
 // Business callouts show from city zoom, nearest to the map center first, capped to keep phones fast.
 const LABEL_ZOOM = 11
 const MAX_LABELS = 24
@@ -31,12 +32,21 @@ type MapMode = '2d' | '3d'
 // buildings change between flat blocks and 3D extrusions.
 const MODE_LAYERS: Record<MapMode, string[]> = {
   '2d': [FLAT_BUILDINGS_LAYER],
-  '3d': [BUILDINGS_3D_LAYER],
+  '3d': [BUILDINGS_3D_LAYER, COLORED_BUILDING_LAYER],
 }
+// 'zoom-tiers': circle, then team-size circle, then the matched building outline as you zoom in (competitor map).
+// 'pin-circle': one glowing circle centered on the pin at every zoom, plus the business's building colored in 3D
+// (job map), so the highlight always sits exactly under the pay tag and never changes shape.
+type AreaStyle = 'zoom-tiers' | 'pin-circle'
+// Pin circle radius on the ground; it never draws smaller than PIN_CIRCLE_MIN_PX on screen.
+const PIN_CIRCLE_METERS = 30
+const PIN_CIRCLE_MIN_PX = 12
+// The colored 3D building is drawn this much wider and taller than the real one, so it covers it cleanly.
+const COLORED_BUILDING_GROW_METERS = 0.3
 // Estimated areas are drawn as stacked rings, each a little smaller, so the circle glows brighter toward the pin.
 const CIRCLE_RINGS = [1, 0.72, 0.46, 0.22]
 const isBuilding: ExpressionSpecification = ['==', ['get', 'tier'], 'building']
-const isCircle: ExpressionSpecification = ['!=', ['get', 'tier'], 'building']
+const isCircle: ExpressionSpecification = ['match', ['get', 'tier'], ['approximate', 'estimate', 'circle'], true, false]
 // Shaded business areas start at this zoom, the same zoom building tiles start.
 const AREA_MIN_ZOOM = 13
 // Building outlines are looked up from this zoom; before it, store-sized buildings are under ~10 px.
@@ -63,6 +73,8 @@ interface Props {
   onPlaceSelect?: (placeId: string) => void
   // Business name cards and dots for `places`. Off on the job map, where the pay pins already label each business.
   placeLabels?: boolean
+  // How business areas are drawn; see AreaStyle.
+  areaStyle?: AreaStyle
   view?: { center: [number, number]; zoom: number }
 }
 
@@ -236,6 +248,23 @@ function addDataLayers(map: LibreMap) {
     },
     labelsStart,
   )
+  // The business's own building in 3D, at its real height, in the business-type color (pin-circle style only).
+  map.addLayer(
+    {
+      id: COLORED_BUILDING_LAYER,
+      type: 'fill-extrusion',
+      source: COMPETITOR_AREA_SOURCE,
+      minzoom: 13,
+      filter: ['==', ['get', 'tier'], 'building-3d'],
+      layout: { visibility: 'none' },
+      paint: {
+        'fill-extrusion-color': ['get', 'color'],
+        'fill-extrusion-height': ['+', ['get', 'height'], COLORED_BUILDING_GROW_METERS],
+        'fill-extrusion-opacity': 0.95,
+      },
+    },
+    labelsStart,
+  )
 
   map.addSource(COMPETITOR_SOURCE, {
     type: 'geojson',
@@ -291,9 +320,10 @@ function addDataLayers(map: LibreMap) {
 // from team size in between, and the outline of the mapped building nearest the pin once it is big enough to see.
 // The businesses are fictional, so a matched building is a visual guide only, not the business's real storefront.
 // Returns the features plus a short signature, so callers can skip updates when nothing changed.
-function businessAreas(map: LibreMap, places: CompetitorPlace[], selectedPlaceId: string | null | undefined, buildingLayer: string) {
+function businessAreas(map: LibreMap, places: CompetitorPlace[], selectedPlaceId: string | null | undefined, buildingLayer: string, areaStyle: AreaStyle) {
   const zoom = map.getZoom()
   if (zoom < AREA_MIN_ZOOM) return { features: [], signature: 'hidden' }
+  if (areaStyle === 'pin-circle') return pinCircles(map, places, selectedPlaceId, buildingLayer)
   const bounds = map.getBounds()
   // One query for the whole view, split into single outlines once. Below this zoom no store-sized building is
   // big enough on screen to outline, so the query is skipped.
@@ -320,6 +350,32 @@ function businessAreas(map: LibreMap, places: CompetitorPlace[], selectedPlaceId
     // An estimate circle covers about the same ground as the team-size footprint square it replaces.
     const radiusKm = tier === 'estimate' ? (footprint * 0.6) / 1000 : (APPROX_RADIUS_PX * mpp) / 1000
     return CIRCLE_RINGS.map((scale, ring) => ({ ...circleFeature(place.lat, place.lng, radiusKm * scale), properties: { ...properties, tier, ring } }))
+  })
+  return { features, signature: signature.join('|') }
+}
+
+// Job-map areas: one glowing circle centered on each business pin, the same shape at every zoom. In 3D the
+// business's own building is also returned, at its real height, so it can be drawn in the business-type color.
+function pinCircles(map: LibreMap, places: CompetitorPlace[], selectedPlaceId: string | null | undefined, buildingLayer: string) {
+  const zoom = map.getZoom()
+  const colorBuildings = buildingLayer === BUILDINGS_3D_LAYER && zoom >= BUILDING_MIN_ZOOM
+  const rendered = colorBuildings ? map.queryRenderedFeatures({ layers: [BUILDINGS_3D_LAYER] }) : []
+  const shapes = rendered.filter((feature) => feature.geometry.type === 'Polygon' || feature.geometry.type === 'MultiPolygon')
+  const buildings = splitBuildings(shapes.map((feature) => feature.geometry as AreaShape), shapes.map((feature) => Number(feature.properties?.render_height) || undefined))
+  const signature: string[] = [zoom.toFixed(2), colorBuildings ? '3d' : '2d']
+  const features = places.flatMap((place): Feature<Polygon | MultiPolygon>[] => {
+    const properties = { category: place.category, color: CATEGORY_STYLE[place.category].color, selected: place.id === selectedPlaceId }
+    const radiusKm = Math.max(PIN_CIRCLE_METERS, PIN_CIRCLE_MIN_PX * metersPerPixel(place.lat, zoom)) / 1000
+    const circle = CIRCLE_RINGS.map((scale, ring): Feature<Polygon> => ({ ...circleFeature(place.lat, place.lng, radiusKm * scale), properties: { ...properties, tier: 'circle', ring } }))
+    const building = buildings.length ? pickBuilding(buildings, [place.lng, place.lat]) : null
+    signature.push(`${place.id}:${properties.selected ? 1 : 0}:${building ? `${building.minLng},${building.minLat}` : ''}`)
+    if (!building) return circle
+    const colored: Feature<Polygon> = {
+      type: 'Feature',
+      properties: { ...properties, tier: 'building-3d', height: building.height ?? 8 },
+      geometry: { type: 'Polygon', coordinates: growOutline(building.coordinates, COLORED_BUILDING_GROW_METERS) },
+    }
+    return [...circle, colored]
   })
   return { features, signature: signature.join('|') }
 }
@@ -388,6 +444,7 @@ export default function MapLibreView({
   selectedPlaceId,
   onPlaceSelect,
   placeLabels = true,
+  areaStyle = 'zoom-tiers',
   view,
 }: Props) {
   const container = useRef<HTMLDivElement>(null)
@@ -555,7 +612,7 @@ export default function MapLibreView({
     const source = map.getSource(COMPETITOR_AREA_SOURCE) as GeoJSONSource | undefined
     let last = ''
     const update = () => {
-      const { features, signature } = businessAreas(map, places, selectedPlaceId, mode === '3d' ? BUILDINGS_3D_LAYER : FLAT_BUILDINGS_LAYER)
+      const { features, signature } = businessAreas(map, places, selectedPlaceId, mode === '3d' ? BUILDINGS_3D_LAYER : FLAT_BUILDINGS_LAYER, areaStyle)
       // Updating the source triggers another idle event; skip it when nothing changed so this does not loop.
       if (signature === last) return
       last = signature
@@ -569,7 +626,7 @@ export default function MapLibreView({
       map.off('moveend', update)
       map.off('idle', update)
     }
-  }, [map, places, selectedPlaceId, mode])
+  }, [map, places, selectedPlaceId, mode, areaStyle])
 
   // Callout cards for businesses in view at street level (and always for the selected one).
   useEffect(() => {

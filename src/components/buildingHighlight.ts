@@ -24,6 +24,8 @@ export interface BuildingPolygon {
   minLat: number
   maxLng: number
   maxLat: number
+  // Height in meters from the map tiles, when known (used to color the building in 3D).
+  height?: number
 }
 
 const metersPerDegreeLat = 110540
@@ -36,10 +38,11 @@ export function metersPerPixel(lat: number, zoom: number): number {
 
 // Map tiles merge many buildings into one feature, so split every feature into single outlines.
 // The same outline can come back more than once (from neighboring tiles); keep one copy.
-export function splitBuildings(geometries: AreaShape[]): BuildingPolygon[] {
+// `heights[i]` is the height of `geometries[i]`, copied onto each outline split from it.
+export function splitBuildings(geometries: AreaShape[], heights: (number | undefined)[] = []): BuildingPolygon[] {
   const seen = new Set<string>()
   const result: BuildingPolygon[] = []
-  for (const geometry of geometries) {
+  geometries.forEach((geometry, index) => {
     const polygons = geometry.type === 'Polygon' ? [geometry.coordinates] : geometry.coordinates
     for (const coordinates of polygons) {
       const outer = coordinates[0]
@@ -57,10 +60,28 @@ export function splitBuildings(geometries: AreaShape[]): BuildingPolygon[] {
         minLat = Math.min(minLat, y)
         maxLat = Math.max(maxLat, y)
       }
-      result.push({ coordinates, minLng, minLat, maxLng, maxLat })
+      result.push({ coordinates, minLng, minLat, maxLng, maxLat, height: heights[index] })
     }
-  }
+  })
   return result
+}
+
+// The outline grown outward by about `meters` on every side, so a colored copy drawn over the real 3D building
+// covers its walls instead of flickering against them.
+export function growOutline(coordinates: Position[][], meters: number): Position[][] {
+  const outer = coordinates[0]
+  const points = outer.slice(0, -1)
+  const cx = points.reduce((sum, [x]) => sum + x, 0) / points.length
+  const cy = points.reduce((sum, [, y]) => sum + y, 0) / points.length
+  const mx = metersPerDegreeLng(cy)
+  return coordinates.map((ring) => ring.map(([x, y]) => {
+    const dx = (x - cx) * mx
+    const dy = (y - cy) * metersPerDegreeLat
+    const length = Math.hypot(dx, dy)
+    if (!length) return [x, y]
+    const scale = (length + meters) / length
+    return [cx + (dx * scale) / mx, cy + (dy * scale) / metersPerDegreeLat]
+  }))
 }
 
 function insideRing([x, y]: Position, ring: Position[]): boolean {

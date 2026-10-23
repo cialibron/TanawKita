@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { MultiPolygon, Polygon, Position } from 'geojson'
-import { areaSquareMeters, areaTier, containsPoint, distanceMeters, metersPerPixel, pickBuilding, sizeMeters, splitBuildings } from './buildingHighlight'
+import { areaSquareMeters, areaTier, containsPoint, distanceMeters, growOutline, metersPerPixel, pickBuilding, sizeMeters, splitBuildings } from './buildingHighlight'
 
 // A square outline about 22 m wide (d = 0.0001°) near Roxas Ave.
 const ring = (lng: number, lat: number, d = 0.0001): Position[][] => [[[lng - d, lat - d], [lng + d, lat - d], [lng + d, lat + d], [lng - d, lat + d], [lng - d, lat - d]]]
@@ -54,5 +54,20 @@ describe('building highlight helpers', () => {
 
   it('uses 512 px tiles for meters per pixel', () => {
     expect(metersPerPixel(0, 0)).toBeCloseTo(78271.5, 0)
+  })
+
+  it('keeps each feature height on the outlines split from it', () => {
+    const merged: MultiPolygon = { type: 'MultiPolygon', coordinates: [ring(125.6, 7.07), ring(125.61, 7.07)] }
+    const outlines = splitBuildings([merged, square(125.62, 7.07)], [8, undefined])
+    expect(outlines.map((outline) => outline.height)).toEqual([8, 8, undefined])
+  })
+
+  it('grows an outline outward by about the given meters', () => {
+    const outline = ring(pin[0], pin[1])
+    const before = sizeMeters(splitBuildings([{ type: 'Polygon', coordinates: outline }])[0])
+    const after = sizeMeters(splitBuildings([{ type: 'Polygon', coordinates: growOutline(outline, 1) }])[0])
+    // Corners move out 1 m along the diagonal, so each side grows by about 2 / sqrt(2) m.
+    expect(after.width - before.width).toBeCloseTo(Math.SQRT2, 1)
+    expect(containsPoint(growOutline(outline, 1), pin)).toBe(true)
   })
 })
