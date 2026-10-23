@@ -3671,30 +3671,30 @@ ul.error {
 
 /* Main map: their 2D/3D switch sits under the zoom buttons (and under the compass, which only shows in 3D). */
 .mapshell-map .map-view-controls {
-  top: 160px;
+  top: 208px;
   right: 10px;
   bottom: auto;
 }
 
 .mapshell-map .maplibre-wrap:has(.map-dimension-toggle.is-3d) .map-view-controls {
-  top: 210px;
+  top: 258px;
 }
 
 @media (max-width: 720px) {
   .mapshell-map .map-view-controls {
-    top: 156px;
+    top: 204px;
   }
 
   .mapshell-map .maplibre-wrap:has(.map-dimension-toggle.is-3d) .map-view-controls {
-    top: 206px;
+    top: 254px;
   }
 
   .mapshell-map:has(.map-overlay) .map-view-controls {
-    top: 256px;
+    top: 304px;
   }
 
   .mapshell-map:has(.map-overlay) .maplibre-wrap:has(.map-dimension-toggle.is-3d) .map-view-controls {
-    top: 306px;
+    top: 354px;
   }
 }
 
@@ -4966,34 +4966,34 @@ ul.error {
    repaint its surfaces in light brand colors. Prefixed with :root[data-theme='light'] so they win.
    ===================================================================================================== */
 :root[data-theme='light'] :is(.mapshell, .profile-shell, .setup-page) {
-  --bg: #eef3fb;
-  --card: #ffffff;
+  --bg: #dbeafa;
+  --card: #e9f3fd;
   --text: #13203f;
   --muted: #56627f;
-  --border: #d3ddef;
+  --border: #b6d4f2;
   --accent: #1f5fd6;
   --accent-text: #fff;
   --ok: #1a7f37;
   --error: #b42318;
-  --line: rgba(31, 95, 214, 0.16);
+  --line: #b6d4f2;
   --hover: rgba(31, 95, 214, 0.06);
   color: var(--text);
 }
 
 :root[data-theme='light'] .mapshell,
 :root[data-theme='light'] .mapshell-map {
-  background: #eef3fb;
+  background: #dbeafa;
 }
 
 /* Rail */
 :root[data-theme='light'] .workspace-rail {
-  border-right-color: #d3ddef;
-  background: linear-gradient(180deg, #ffffff 0%, #eef3fb 100%);
+  border-right-color: #b6d4f2;
+  background: linear-gradient(180deg, #e9f3fd 0%, #dbeafa 100%);
 }
 
 :root[data-theme='light'] .workspace-avatar {
-  border-color: #c5d4f0;
-  background: #e5edfc;
+  border-color: #a9cbef;
+  background: #d0e4f9;
   color: #1f5fd6;
 }
 
@@ -5005,8 +5005,8 @@ ul.error {
 :root[data-theme='light'] .rail-toggle:hover,
 :root[data-theme='light'] .role-rail-button:hover,
 :root[data-theme='light'] .role-rail-button.active {
-  border-color: #c5d4f0;
-  background: #e3ecfb;
+  border-color: #a9cbef;
+  background: #d0e4f9;
   color: #0b1c48;
 }
 
@@ -5015,19 +5015,19 @@ ul.error {
 }
 
 :root[data-theme='light'] .role-tooltip {
-  border-color: #c5d4f0;
-  background: #fff;
+  border-color: #a9cbef;
+  background: #e9f3fd;
   color: #13203f;
 }
 
 :root[data-theme='light'] .rail-divider {
-  background: #d3ddef;
+  background: #b6d4f2;
 }
 
 /* Left menu panel */
 :root[data-theme='light'] .mapshell-panel {
-  border-right-color: #d3ddef;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(244, 248, 255, 0.97));
+  border-right-color: #b6d4f2;
+  background: linear-gradient(180deg, rgba(233, 243, 253, 0.96), rgba(214, 232, 250, 0.97));
   box-shadow: 8px 0 24px rgba(19, 32, 63, 0.08);
 }
 
@@ -5037,8 +5037,8 @@ ul.error {
 }
 
 :root[data-theme='light'] .mapshell .badge {
-  border-color: #c5d4f0;
-  background: #eef3fb;
+  border-color: #a9cbef;
+  background: #dbeafa;
   color: #3d4a68;
 }
 
@@ -5046,20 +5046,20 @@ ul.error {
 :root[data-theme='light'] .mapshell input,
 :root[data-theme='light'] .mapshell select,
 :root[data-theme='light'] .mapshell textarea {
-  border-color: #c5d4f0;
-  background: #fff;
+  border-color: #a9cbef;
+  background: #e9f3fd;
   color: #13203f;
 }
 
 :root[data-theme='light'] .mapshell .card {
-  border-color: #d3ddef;
-  background: #fff;
+  border-color: #b6d4f2;
+  background: #e9f3fd;
   color: #13203f;
 }
 
 :root[data-theme='light'] .mapshell button:not(.tab):not(.chip):not(.rail-toggle):not(.role-rail-button):not(.map-action-button):not(.detail-close):not(.detail-expand-button):not(.detail-collapse-button):not([class*='maplibregl-ctrl']):not([class*='dash-']):not(.rail-eye *):not(.primary):not(.job-row) {
-  border-color: #c5d4f0;
-  background: #fff;
+  border-color: #a9cbef;
+  background: #e9f3fd;
   color: #13203f;
 }
 
@@ -5070,8 +5070,8 @@ ul.error {
 }
 
 :root[data-theme='light'] .mapshell button.chip {
-  border-color: #d3ddef;
-  background: #fff;
+  border-color: #b6d4f2;
+  background: #e9f3fd;
   color: #3d4a68;
 }
 
@@ -5083,13 +5083,13 @@ ul.error {
 }
 
 :root[data-theme='light'] .mapshell .job-chips button.chip {
-  background: #e8eef9;
+  background: #d6e8fa;
   color: #3d4a68;
 }
 
 /* Find jobs list */
 :root[data-theme='light'] .job-count {
-  background: #e8eef9;
+  background: #d6e8fa;
   color: #3d4a68;
 }
 
@@ -5098,8 +5098,8 @@ ul.error {
 }
 
 :root[data-theme='light'] .job-search {
-  border-color: #c5d4f0;
-  background: #fff;
+  border-color: #a9cbef;
+  background: #e9f3fd;
   color: #56627f;
 }
 
@@ -5109,20 +5109,20 @@ ul.error {
 
 /* !important: the workspace's generic dark button rule is far more specific than this one. */
 :root[data-theme='light'] .mapshell button.job-row {
-  border-color: #d3ddef !important;
-  background: #fff !important;
+  border-color: #b6d4f2 !important;
+  background: #e9f3fd !important;
   color: #13203f !important;
   box-shadow: 0 1px 3px rgba(19, 32, 63, 0.06);
 }
 
 :root[data-theme='light'] .mapshell button.job-row:hover {
-  border-color: #a9bfe6 !important;
-  background: #f7faff !important;
+  border-color: #8fbaea !important;
+  background: #f0f7fe !important;
 }
 
 :root[data-theme='light'] .mapshell button.job-row.selected {
   border-color: #1f5fd6 !important;
-  background: #eef4ff !important;
+  background: #cfe3fa !important;
   box-shadow: 0 0 0 1px rgba(31, 95, 214, 0.35);
 }
 
@@ -5143,7 +5143,7 @@ ul.error {
 }
 
 :root[data-theme='light'] .job-route-chip {
-  background: #e3ecfb;
+  background: #d0e4f9;
   color: #1a3a80;
 }
 
@@ -5163,7 +5163,7 @@ ul.error {
 }
 
 :root[data-theme='light'] .job-badge.type {
-  background: #e3ecfb;
+  background: #d0e4f9;
   color: #1a3a80;
 }
 
@@ -5175,14 +5175,14 @@ ul.error {
 :root[data-theme='light'] .map-action-button,
 :root[data-theme='light'] .map-zoom-reset,
 :root[data-theme='light'] .map-dimension-toggle {
-  border-color: #c5d4f0;
-  background: rgba(255, 255, 255, 0.96);
+  border-color: #a9cbef;
+  background: rgba(233, 243, 253, 0.96);
   color: #13203f;
   box-shadow: 0 2px 10px rgba(19, 32, 63, 0.14);
 }
 
 :root[data-theme='light'] .map-action-button:hover {
-  background: #eef3fb;
+  background: #dbeafa;
 }
 
 :root[data-theme='light'] .map-dimension-toggle span {
@@ -5190,8 +5190,8 @@ ul.error {
 }
 
 :root[data-theme='light'] .dev-role-menu {
-  border-color: #c5d4f0;
-  background: #fff;
+  border-color: #a9cbef;
+  background: #e9f3fd;
 }
 
 :root[data-theme='light'] .dev-role-menu button {
@@ -5200,41 +5200,41 @@ ul.error {
 
 :root[data-theme='light'] .dev-role-menu button:hover,
 :root[data-theme='light'] .dev-role-menu button.active {
-  background: #e3ecfb;
+  background: #d0e4f9;
   color: #0b1c48;
 }
 
 :root[data-theme='light'] .maplibre-wrap .maplibregl-ctrl-group button {
-  border-color: #c5d4f0;
-  background: #fff;
+  border-color: #a9cbef;
+  background: #e9f3fd;
   box-shadow: 0 2px 10px rgba(19, 32, 63, 0.14);
 }
 
 :root[data-theme='light'] .maplibre-wrap .maplibregl-ctrl-group button:hover {
-  background: #eef3fb;
+  background: #dbeafa;
 }
 
 :root[data-theme='light'] .maplibre-wrap .maplibregl-ctrl-group .maplibregl-ctrl-icon {
   filter: none;
 }
 
-/* The base map is drawn dark; light mode flips its lightness and keeps its hues. */
+/* The base map is drawn dark navy; light mode turns it into a pastel-blue city plan. */
 :root[data-theme='light'] .maplibre-wrap .maplibregl-canvas {
-  filter: invert(1) hue-rotate(180deg) saturate(0.7) brightness(1.04);
+  filter: grayscale(1) invert(1) sepia(1) hue-rotate(180deg) saturate(1.25) brightness(1.04);
 }
 
 /* Selected job detail panel */
 :root[data-theme='light'] .workspace-detail {
-  border-color: #c5d4f0;
-  background: linear-gradient(160deg, rgba(255, 255, 255, 0.98), rgba(240, 245, 254, 0.98));
+  border-color: #a9cbef;
+  background: linear-gradient(160deg, rgba(233, 243, 253, 0.98), rgba(214, 232, 250, 0.98));
   color: #13203f;
   box-shadow: 0 8px 28px rgba(19, 32, 63, 0.18);
 }
 
 :root[data-theme='light'] .workspace-detail-controls button,
 :root[data-theme='light'] .detail-close {
-  border-color: #c5d4f0;
-  background: #fff;
+  border-color: #a9cbef;
+  background: #e9f3fd;
   color: #13203f;
 }
 
@@ -5253,8 +5253,8 @@ ul.error {
 
 :root[data-theme='light'] .workspace-detail .selected-job-metrics > div,
 :root[data-theme='light'] .job-more-facts > div {
-  border-color: #d3ddef;
-  background: #f5f8fe;
+  border-color: #b6d4f2;
+  background: #e2eefb;
 }
 
 :root[data-theme='light'] .selected-job-metrics span,
@@ -5265,7 +5265,7 @@ ul.error {
 }
 
 :root[data-theme='light'] .selected-job-more {
-  border-top-color: #d3ddef;
+  border-top-color: #b6d4f2;
 }
 
 :root[data-theme='light'] .mockup-tag {
@@ -5275,27 +5275,27 @@ ul.error {
 
 :root[data-theme='light'] .location-photo-link {
   border-color: #1f5fd6;
-  background: #e3ecfb;
+  background: #d0e4f9;
   color: #1a3a80;
 }
 
 /* Profile and account setup pages */
 :root[data-theme='light'] .profile-shell,
 :root[data-theme='light'] .setup-page {
-  background: #eef3fb;
+  background: #dbeafa;
 }
 
 :root[data-theme='light'] .profile-panel {
-  background: rgba(255, 255, 255, 0.85);
+  background: rgba(233, 243, 253, 0.88);
   box-shadow: 0 18px 50px rgba(19, 32, 63, 0.12);
 }
 
 :root[data-theme='light'] .profile-sections button:hover {
-  background: #eef3fb;
+  background: #dbeafa;
 }
 
 :root[data-theme='light'] .profile-sections button.active {
-  background: #e3ecfb;
+  background: #d0e4f9;
   color: #1a4fae;
 }
 
@@ -5305,8 +5305,8 @@ ul.error {
 
 /* Rail eye menu and Settings panel */
 :root[data-theme='light'] .rail-eye-menu {
-  border-color: #c5d4f0;
-  background: #fff;
+  border-color: #a9cbef;
+  background: #e9f3fd;
   box-shadow: 0 10px 28px rgba(19, 32, 63, 0.18);
 }
 
@@ -5316,16 +5316,16 @@ ul.error {
 
 :root[data-theme='light'] .workspace-rail .rail-eye-menu button:hover,
 :root[data-theme='light'] .workspace-rail .rail-eye-menu button:focus-visible {
-  background: #e3ecfb;
+  background: #d0e4f9;
 }
 
 :root[data-theme='light'] .settings-switch {
-  border-color: #a9bfe6;
-  background: #e3ecfb;
+  border-color: #8fbaea;
+  background: #d0e4f9;
 }
 
 :root[data-theme='light'] .settings-switch > span {
-  background: #fff;
+  background: #e9f3fd;
   box-shadow: 0 1px 3px rgba(19, 32, 63, 0.3);
 }
 
@@ -5339,20 +5339,20 @@ ul.error {
 }
 
 :root[data-theme='light'] .settings-panel {
-  border-right-color: #d3ddef;
-  background: #fff;
+  border-right-color: #b6d4f2;
+  background: #e9f3fd;
   color: #13203f;
   box-shadow: 12px 0 40px rgba(19, 32, 63, 0.18);
 }
 
 :root[data-theme='light'] .settings-panel > header,
 :root[data-theme='light'] .settings-group {
-  border-color: #e1e8f5;
+  border-color: #bfdaf4;
 }
 
 :root[data-theme='light'] .settings-close,
 :root[data-theme='light'] .settings-segmented {
-  border-color: #c5d4f0;
+  border-color: #a9cbef;
 }
 
 :root[data-theme='light'] .settings-segmented button {
@@ -5370,8 +5370,8 @@ ul.error {
 }
 
 :root[data-theme='light'] .settings-secondary {
-  border-color: #a9bfe6;
-  background: #eef3fb;
+  border-color: #8fbaea;
+  background: #dbeafa;
 }
 
 :root[data-theme='light'] .settings-done {
@@ -5384,8 +5384,8 @@ ul.error {
 }
 
 :root[data-theme='light'] .mapshell button.job-locate:hover {
-  border-color: #c5d4f0;
-  background: #eef3fb;
+  border-color: #a9cbef;
+  background: #dbeafa;
 }
 
 /* Logo word: dark ink on light backgrounds. */
@@ -5407,33 +5407,33 @@ ul.error {
 
 /* Profile backdrop: the brand image is set inline, so it needs !important; the faint map is flipped light. */
 :root[data-theme='light'] .profile-shell {
-  background: #eef3fb !important;
+  background: #dbeafa !important;
 }
 
 :root[data-theme='light'] .profile-shell .landing-map .maplibregl-canvas {
-  filter: invert(1) hue-rotate(180deg) saturate(0.6);
+  filter: grayscale(1) invert(1) sepia(1) hue-rotate(180deg) saturate(1.25) brightness(1.04);
   opacity: 0.55;
 }
 
 :root[data-theme='light'] .profile-topbar {
-  border-bottom-color: #d3ddef;
-  background: rgba(255, 255, 255, 0.7);
+  border-bottom-color: #b6d4f2;
+  background: rgba(219, 234, 250, 0.8);
 }
 
 :root[data-theme='light'] .profile-add {
   border-color: #1f5fd6;
-  background: #e3ecfb;
+  background: #d0e4f9;
   color: #1a3a80;
 }
 
 :root[data-theme='light'] .profile-add:hover {
-  background: #d3e2fa;
+  background: #bcd8f6;
 }
 
 /* Account setup page accents in light mode. */
 :root[data-theme='light'] .setup-topbar .badge {
-  border-color: #a9bfe6;
-  background: #e3ecfb;
+  border-color: #8fbaea;
+  background: #d0e4f9;
   color: #1a4fae;
 }
 
@@ -5443,7 +5443,7 @@ ul.error {
 
 :root[data-theme='light'] .setup-progress li.current {
   border-color: #1f5fd6;
-  background: #e3ecfb;
+  background: #d0e4f9;
   color: #0b1c48;
 }
 
@@ -5471,4 +5471,14 @@ ul.error {
 
 :root[data-theme='light'] .setup-error {
   color: #b42318;
+}
+
+/* =====================================================================================================
+   Brand rule: square corners everywhere — boxes, panels, tabs, buttons, inputs, menus, chips, avatars.
+   Only artwork keeps its shape: the logo and eye icon, and the pins and dots drawn on the map.
+   ===================================================================================================== */
+*:not(.tk-logo, .tk-logo *, .tk-emblem, .tk-emblem *, .tk-eye-icon, .tk-eye-icon *, .user-position-dot, .location-photo-pin, .map-dot, .glow-particle, .spinner),
+*:not(.tk-logo *, .tk-emblem *, .tk-eye-icon *)::before,
+*:not(.tk-logo *, .tk-emblem *, .tk-eye-icon *, .biz-callout-line, .map-dot)::after {
+  border-radius: 0 !important;
 }

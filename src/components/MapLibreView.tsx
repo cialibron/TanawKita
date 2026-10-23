@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Map as LibreMap, Marker as LibreMarker, NavigationControl, Popup, setWorkerUrl, type ExpressionSpecification, type GeoJSONSource, type MapLayerMouseEvent, type MapMouseEvent } from 'maplibre-gl'
+import { Map as LibreMap, Marker as LibreMarker, NavigationControl, Popup, setWorkerUrl, type ExpressionSpecification, type IControl, type GeoJSONSource, type MapLayerMouseEvent, type MapMouseEvent } from 'maplibre-gl'
 import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?url'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import './maplibre.css'
@@ -16,6 +16,35 @@ import brandPupil from '../assets/brand/pupil.svg'
 import brandPupilStar from '../assets/brand/pupil-star.png'
 
 const DAVAO_CENTER: [number, number] = [7.0731, 125.6128]
+
+// Map button above zoom in/out that flies back to the default Davao view, for when the map has been
+// panned far away. Uses MapLibre's control-group look so it matches the zoom buttons.
+class DavaoHomeControl implements IControl {
+  private container?: HTMLDivElement
+  private goHome: () => void
+  constructor(goHome: () => void) {
+    this.goHome = goHome
+  }
+
+  onAdd() {
+    const container = document.createElement('div')
+    container.className = 'maplibregl-ctrl maplibregl-ctrl-group map-home-control'
+    const button = document.createElement('button')
+    button.type = 'button'
+    button.className = 'map-home-button'
+    button.title = 'Back to Davao City'
+    button.setAttribute('aria-label', 'Back to the default Davao City view')
+    button.innerHTML = '<span aria-hidden="true">⌂</span>'
+    button.addEventListener('click', this.goHome)
+    container.appendChild(button)
+    this.container = container
+    return container
+  }
+
+  onRemove() {
+    this.container?.remove()
+  }
+}
 
 setWorkerUrl(workerUrl)
 
@@ -546,6 +575,8 @@ export default function MapLibreView({
 
     mapRef.current = instance
     instance.addControl(new NavigationControl({ showCompass: false }), 'bottom-right')
+    // Bottom corners stack newer controls on top, so this sits above zoom in/out.
+    instance.addControl(new DavaoHomeControl(() => homeRef.current()), 'bottom-right')
     instance.touchZoomRotate.disableRotation()
     instance.keyboard.disableRotation()
     instance.on('load', () => {
@@ -592,6 +623,16 @@ export default function MapLibreView({
   function resetZoom() {
     map?.easeTo({ zoom: defaultZoom, duration: 600 })
   }
+
+  // Default Davao view: the page's own view when it sets one, otherwise the city center at the default zoom.
+  // Kept in a ref because the map control is created once, before this function exists.
+  const homeRef = useRef(() => {})
+  useEffect(() => {
+    homeRef.current = () => {
+      const center = view?.center ?? DAVAO_CENTER
+      mapRef.current?.flyTo({ center: [center[1], center[0]], zoom: defaultZoom, duration: 900 })
+    }
+  })
 
   useEffect(() => {
     if (!map || !focus || view) return
