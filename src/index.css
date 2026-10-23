@@ -2063,6 +2063,12 @@ ul.error {
   transform: translateX(-50%);
 }
 
+/* Extra roles at the same business stack above the first tag; only the bottom tag points at the ground. */
+.tanawkita-map-marker.stacked::before,
+.mapshell .tanawkita-map-marker.stacked .pay-pin::after {
+  display: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .mapshell .pay-pin,
   .tanawkita-map-marker:has(.pay-pin)::before {

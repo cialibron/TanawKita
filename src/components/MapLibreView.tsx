@@ -18,7 +18,6 @@ const HEAT_SOURCE = 'tanawkita-seeker-heat'
 const RADIUS_SOURCE = 'tanawkita-business-radius'
 const COMPETITOR_SOURCE = 'tanawkita-competitors'
 const COMPETITOR_AREA_SOURCE = 'tanawkita-competitor-areas'
-const AREA_3D_LAYER = 'tanawkita-competitor-area-3d'
 // Business callouts show from city zoom, nearest to the map center first, capped to keep phones fast.
 const LABEL_ZOOM = 11
 const MAX_LABELS = 24
@@ -28,10 +27,11 @@ const MIN_PITCH_3D = 40
 const MAX_PITCH_3D = 70
 type MapMode = '2d' | '3d'
 // Layers that belong to only one mode. Everything else (heatmap, radius, pins) shows in both.
-// The estimated-area circles lie flat on the ground in both modes; only a matched building changes between them.
+// Business highlights (circles and matched buildings) lie flat on the ground in both modes; only the base
+// buildings change between flat blocks and 3D extrusions.
 const MODE_LAYERS: Record<MapMode, string[]> = {
-  '2d': [FLAT_BUILDINGS_LAYER, 'tanawkita-competitor-area-fill', 'tanawkita-competitor-area-glow', 'tanawkita-competitor-area-outline'],
-  '3d': [BUILDINGS_3D_LAYER, AREA_3D_LAYER],
+  '2d': [FLAT_BUILDINGS_LAYER],
+  '3d': [BUILDINGS_3D_LAYER],
 }
 // Estimated areas are drawn as stacked rings, each a little smaller, so the circle glows brighter toward the pin.
 const CIRCLE_RINGS = [1, 0.72, 0.46, 0.22]
@@ -42,7 +42,8 @@ const AREA_MIN_ZOOM = 13
 // Building outlines are looked up from this zoom; before it, store-sized buildings are under ~10 px.
 const BUILDING_MIN_ZOOM = 15.5
 const UNIT_SHORT = { day: 'day', hour: 'hr', task: 'task' } as const
-const JOB_PIN_SPACING_PX = 112
+// Vertical step between pay tags stacked over one business.
+const JOB_PIN_STACK_PX = 34
 
 interface Props {
   jobs?: JobPost[]
@@ -232,23 +233,6 @@ function addDataLayers(map: LibreMap) {
       minzoom: 13,
       filter: isBuilding,
       paint: { 'line-color': '#ffe2c4', 'line-width': ['case', ['get', 'selected'], 1.5, 0.8], 'line-opacity': 0.8 },
-    },
-    labelsStart,
-  )
-  // Matched building in 3D: raised in the category color.
-  map.addLayer(
-    {
-      id: AREA_3D_LAYER,
-      type: 'fill-extrusion',
-      source: COMPETITOR_AREA_SOURCE,
-      minzoom: 13,
-      filter: isBuilding,
-      layout: { visibility: 'none' },
-      paint: {
-        'fill-extrusion-color': ['get', 'color'],
-        'fill-extrusion-height': 10,
-        'fill-extrusion-opacity': 0.9,
-      },
     },
     labelsStart,
   )
@@ -670,16 +654,18 @@ export default function MapLibreView({
   useEffect(() => {
     if (!map) return
     const markers: LibreMarker[] = []
-    // Jobs at the same spot (several roles at one business) sit side by side above it instead of stacking.
+    // Jobs at the same spot (several roles at one business) stack upward from it. Only the bottom tag keeps the
+    // leader line and ground marker, so it points exactly at the business and its highlight.
     const atSpot = new Map<string, JobPost[]>()
     for (const job of jobs) atSpot.set(`${job.lat},${job.lng}`, [...(atSpot.get(`${job.lat},${job.lng}`) ?? []), job])
     for (const job of jobs) {
       const selected = job.id === selectedId
       const group = atSpot.get(`${job.lat},${job.lng}`) ?? [job]
-      const offsetX = (group.indexOf(job) - (group.length - 1) / 2) * JOB_PIN_SPACING_PX
+      const level = group.indexOf(job)
       const element = markerElement(`pay-pin${selected ? ' selected' : ''}`, `₱${job.payAmount.toLocaleString()}/${UNIT_SHORT[job.payUnit]}`)
+      if (level > 0) element.classList.add('stacked')
       if (selected) element.style.zIndex = '5'
-      const marker = new LibreMarker({ element, anchor: 'bottom', offset: [offsetX, 0] })
+      const marker = new LibreMarker({ element, anchor: 'bottom', offset: [0, -level * JOB_PIN_STACK_PX] })
         .setLngLat([job.lng, job.lat])
         .addTo(map)
       if (onSelect) element.addEventListener('click', () => onSelect(job.id))
