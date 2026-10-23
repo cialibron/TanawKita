@@ -8,21 +8,30 @@ import type { Feature, MultiPolygon, Polygon } from 'geojson'
 import type { CompetitorPlace } from '../businessDirectory'
 import { CATEGORY_STYLE, categoryLabel, estimatedFootprintMeters, yearsInBusinessLabel } from './businessCategoryStyle'
 import { APPROX_RADIUS_PX, areaSquareMeters, areaTier, metersPerPixel, pickBuilding, sizeMeters, splitBuildings, type AreaShape } from './buildingHighlight'
+import { BUILDINGS_3D_LAYER, FLAT_BUILDINGS_LAYER, TANAWKITA_MAP_STYLE } from './tanawkitaMapStyle'
 
 const DAVAO_CENTER: [number, number] = [7.0731, 125.6128]
 
 setWorkerUrl(workerUrl)
 
-const STYLE_URL = 'https://tiles.openfreemap.org/styles/dark'
 const HEAT_SOURCE = 'tanawkita-seeker-heat'
 const RADIUS_SOURCE = 'tanawkita-business-radius'
 const COMPETITOR_SOURCE = 'tanawkita-competitors'
 const COMPETITOR_AREA_SOURCE = 'tanawkita-competitor-areas'
-const BUILDINGS_LAYER = 'tanawkita-3d-buildings'
+const AREA_3D_LAYER = 'tanawkita-competitor-area-3d'
 // Business callouts show from city zoom, nearest to the map center first, capped to keep phones fast.
 const LABEL_ZOOM = 11
 const MAX_LABELS = 24
+// 3D keeps a tilt between these angles so it never flattens back into 2D; 2D is locked flat and north-up.
 const PITCH_3D = 55
+const MIN_PITCH_3D = 40
+const MAX_PITCH_3D = 70
+type MapMode = '2d' | '3d'
+// Layers that belong to only one mode. Everything else (heatmap, radius, pins) shows in both.
+const MODE_LAYERS: Record<MapMode, string[]> = {
+  '2d': [FLAT_BUILDINGS_LAYER, 'tanawkita-competitor-area-fill', 'tanawkita-competitor-area-glow', 'tanawkita-competitor-area-outline'],
+  '3d': [BUILDINGS_3D_LAYER, AREA_3D_LAYER],
+}
 // Shaded business areas start at this zoom, the same zoom building tiles start.
 const AREA_MIN_ZOOM = 13
 // Building outlines are looked up from this zoom; before it, store-sized buildings are under ~10 px.
@@ -95,51 +104,9 @@ function squareFeature(lat: number, lng: number, sideMeters: number, properties:
   }
 }
 
-// Diagonal stripe tile in one category color, for the hatched estimated-area fill.
-function hatchImage(hex: string) {
-  const size = 12
-  const data = new Uint8Array(size * size * 4)
-  const r = Number.parseInt(hex.slice(1, 3), 16)
-  const g = Number.parseInt(hex.slice(3, 5), 16)
-  const b = Number.parseInt(hex.slice(5, 7), 16)
-  for (let y = 0; y < size; y++) {
-    for (let x = 0; x < size; x++) {
-      if ((x + y) % size < 3) data.set([r, g, b, 235], (y * size + x) * 4)
-    }
-  }
-  return { width: size, height: size, data }
-}
-
-// Recolor the dark OpenFreeMap base toward a navy city plan with warm gold roads.
-function tintBaseStyle(map: LibreMap) {
-  for (const layer of map.getStyle().layers) {
-    const sourceLayer = 'source-layer' in layer ? layer['source-layer'] : undefined
-    try {
-      if (layer.type === 'background') map.setPaintProperty(layer.id, 'background-color', '#0e1834')
-      else if (layer.type === 'fill' && sourceLayer === 'water') map.setPaintProperty(layer.id, 'fill-color', '#071027')
-      else if (layer.type === 'fill' && sourceLayer === 'building') map.setPaintProperty(layer.id, 'fill-color', '#1c2a52')
-      else if (layer.type === 'fill' && (sourceLayer === 'landcover' || sourceLayer === 'park')) map.setPaintProperty(layer.id, 'fill-color', '#0f3238')
-      else if (layer.type === 'fill' && sourceLayer === 'landuse') map.setPaintProperty(layer.id, 'fill-color', '#121f42')
-      else if (layer.type === 'line' && sourceLayer === 'transportation') {
-        const major = /motorway|trunk|primary|secondary/.test(layer.id)
-        map.setPaintProperty(layer.id, 'line-color', major ? '#d6a646' : '#7d6a3e')
-      }
-    } catch {
-      // Some layers use paint values that cannot be overridden; leave them as the base style has them.
-    }
-  }
-}
-
-// Adds TanawKita's layers and returns the base style's flat building layers, used to find a pin's building.
-function addDataLayers(map: LibreMap): string[] {
-  const buildingLayers = map.getStyle().layers
-    .filter((layer) => layer.type === 'fill' && 'source-layer' in layer && layer['source-layer'] === 'building')
-    .map((layer) => layer.id)
-  if (map.getSource(HEAT_SOURCE)) return buildingLayers
-  tintBaseStyle(map)
-  for (const [category, style] of Object.entries(CATEGORY_STYLE)) {
-    if (!map.hasImage(`tk-hatch-${category}`)) map.addImage(`tk-hatch-${category}`, hatchImage(style.color))
-  }
+// Adds TanawKita's data layers on top of the base city plan, below its labels.
+function addDataLayers(map: LibreMap) {
+  if (map.getSource(HEAT_SOURCE)) return
 
   map.addSource(HEAT_SOURCE, {
     type: 'geojson',
@@ -202,38 +169,6 @@ function addDataLayers(map: LibreMap): string[] {
     labelsStart,
   )
 
-  // Dark OpenFreeMap style has no building extrusions; add TanawKita's own 3D OSM buildings.
-  // Starts hidden: the map opens in 2D, and the 3D button turns buildings on.
-  if (!map.getLayer(BUILDINGS_LAYER)) {
-    map.addLayer(
-      {
-        id: BUILDINGS_LAYER,
-        type: 'fill-extrusion',
-        source: 'openmaptiles',
-        'source-layer': 'building',
-        minzoom: 13,
-        layout: { visibility: 'none' },
-        paint: {
-          'fill-extrusion-base': ['coalesce', ['get', 'render_min_height'], 0],
-          'fill-extrusion-height': ['coalesce', ['get', 'render_height'], 8],
-          'fill-extrusion-color': [
-            'interpolate',
-            ['linear'],
-            ['coalesce', ['get', 'render_height'], 0],
-            0,
-            '#1f2d58',
-            25,
-            '#2a4486',
-            60,
-            '#3a6bc0',
-          ],
-          'fill-extrusion-opacity': 0.9,
-        },
-      },
-      labelsStart,
-    )
-  }
-
   map.addSource(COMPETITOR_AREA_SOURCE, {
     type: 'geojson',
     data: { type: 'FeatureCollection', features: [] },
@@ -244,17 +179,23 @@ function addDataLayers(map: LibreMap): string[] {
       type: 'fill',
       source: COMPETITOR_AREA_SOURCE,
       minzoom: 13,
-      paint: { 'fill-color': ['get', 'color'], 'fill-opacity': ['case', ['get', 'selected'], 0.32, 0.14] },
+      paint: { 'fill-color': ['get', 'color'], 'fill-opacity': ['case', ['get', 'selected'], 0.9, 0.65] },
     },
     labelsStart,
   )
+  // Soft glow around the shaded area, like a lit-up building on a city plan.
   map.addLayer(
     {
-      id: 'tanawkita-competitor-area-hatch',
-      type: 'fill',
+      id: 'tanawkita-competitor-area-glow',
+      type: 'line',
       source: COMPETITOR_AREA_SOURCE,
       minzoom: 13,
-      paint: { 'fill-pattern': ['concat', 'tk-hatch-', ['get', 'category']], 'fill-opacity': ['case', ['get', 'selected'], 0.95, 0.7] },
+      paint: {
+        'line-color': ['get', 'color'],
+        'line-width': ['case', ['get', 'selected'], 14, 8],
+        'line-blur': 10,
+        'line-opacity': ['case', ['get', 'selected'], 0.55, 0.3],
+      },
     },
     labelsStart,
   )
@@ -264,7 +205,23 @@ function addDataLayers(map: LibreMap): string[] {
       type: 'line',
       source: COMPETITOR_AREA_SOURCE,
       minzoom: 13,
-      paint: { 'line-color': ['get', 'color'], 'line-width': ['case', ['get', 'selected'], 2, 1], 'line-blur': 0.5 },
+      paint: { 'line-color': '#ffe2c4', 'line-width': ['case', ['get', 'selected'], 1.5, 0.8], 'line-opacity': 0.8 },
+    },
+    labelsStart,
+  )
+  // 3D version of the shaded areas: a raised block in the category color, taller once matched to a building.
+  map.addLayer(
+    {
+      id: AREA_3D_LAYER,
+      type: 'fill-extrusion',
+      source: COMPETITOR_AREA_SOURCE,
+      minzoom: 13,
+      layout: { visibility: 'none' },
+      paint: {
+        'fill-extrusion-color': ['get', 'color'],
+        'fill-extrusion-height': ['match', ['get', 'tier'], 'building', 10, 'estimate', 6, 1.5],
+        'fill-extrusion-opacity': 0.9,
+      },
     },
     labelsStart,
   )
@@ -317,21 +274,20 @@ function addDataLayers(map: LibreMap): string[] {
     },
     labelsStart,
   )
-  return buildingLayers
 }
 
 // Shaded area for each business, as precise as the zoom allows: a soft circle when zoomed out, a square sized
 // from team size in between, and the outline of the mapped building nearest the pin once it is big enough to see.
 // The businesses are fictional, so a matched building is a visual guide only, not the business's real storefront.
 // Returns the features plus a short signature, so callers can skip updates when nothing changed.
-function businessAreas(map: LibreMap, places: CompetitorPlace[], selectedPlaceId: string | null | undefined, buildingLayers: string[]) {
+function businessAreas(map: LibreMap, places: CompetitorPlace[], selectedPlaceId: string | null | undefined, buildingLayer: string) {
   const zoom = map.getZoom()
   if (zoom < AREA_MIN_ZOOM) return { features: [], signature: 'hidden' }
   const bounds = map.getBounds()
   // One query for the whole view, split into single outlines once. Below this zoom no store-sized building is
   // big enough on screen to outline, so the query is skipped.
-  const buildings = buildingLayers.length && zoom >= BUILDING_MIN_ZOOM
-    ? splitBuildings(map.queryRenderedFeatures({ layers: buildingLayers })
+  const buildings = zoom >= BUILDING_MIN_ZOOM && map.getLayer(buildingLayer)
+    ? splitBuildings(map.queryRenderedFeatures({ layers: [buildingLayer] })
       .map((feature) => feature.geometry)
       .filter((geometry): geometry is AreaShape => geometry.type === 'Polygon' || geometry.type === 'MultiPolygon'))
     : []
@@ -423,10 +379,12 @@ export default function MapLibreView({
 }: Props) {
   const container = useRef<HTMLDivElement>(null)
   const mapRef = useRef<LibreMap | null>(null)
-  const buildingLayers = useRef<string[]>([])
   const [map, setMap] = useState<LibreMap | null>(null)
   const [error, setError] = useState('')
-  const [is3d, setIs3d] = useState(false)
+  const [mode, setMode] = useState<MapMode>('2d')
+  const modeRef = useRef<MapMode>('2d')
+  const compassRef = useRef<NavigationControl | null>(null)
+  const is3d = mode === '3d'
   const selectedJob = jobs.find((job) => job.id === selectedId)
   const focus = selectedJob ? [selectedJob.lat, selectedJob.lng] as [number, number] : business ? [business.lat, business.lng] as [number, number] : (me ?? null)
 
@@ -437,11 +395,15 @@ export default function MapLibreView({
     try {
       instance = new LibreMap({
         container: container.current,
-        style: STYLE_URL,
+        style: TANAWKITA_MAP_STYLE,
         center: view ? [view.center[1], view.center[0]] : [DAVAO_CENTER[1], DAVAO_CENTER[0]],
         zoom: view?.zoom ?? zoom ?? (fill ? 14 : 13.5),
+        // Opens in 2D: flat, north-up, no rotating or tilting until the 3D button is pressed.
         pitch: 0,
         bearing: 0,
+        maxPitch: 0,
+        dragRotate: false,
+        touchPitch: false,
         // Scroll-wheel zoom needs Ctrl (Cmd on Mac); touch needs two fingers. Keeps page scrolling usable.
         cooperativeGestures: true,
       })
@@ -451,14 +413,11 @@ export default function MapLibreView({
     }
 
     mapRef.current = instance
-    instance.addControl(new NavigationControl({ visualizePitch: true }), 'bottom-right')
-    // The base style references sprite images it does not ship (e.g. "wood-pattern"); fill them with a blank pixel.
-    instance.on('styleimagemissing', (event) => {
-      if (!instance.hasImage(event.id)) instance.addImage(event.id, { width: 1, height: 1, data: new Uint8Array(4) })
-    })
-    instance.on('pitchend', () => setIs3d(instance.getPitch() > 5))
+    instance.addControl(new NavigationControl({ showCompass: false }), 'bottom-right')
+    instance.touchZoomRotate.disableRotation()
+    instance.keyboard.disableRotation()
     instance.on('load', () => {
-      buildingLayers.current = addDataLayers(instance)
+      addDataLayers(instance)
       setMap(instance)
     })
     instance.on('error', (event) => {
@@ -498,16 +457,48 @@ export default function MapLibreView({
     }
   }, [map, onPick])
 
+  // Each mode shows only its own layers, so 2D never draws 3D buildings and 3D never draws the flat shapes.
   useEffect(() => {
-    if (!map?.getLayer(BUILDINGS_LAYER)) return
-    map.setLayoutProperty(BUILDINGS_LAYER, 'visibility', is3d ? 'visible' : 'none')
-  }, [map, is3d])
-
-  function toggle3d() {
     if (!map) return
-    const next = !is3d
-    setIs3d(next)
-    map.easeTo({ pitch: next ? PITCH_3D : 0, bearing: next ? -15 : 0, duration: 700 })
+    for (const [layerMode, ids] of Object.entries(MODE_LAYERS)) {
+      for (const id of ids) {
+        if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', layerMode === mode ? 'visible' : 'none')
+      }
+    }
+  }, [map, mode])
+
+  // Only this button changes modes. Gestures stay inside the current mode: 2D cannot tilt or rotate,
+  // and 3D keeps its tilt between MIN_PITCH_3D and MAX_PITCH_3D.
+  function switchMode(next: MapMode) {
+    if (!map || next === modeRef.current) return
+    modeRef.current = next
+    setMode(next)
+    if (next === '3d') {
+      map.setMaxPitch(MAX_PITCH_3D)
+      map.dragRotate.enable()
+      map.touchPitch.enable()
+      map.touchZoomRotate.enableRotation()
+      map.keyboard.enableRotation()
+      compassRef.current = new NavigationControl({ showZoom: false, visualizePitch: true })
+      map.addControl(compassRef.current, 'bottom-right')
+      map.easeTo({ pitch: PITCH_3D, bearing: -15, duration: 700 })
+      // Set the tilt floor after the camera has tilted, or it would jump straight to it.
+      map.once('moveend', () => {
+        if (modeRef.current === '3d') map.setMinPitch(MIN_PITCH_3D)
+      })
+    } else {
+      map.setMinPitch(0)
+      map.dragRotate.disable()
+      map.touchPitch.disable()
+      map.touchZoomRotate.disableRotation()
+      map.keyboard.disableRotation()
+      if (compassRef.current) map.removeControl(compassRef.current)
+      compassRef.current = null
+      map.easeTo({ pitch: 0, bearing: 0, duration: 700 })
+      map.once('moveend', () => {
+        if (modeRef.current === '2d') map.setMaxPitch(0)
+      })
+    }
   }
 
   useEffect(() => {
@@ -551,7 +542,7 @@ export default function MapLibreView({
     const source = map.getSource(COMPETITOR_AREA_SOURCE) as GeoJSONSource | undefined
     let last = ''
     const update = () => {
-      const { features, signature } = businessAreas(map, places, selectedPlaceId, buildingLayers.current)
+      const { features, signature } = businessAreas(map, places, selectedPlaceId, mode === '3d' ? BUILDINGS_3D_LAYER : FLAT_BUILDINGS_LAYER)
       // Updating the source triggers another idle event; skip it when nothing changed so this does not loop.
       if (signature === last) return
       last = signature
@@ -565,7 +556,7 @@ export default function MapLibreView({
       map.off('moveend', update)
       map.off('idle', update)
     }
-  }, [map, places, selectedPlaceId])
+  }, [map, places, selectedPlaceId, mode])
 
   // Callout cards for businesses in view at street level (and always for the selected one).
   useEffect(() => {
@@ -689,8 +680,9 @@ export default function MapLibreView({
         <button
           type="button"
           className={`map-dimension-toggle${is3d ? ' is-3d' : ''}`}
-          onClick={toggle3d}
+          onClick={() => switchMode(is3d ? '2d' : '3d')}
           aria-pressed={is3d}
+          aria-label={is3d ? 'Map is 3D. Switch to flat 2D map' : 'Map is 2D. Switch to 3D buildings'}
           title={is3d ? 'Switch to flat 2D map' : 'Show 3D buildings'}
         >
           <span className={is3d ? '' : 'active'}>2D</span>
