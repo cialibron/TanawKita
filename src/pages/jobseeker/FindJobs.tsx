@@ -157,13 +157,7 @@ export default function FindJobs({ view, onViewChange, navigation, activeNavigat
   function select(id: string | null) {
     setSelectedId(id)
     if (!id) return
-    // Leave the full-screen menu so the map and the job's details (hidden behind it) come into view.
-    onPanelFullScreenChange?.(false)
-    // Phones: close the menu so the map (zooming to the job's pin) and its details are in view.
-    if (window.matchMedia('(max-width: 720px)').matches) {
-      setPanelOpen(false)
-      return
-    }
+    // The menu stays as it is (full screen, or covering the map on a phone); the details pop up over it.
     setPanelOpen(true)
     setTimeout(() => document.getElementById(`job-${id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' }))
   }

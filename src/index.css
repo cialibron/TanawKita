@@ -6296,3 +6296,33 @@ button.skill-picker-option.custom {
   background: #3a7ef0 !important;
   box-shadow: 0 0 0 2px #8cc4ff !important;
 }
+
+/* ===== Job details pop up over the menu: above it when it is open or full screen (and on phones, where it
+   covers the map). The menu stays open underneath. ===== */
+.mapshell .workspace-detail,
+.mapshell .workspace-detail-bar {
+  z-index: 1004;
+}
+
+/* Positions are inside the map area, which already starts right of the (widened) rail. */
+.mapshell.panel-fullscreen .workspace-detail {
+  left: 16px;
+  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.55);
+}
+
+.mapshell.panel-fullscreen .workspace-detail-bar {
+  left: 0;
+}
+
+@media (max-width: 720px) {
+  .mapshell.panel-fullscreen .workspace-detail,
+  .mapshell.menu-open .workspace-detail {
+    left: 10px;
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.55);
+  }
+
+  .mapshell.panel-fullscreen .workspace-detail-bar,
+  .mapshell.menu-open .workspace-detail-bar {
+    left: 0;
+  }
+}

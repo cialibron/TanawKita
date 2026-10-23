@@ -81,7 +81,7 @@ export const LOGIN_TOUR: TourStep[] = [
 ]
 
 // Part 2, the jobseeker tour. It starts on the Find jobs tab with the menu full screen (where sign-in lands);
-// opening a job leaves full screen, so the later steps can point at the details and the map controls.
+// the job details pop up over the list, and full screen ends before the step that points at the map controls.
 export const JOBSEEKER_TOUR: TourStep[] = [
   {
     target: '.workspace-rail .role-rail',
@@ -107,6 +107,7 @@ export const JOBSEEKER_TOUR: TourStep[] = [
     scroll: true,
     title: 'Apply',
     text: 'Press Apply now to send your skill card to the employer. The job then shows ✓ Applied in the list and under My applications.',
+    onNext: click('.workspace-rail .rail-fullscreen[aria-pressed="true"]'),
   },
   {
     target: '.dev-role-picker',
