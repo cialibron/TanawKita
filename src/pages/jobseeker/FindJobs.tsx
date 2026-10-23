@@ -5,6 +5,7 @@ import { useSession, useStore } from '../../store'
 import EyeIcon from '../../components/EyeIcon'
 import { barangayName } from '../../data/barangays'
 import { BARANGAY_CENTERS } from '../../data/barangayGeo'
+import { employerPlaces, type CompetitorPlace } from '../../businessDirectory'
 import { blockedReason, distanceKm, matchScore } from '../../rules'
 import type { JobPost, JobType, View } from '../../types'
 import { VerificationBadge } from '../employer/Verify'
@@ -14,9 +15,9 @@ function payLabel(job: JobPost): string {
   return `₱${job.payAmount.toLocaleString()} / ${unit}`
 }
 
-// Short uppercase code for a place, like an airport code on a route: "Talomo" -> "TALO".
+// Short uppercase code for a place, like an airport code on a route: "Talomo" -> "TALO", "Barangay 32-D" -> "32D".
 function placeCode(name: string): string {
-  return name.replace(/[^A-Za-z]/g, '').slice(0, 4).toUpperCase()
+  return name.replace(/^barangay\s+/i, '').replace(/[^A-Za-z0-9]/g, '').slice(0, 4).toUpperCase()
 }
 
 const place = (code: string) => barangayName(code).trim()
@@ -30,6 +31,14 @@ function startLabel(date: string): string {
 
 function matchTone(percent: number): string {
   return percent >= 80 ? 'good' : percent >= 50 ? 'fair' : 'low'
+}
+
+// Map places per set of hiring employers. Kept stable between renders so the map does not redraw its areas.
+const placesCache = new Map<string, CompetitorPlace[]>()
+function placesFor(employerIds: string[]): CompetitorPlace[] {
+  const key = [...new Set(employerIds)].sort().join('|')
+  if (!placesCache.has(key)) placesCache.set(key, employerPlaces(key.split('|')))
+  return placesCache.get(key)!
 }
 
 const TYPE_CHIPS: { id: JobType | 'all'; label: string }[] = [
@@ -90,6 +99,23 @@ export default function FindJobs({ view, onViewChange, navigation, activeNavigat
     )
     .map((job) => ({ job, match: card ? matchScore(job, card, true) : null }))
     .sort((a, b) => (b.match?.percent ?? 0) - (a.match?.percent ?? 0))
+
+  // Hiring businesses for the map, each shown as a business callout over its glowing circle. A job at its
+  // business (every demo-sheet job, or one posted within 150 m) is reached through that callout; a job posted
+  // somewhere else keeps its own pay tag.
+  const places = placesFor(jobs.map(({ job }) => job.employerId))
+  const isAtBusiness = (job: JobPost) => {
+    const place = places.find((item) => item.id === job.employerId)
+    return Boolean(place && (job.id.startsWith('SYN-JOB-') || distanceKm([job.lat, job.lng], [place.lat, place.lng]) <= 0.15))
+  }
+  const jobsAtBusiness = jobs.filter(({ job }) => isAtBusiness(job)).map(({ job }) => job)
+  const mapJobs = jobs.filter(({ job }) => !isAtBusiness(job)).map(({ job }) => job)
+  const businessPlaces = places.filter((place) => jobsAtBusiness.some((job) => job.employerId === place.id))
+  const selectedEmployerId = jobsAtBusiness.find((job) => job.id === selectedId)?.employerId ?? null
+  const selectBusiness = (placeId: string) => {
+    const job = jobsAtBusiness.find((item) => item.employerId === placeId)
+    if (job) select(job.id)
+  }
 
   const alreadyApplied = (jobId: string) =>
     state.applications.some((a) => a.jobId === jobId && a.userId === session.userId)
@@ -267,7 +293,7 @@ export default function FindJobs({ view, onViewChange, navigation, activeNavigat
       onViewChange={onViewChange}
       panelOpen={panelOpen}
       onPanelOpenChange={setPanelOpen}
-      map={<JobMap fill jobs={jobs.map((j) => j.job)} selectedId={selectedId} onSelect={select} me={me} />}
+      map={<JobMap fill jobs={mapJobs} selectedId={selectedId} onSelect={select} me={me} places={businessPlaces} selectedPlaceId={selectedEmployerId} onPlaceSelect={selectBusiness} />}
       panel={
         <>
           {panelHeader}

@@ -392,6 +392,20 @@
   color: var(--l-muted);
 }
 
+.landing .demo-banner {
+  margin: 0 0 16px;
+  padding: 10px 12px;
+  border: 1px solid #ffc94a;
+  border-radius: 10px;
+  background: rgba(255, 201, 74, 0.14);
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+
+.landing .demo-banner strong {
+  color: #ffc94a;
+}
+
 .landing .notice {
   background: rgba(72, 169, 245, 0.15);
   border: 1px solid var(--l-accent);
@@ -482,37 +496,16 @@
   min-width: 0;
 }
 
-/* Faint moving map of Davao City behind everything. Dark tiles + screen blend = only roads and labels glow. */
-.landing-map {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  opacity: 0.42;
-  mix-blend-mode: screen;
-  pointer-events: none;
-  /* Fade the map out toward the edges so it reads as texture, not a widget. */
-  mask-image: radial-gradient(ellipse 85% 80% at 50% 50%, #000 55%, transparent 100%);
-  -webkit-mask-image: radial-gradient(ellipse 85% 80% at 50% 50%, #000 55%, transparent 100%);
-}
-
-.landing-map.maplibregl-map {
-  background: transparent;
-}
-
-/* The map credit sits outside the faded map layer so it stays readable. */
-.landing-map-credit {
+/* Synthetic-data disclosure, pinned to the bottom-left of the page. */
+.landing-disclosure {
   position: absolute;
-  right: 12px;
-  bottom: 8px;
+  left: 24px;
+  bottom: 12px;
   z-index: 3;
+  max-width: 52ch;
   margin: 0;
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.75);
-  pointer-events: auto;
-}
-
-.landing-map-credit a {
-  color: inherit;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.8);
 }
 
 .landing-nav,
@@ -719,89 +712,6 @@
   --tone: #ffc94a;
 }
 
-/* Map: only the tiles are faded; pins and routes stay bright. */
-.landing-map {
-  opacity: 1;
-}
-
-.landing-map .maplibregl-canvas {
-  opacity: 0.42;
-}
-
-.map-dot {
-  position: absolute;
-  left: -5px;
-  top: -5px;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: var(--dot);
-  box-shadow: 0 0 8px var(--dot), 0 0 18px var(--dot);
-  animation: map-twinkle 3.2s ease-in-out infinite;
-}
-
-.map-dot.active::after {
-  content: '';
-  position: absolute;
-  inset: -4px;
-  border-radius: 50%;
-  border: 2px solid var(--dot);
-  animation: map-pulse 2.4s ease-out infinite;
-  animation-delay: inherit;
-}
-
-.map-dot-orange {
-  --dot: #ff8a3d;
-}
-
-.map-dot-pink {
-  --dot: #ff4fa3;
-}
-
-.map-dot-cyan {
-  --dot: #2ee6ff;
-}
-
-.map-dot-gold {
-  --dot: #ffc94a;
-}
-
-@keyframes map-twinkle {
-  0%,
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.6;
-    transform: scale(0.8);
-  }
-}
-
-@keyframes map-pulse {
-  0% {
-    transform: scale(0.6);
-    opacity: 0.9;
-  }
-  100% {
-    transform: scale(3.2);
-    opacity: 0;
-  }
-}
-
-.map-route {
-  stroke-dasharray: 4 6;
-  opacity: 0.55;
-  filter: drop-shadow(0 0 3px #5ce1ff);
-  animation: map-route-flow 2.5s linear infinite;
-}
-
-@keyframes map-route-flow {
-  to {
-    stroke-dashoffset: -20;
-  }
-}
-
 /* Glowing diagonal edge with drifting particles */
 .glow-edge {
   position: fixed;
@@ -966,9 +876,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .map-dot,
-  .map-dot.active::after,
-  .map-route,
   .glow-particle {
     animation: none;
   }
@@ -1070,14 +977,6 @@
   filter: none;
 }
 
-.map-dot {
-  box-shadow: none;
-}
-
-.map-route {
-  filter: none;
-}
-
 .glow-edge-halo {
   display: none;
 }
@@ -1115,3 +1014,128 @@
   box-shadow: none;
 }
 
+
+/* ===== Live map background (MapLibre + OpenFreeMap) ===== */
+.landing-map {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  /* Fade the map out toward the edges so it reads as texture, not a widget. */
+  mask-image: radial-gradient(ellipse 85% 80% at 50% 50%, #000 55%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse 85% 80% at 50% 50%, #000 55%, transparent 100%);
+}
+
+.landing-map.maplibregl-map {
+  background: transparent;
+}
+
+/* Only the tiles are faded and blended; pins (DOM markers above the canvas) stay bright. */
+.landing-map .maplibregl-canvas {
+  opacity: 0.5;
+  mix-blend-mode: screen;
+}
+
+.landing-pin {
+  width: 10px;
+  height: 10px;
+}
+
+.map-dot {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: var(--dot);
+  box-shadow: 0 0 8px var(--dot), 0 0 18px var(--dot);
+  animation: map-twinkle 3.2s ease-in-out infinite;
+}
+
+/* Activity indicator: a ring that ripples out from busy pins. */
+.map-dot.active::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 2px solid var(--dot);
+  animation: map-pulse 2.4s ease-out infinite;
+  animation-delay: inherit;
+}
+
+.map-dot-orange {
+  --dot: #ff8a3d;
+}
+
+.map-dot-pink {
+  --dot: #ff4fa3;
+}
+
+.map-dot-cyan {
+  --dot: #2ee6ff;
+}
+
+.map-dot-gold {
+  --dot: #ffc94a;
+}
+
+@keyframes map-twinkle {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(0.8);
+  }
+}
+
+@keyframes map-pulse {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(3.2);
+    opacity: 0;
+  }
+}
+
+/* The map credit sits outside the faded map layer so it stays readable. */
+.landing-map-credit {
+  position: absolute;
+  right: 12px;
+  bottom: 8px;
+  z-index: 3;
+  margin: 0;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.landing-map-credit a {
+  color: inherit;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .map-dot,
+  .map-dot.active::after {
+    animation: none;
+  }
+}
+
+/* Phones: the disclosure and map credit follow the sign-in card instead of being pinned over it,
+   so they never cover "Explore without an account". */
+@media (max-width: 860px) {
+  .landing-disclosure,
+  .landing-map-credit {
+    position: relative;
+    left: auto;
+    right: auto;
+    bottom: auto;
+    max-width: none;
+    margin: 12px 16px 0;
+  }
+
+  .landing-map-credit {
+    margin-bottom: 16px;
+  }
+}

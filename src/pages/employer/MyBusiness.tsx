@@ -1,5 +1,6 @@
 import { useMemo, useState, type ReactNode } from 'react'
 import AreaMap from '../../components/AreaMap'
+import CompetitorDetail from '../../components/CompetitorDetail'
 import MapShell, { type WorkspaceNavItem } from '../../components/MapShell'
 import { areaStats, barangaysWithin, jobseekerHeat, nearestBarangay, seekerPoint } from '../../area'
 import { barangayName } from '../../data/barangays'
@@ -186,12 +187,7 @@ export default function MyBusiness({ view, onViewChange, navigation, activeNavig
       activeNavigation={activeNavigation}
       onNavigationChange={onNavigationChange}
       detail={selectedCompetitor ? (
-        <div className="selected-business-detail">
-          <div className="detail-kicker">SELECTED COMPETITOR</div>
-          <h2>{selectedCompetitor.name}</h2>
-          <p className="muted">{selectedCompetitor.address || 'Mapped place of interest'}{selectedCompetitor.distanceKm !== undefined ? ` · ${selectedCompetitor.distanceKm.toFixed(1)} km away` : ''}</p>
-          <p className="advisor-synthetic-note">Approximate simulation location · not an actual storefront</p>
-        </div>
+        <CompetitorDetail key={selectedCompetitor.id} place={selectedCompetitor} />
       ) : business ? (
         <div className="selected-business-detail">
           <div className="detail-kicker">CURRENT BUSINESS AREA</div>

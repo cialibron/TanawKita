@@ -1,9 +1,10 @@
 import { useState, type ReactNode } from 'react'
 import MapShell, { type WorkspaceNavItem } from './components/MapShell'
 import JobMap from './components/JobMap'
+import Logo from './components/Logo'
 import { useSession, useStore } from './store'
 import { usernameFor } from './rules'
-import { clearSession, loadSession } from './auth'
+import { clearSession, loadSession } from './pages/demoAuth'
 import Landing from './pages/Landing'
 import SetupPanel from './pages/SetupPanel'
 import { accountKey, getSetup, type SetupStep } from './onboarding'
@@ -123,7 +124,7 @@ export default function App() {
   const shellHeader = (
     <div className="workspace-heading">
       <div className="header">
-        <strong className="brand">TanawKita</strong>
+        <Logo height={34} />
         <span className="row">
           <span className="badge">Demo</span>
           <button type="button" className="badge sign-out" onClick={signOut}>

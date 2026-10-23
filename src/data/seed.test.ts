@@ -7,11 +7,11 @@ import { seedState } from './seed'
 describe('seed data', () => {
   const jobs = seedState.jobs
 
-  it('has many employers, jobseekers, jobs and applications', () => {
-    expect(Object.keys(seedState.verifications).length).toBeGreaterThanOrEqual(20)
-    expect(Object.keys(seedState.skillCards).length).toBeGreaterThanOrEqual(40)
-    expect(jobs.length).toBeGreaterThanOrEqual(20)
-    expect(seedState.applications.length).toBeGreaterThan(10)
+  it('has the five demo businesses, two jobseekers, their jobs and applications', () => {
+    expect(Object.keys(seedState.verifications).length).toBe(5)
+    expect(Object.values(seedState.skillCards).map((c) => c.name).sort()).toEqual(['Ana Reyes', 'Viola Co'])
+    expect(jobs.length).toBe(5)
+    expect(seedState.applications.length).toBeGreaterThan(0)
   })
 
   it('gives every employer with jobs a name, business location and verification record', () => {

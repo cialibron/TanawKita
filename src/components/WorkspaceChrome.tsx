@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import EyeIcon from './EyeIcon'
+import { BrandEmblem } from './Logo'
 import type { View } from '../types'
 
 export interface WorkspaceNavItem {
@@ -32,7 +34,7 @@ interface RailProps {
 export function WorkspaceRail({ view, navigation, activeNavigation, onNavigationChange, menu }: RailProps) {
   return (
     <nav className="workspace-rail" aria-label={`${VIEW_LABEL[view]} navigation`}>
-      <div className="workspace-mark" title="TanawKita">T</div>
+      <div className="workspace-mark tk-brand-mark" title="TanawKita"><BrandEmblem height={30} /></div>
       {menu && (
         <button
           type="button"
@@ -66,7 +68,7 @@ export function WorkspaceRail({ view, navigation, activeNavigation, onNavigation
         ))}
       </div>
       <div className="rail-spacer" />
-      <div className="workspace-avatar" title="Demo workspace">TK</div>
+      <div className="workspace-avatar tk-eye-avatar" title="TanawKita demo"><EyeIcon width={22} /></div>
     </nav>
   )
 }

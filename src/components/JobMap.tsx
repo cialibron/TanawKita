@@ -1,4 +1,5 @@
 import type { JobPost } from '../types'
+import type { CompetitorPlace } from '../businessDirectory'
 import MapLibreView from './MapLibreView'
 
 export const DAVAO_CENTER: [number, number] = [7.0731, 125.6128]
@@ -13,8 +14,13 @@ interface Props {
   height?: number
   // Fill the parent instead of a fixed-height rounded box.
   fill?: boolean
+  // Hiring businesses, each drawn as a callout over a glowing circle (and its building colored in 3D).
+  places?: CompetitorPlace[]
+  selectedPlaceId?: string | null
+  onPlaceSelect?: (placeId: string) => void
+  placeLabels?: boolean
 }
 
 export default function JobMap(props: Props) {
-  return <MapLibreView {...props} />
+  return <MapLibreView {...props} areaStyle="pin-circle" />
 }

@@ -1,11 +1,11 @@
 # Synthetic simulation sheets
 
-These CSVs are **new, separate demo sheets**. The app reads them as additive synthetic simulation records at startup; they do not replace the existing seed records. Existing saved records and user edits are preserved when the new rows are merged into local storage.
+These CSVs are the **only demo records** the app loads at startup.
 
 ## Files
 
-- `businesses.csv` — 300 fictional Davao-area businesses across 14 sectors, including business model, approximate location, sample hiring status, job roles, and pay examples. Appended urban clusters make local competitor searches useful in the demo.
-- `jobseekers.csv` — 300 fictional jobseeker profiles with varied ages, work status, education, experience, skills, training, availability, preferences, pay expectations, languages, and commute/access patterns.
+- `businesses.csv` — 5 fictional demo businesses, one each in Mandug, Buhangin, Puan (Talomo), Roxas Ave (Barangay 8-A) and Matina Crossing, with business model, approximate location, sample hiring status, job roles, and pay examples.
+- `jobseekers.csv` — 2 fictional jobseeker profiles: Viola Co (19, 2nd-year BS Data Science student, part-time) and Ana Reyes (24, adult jobseeker in food service).
 
 ## Important simulation and privacy notes
 
@@ -32,4 +32,4 @@ These CSVs are **new, separate demo sheets**. The app reads them as additive syn
 - Context for richer simulations: `languages`, `commute_mode`, `digital_access`, `profile_summary`
 - Provenance: `data_origin`
 
-The runtime adapter is `src/data/simulation.ts`. It converts these CSV rows into the app's demo business, job, and skill-card records while keeping the original records intact. The competitor simulator reads the business sheet and labels all locations as synthetic approximate points. `mockEmployers.ts` and `mockSeekers.ts` remain unchanged.
+The runtime adapter is `src/data/simulation.ts`. It converts these CSV rows into the app's demo business, job, and skill-card records. These two sheets are the only demo businesses and jobseekers. The competitor simulator reads the business sheet and labels all locations as synthetic approximate points.

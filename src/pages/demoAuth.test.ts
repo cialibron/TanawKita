@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { emailError, nameFromEmail, passwordError, signIn } from './auth'
+import { emailError, nameFromEmail, passwordError, signIn } from './demoAuth'
 
 describe('emailError', () => {
   it('asks for an email, then for a valid format', () => {

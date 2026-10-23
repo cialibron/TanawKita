@@ -705,12 +705,12 @@ ul.error {
 
 /* TanawKita's map-first workspace: dark tracking-dashboard layout with left navigation. */
 .mapshell {
-  --bg: #141517;
-  --card: #1d1f22;
+  --bg: #0f1832;
+  --card: #152144;
   --text: #f1f2f3;
   --muted: #9a9da3;
-  --border: #303236;
-  --accent: #26a6d8;
+  --border: #213367;
+  --accent: #286ce3;
   --accent-text: #fff;
   --ok: #57b879;
   --error: #f0756c;
@@ -720,7 +720,7 @@ ul.error {
   display: flex;
   overflow: hidden;
   color: var(--text);
-  background: #141517;
+  background: #0f1832;
   font-family: Inter, system-ui, -apple-system, 'Segoe UI', sans-serif;
 }
 
@@ -733,8 +733,8 @@ ul.error {
   gap: 10px;
   padding: 12px 0;
   box-sizing: border-box;
-  border-right: 1px solid #292b2e;
-  background: #101113;
+  border-right: 1px solid #1c2c59;
+  background: #0c142b;
 }
 
 .workspace-mark,
@@ -743,16 +743,16 @@ ul.error {
   width: 34px;
   height: 34px;
   place-items: center;
-  border: 1px solid #3b3e42;
+  border: 1px solid #293d7a;
   border-radius: 10px;
-  background: #202327;
-  color: #70d2f5;
+  background: #17254b;
+  color: #6aeafb;
   font-weight: 800;
 }
 
 .workspace-mark {
-  background: #167ba2;
-  border-color: #32b7e5;
+  background: #104bb1;
+  border-color: #38e3fa;
   color: #fff;
 }
 
@@ -775,13 +775,13 @@ ul.error {
 .rail-toggle:hover,
 .role-rail-button:hover,
 .role-rail-button.active {
-  border-color: #313438;
-  background: #24272a;
+  border-color: #223469;
+  background: #192752;
   color: #fff;
 }
 
 .role-rail-button.active {
-  box-shadow: inset 3px 0 #2db6e7;
+  box-shadow: inset 3px 0 #38e3fa;
 }
 
 .role-tooltip {
@@ -791,9 +791,9 @@ ul.error {
   width: max-content;
   max-width: 180px;
   padding: 7px 10px;
-  border: 1px solid #3a3d42;
+  border: 1px solid #293d7a;
   border-radius: 8px;
-  background: #25272a;
+  background: #192852;
   color: #f3f4f5;
   font-size: 12px;
   font-weight: 600;
@@ -819,7 +819,7 @@ ul.error {
 .rail-divider {
   width: 30px;
   height: 1px;
-  background: #303236;
+  background: #213367;
 }
 
 .role-rail {
@@ -839,9 +839,9 @@ ul.error {
   width: 360px;
   min-width: 0;
   border: 0;
-  border-right: 1px solid #2c2e31;
+  border-right: 1px solid #1e2e5f;
   border-radius: 0;
-  background: #17181a;
+  background: #101a38;
   box-shadow: 8px 0 24px rgba(0, 0, 0, 0.18);
   transition: flex-basis 200ms ease, width 200ms ease, transform 200ms ease;
 }
@@ -870,12 +870,12 @@ ul.error {
   flex: 1 1 auto;
   min-width: 0;
   height: 100%;
-  background: #181a1d;
+  background: #111c3b;
 }
 
 .workspace-heading {
   padding: 2px 1px 12px;
-  border-bottom: 1px solid #303236;
+  border-bottom: 1px solid #213367;
   margin-bottom: 12px;
 }
 
@@ -891,8 +891,8 @@ ul.error {
 }
 
 .mapshell .badge {
-  border-color: #373a3e;
-  background: #242629;
+  border-color: #273a74;
+  background: #192750;
   color: #a4a7ad;
 }
 
@@ -905,8 +905,8 @@ ul.error {
 .mapshell .acting-as select,
 .mapshell input,
 .mapshell select {
-  border-color: #383b3f;
-  background: #202225;
+  border-color: #273b75;
+  background: #172349;
   color: #f1f2f3;
 }
 
@@ -921,9 +921,9 @@ ul.error {
 }
 
 .mapshell .card {
-  border-color: #303236;
+  border-color: #213367;
   border-radius: 12px;
-  background: #1d1f22;
+  background: #152144;
   color: #e8e9eb;
 }
 
@@ -935,9 +935,9 @@ ul.error {
   gap: 4px;
   overflow-x: auto;
   padding: 3px;
-  border: 1px solid #303236;
+  border: 1px solid #213367;
   border-radius: 10px;
-  background: #111214;
+  background: #0e152c;
   scrollbar-width: none;
 }
 
@@ -953,21 +953,21 @@ ul.error {
 }
 
 .mapshell button.tab.active {
-  border-color: #34383b;
-  background: #292c2f;
+  border-color: #24366e;
+  background: #1d2c5a;
   color: #fff;
 }
 
 /* Detail-panel controls and MapLibre's map controls are excluded: they have their own navy styles below. */
 .mapshell button:not(.tab):not(.chip):not(.rail-toggle):not(.role-rail-button):not(.map-action-button):not(.detail-close):not(.detail-expand-button):not(.detail-collapse-button):not([class*='maplibregl-ctrl']) {
-  border-color: #3a3d41;
-  background: #25272a;
+  border-color: #293c78;
+  background: #192852;
   color: #e8e9eb;
 }
 
 .mapshell button.primary {
-  border-color: #1688b3;
-  background: #1688b3;
+  border-color: #0f51c4;
+  background: #0f51c4;
   color: #fff;
 }
 
@@ -989,21 +989,21 @@ ul.error {
 
 .mapshell .searchbar input {
   border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(25, 27, 30, 0.94);
+  background: rgba(18, 30, 61, 0.94);
   color: #f4f5f6;
   backdrop-filter: blur(12px);
 }
 
 .mapshell button.chip {
   border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(26, 28, 31, 0.92);
+  background: rgba(18, 29, 63, 0.92);
   color: #e1e3e5;
   backdrop-filter: blur(12px);
 }
 
 .mapshell button.chip.active {
-  border-color: #2db6e7;
-  background: #12759a;
+  border-color: #38e3fa;
+  background: #0c45a9;
   color: white;
 }
 
@@ -1020,9 +1020,9 @@ ul.error {
   gap: 8px;
   min-height: 38px;
   padding: 8px 12px;
-  border: 1px solid #3b3e42;
+  border: 1px solid #293d7a;
   border-radius: 9px;
-  background: rgba(24, 26, 29, 0.94);
+  background: rgba(17, 28, 59, 0.94);
   color: #f5f6f7;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
   cursor: pointer;
@@ -1030,14 +1030,14 @@ ul.error {
 }
 
 .map-action-button:hover {
-  background: #2b2e32;
+  background: #1e2e5f;
 }
 
 .mapshell .heat-legend,
 .mapshell .map-hint {
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 9px;
-  background: rgba(24, 26, 29, 0.92);
+  background: rgba(17, 28, 59, 0.92);
   color: #e4e6e8;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
   backdrop-filter: blur(12px);
@@ -1117,7 +1117,7 @@ ul.error {
   flex: none;
   transform: translateX(calc(-100% - 8px));
   overflow: hidden;
-  border-right: 1px solid #303236;
+  border-right: 1px solid #213367;
   box-shadow: none;
   transition: transform 200ms ease;
   pointer-events: none;
@@ -1132,7 +1132,7 @@ ul.error {
 .mapshell.menu-minimized .mapshell-panel {
   flex-basis: auto;
   width: 360px;
-  border-right: 1px solid #303236;
+  border-right: 1px solid #213367;
 }
 
 .mapshell-panel .panel-body {
@@ -1165,9 +1165,9 @@ ul.error {
   display: none;
   min-width: 190px;
   padding: 5px;
-  border: 1px solid #3a3d42;
+  border: 1px solid #293d7a;
   border-radius: 10px;
-  background: #202225;
+  background: #172349;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
 }
 
@@ -1190,7 +1190,7 @@ ul.error {
 
 .dev-role-menu button:hover,
 .dev-role-menu button.active {
-  background: #303438;
+  background: #223468;
   color: #fff;
 }
 
@@ -1281,7 +1281,7 @@ ul.error {
 }
 
 .detail-kicker {
-  color: #68c7e9;
+  color: #56e8fb;
   font-size: 10px;
   font-weight: 800;
   letter-spacing: 0.12em;
@@ -1431,9 +1431,9 @@ ul.error {
   justify-items: start;
   gap: 3px;
   padding: 8px 10px;
-  border: 1px solid #34373b;
+  border: 1px solid #24366e;
   border-radius: 10px;
-  background: #202225;
+  background: #172349;
   color: #b7bbc0;
   font-size: 12px;
   text-align: left;
@@ -1448,20 +1448,20 @@ ul.error {
 }
 
 .advisor-tabs button.active {
-  border-color: #1a8eb8;
-  background: #152a31;
-  color: #f1f7f9;
+  border-color: #1356c9;
+  background: #1c2b48;
+  color: #ebfcfe;
 }
 
 .advisor-tabs button.active span {
-  color: #59c3e4;
+  color: #43e5fa;
 }
 
 .advisor-filter-card {
   padding: 12px;
-  border: 1px solid #33363a;
+  border: 1px solid #23366d;
   border-radius: 11px;
-  background: #1c1e20;
+  background: #131f41;
 }
 
 .advisor-filter-card label {
@@ -1484,17 +1484,17 @@ ul.error {
   flex: 1;
   min-height: 34px;
   padding: 5px 8px;
-  border: 1px solid #393c40;
+  border: 1px solid #283b76;
   border-radius: 8px;
-  background: #25272a;
+  background: #192852;
   color: #c0c3c7;
   cursor: pointer;
 }
 
 .advisor-radius.active {
-  border-color: #229cc5;
-  background: #16475a;
-  color: #f0fbff;
+  border-color: #1b60d7;
+  background: #1a3e7e;
+  color: #f0fdff;
 }
 
 .advisor-search-context {
@@ -1508,7 +1508,7 @@ ul.error {
 }
 
 .advisor-search-context > span:first-child {
-  color: #62c9ed;
+  color: #54e7fb;
   font-size: 16px;
   line-height: 1;
 }
@@ -1545,9 +1545,9 @@ ul.error {
   width: 34px;
   min-height: 34px;
   padding: 0;
-  border: 1px solid #383b3f;
+  border: 1px solid #273b75;
   border-radius: 9px;
-  background: #232528;
+  background: #18264e;
   color: #dfe2e4;
   font-size: 19px;
   cursor: pointer;
@@ -1564,9 +1564,9 @@ ul.error {
   display: grid;
   gap: 4px;
   padding: 10px;
-  border: 1px solid #34373a;
+  border: 1px solid #24366d;
   border-radius: 9px;
-  background: #202225;
+  background: #172349;
 }
 
 .advisor-market-snapshot span {
@@ -1595,9 +1595,9 @@ ul.error {
   gap: 9px;
   min-height: 55px;
   padding: 8px 9px;
-  border: 1px solid #303337;
+  border: 1px solid #223367;
   border-radius: 9px;
-  background: #1d1f22;
+  background: #152144;
   color: #eceef0;
   text-align: left;
   cursor: pointer;
@@ -1605,7 +1605,7 @@ ul.error {
 
 .advisor-place:hover,
 .advisor-place.selected {
-  border-color: #248fb4;
+  border-color: #1e5bc5;
   background: #202a2e;
 }
 
@@ -1616,8 +1616,8 @@ ul.error {
   flex: 0 0 27px;
   place-items: center;
   border-radius: 8px;
-  background: #292c30;
-  color: #8fcde1;
+  background: #1d2d5b;
+  color: #75ecfb;
   font-size: 10px;
   font-weight: 800;
 }
@@ -1646,7 +1646,7 @@ ul.error {
 
 .advisor-place-marker {
   margin-left: auto;
-  color: #69c6e5;
+  color: #53e7fb;
 }
 
 .advisor-empty,
@@ -1654,9 +1654,9 @@ ul.error {
 .advisor-loading {
   margin: 10px 0;
   padding: 13px;
-  border: 1px solid #35383c;
+  border: 1px solid #253770;
   border-radius: 10px;
-  background: #202225;
+  background: #172349;
   color: #c2c5c8;
   font-size: 12px;
   line-height: 1.45;
@@ -1668,7 +1668,7 @@ ul.error {
 }
 
 .advisor-empty > span {
-  color: #64c5e4;
+  color: #4ee6fa;
   font-size: 20px;
 }
 
@@ -1697,7 +1697,7 @@ ul.error {
 }
 
 .advisor-loading {
-  color: #b1dae7;
+  color: #9cf1fc;
 }
 
 .advisor-selected-place {
@@ -1705,9 +1705,9 @@ ul.error {
   gap: 5px;
   margin: 9px 0;
   padding: 11px;
-  border: 1px solid #1f7d9e;
+  border: 1px solid #1a50ad;
   border-radius: 10px;
-  background: #172b31;
+  background: #1f2e47;
   font-size: 12px;
 }
 
@@ -1727,20 +1727,20 @@ ul.error {
 
 .advisor-selected-place a,
 .selected-business-detail a {
-  color: #69c9e8;
+  color: #56e8fb;
   text-decoration: none;
 }
 
 .advisor-positioning {
   margin: 12px 0 8px;
   padding: 11px;
-  border-left: 2px solid #2da6cb;
+  border-left: 2px solid #2b6bda;
   background: #1c2326;
 }
 
 .advisor-positioning h3 {
   margin: 0 0 5px;
-  color: #e7f3f7;
+  color: #e0fbfe;
   font-size: 12px;
 }
 
@@ -1761,9 +1761,9 @@ ul.error {
   gap: 8px;
   margin: 12px 0;
   padding: 11px;
-  border: 1px solid #34383c;
+  border: 1px solid #24386f;
   border-radius: 10px;
-  background: #1d2023;
+  background: #152145;
 }
 
 .business-context-grid {
@@ -1790,7 +1790,7 @@ ul.error {
 
 .business-context-card p {
   margin: 0;
-  color: #b5dfe9;
+  color: #a1f2fd;
   font-size: 11px;
 }
 
@@ -1801,7 +1801,7 @@ ul.error {
 
 .simulation-certifications {
   margin-top: 6px;
-  color: #80cce4;
+  color: #69eafb;
   font-size: 11px;
 }
 
@@ -2417,13 +2417,6 @@ ul.error {
 .mapshell-map .maplibregl-ctrl-bottom-right .maplibregl-ctrl-attrib {
   order: 1;
   margin-top: auto;
-}
-
-/* 2D/3D toggle under the map compass (same navy button style as the zoom controls). */
-.maplibre-wrap .maplibregl-ctrl-group button.maplibregl-ctrl-pitch-toggle {
-  color: #fff;
-  font: 700 13px/1 'Poppins', Inter, system-ui, sans-serif;
-  letter-spacing: 0.02em;
 }
 
 /* Profile: account setup rows with Add buttons for anything skipped during setup. */
@@ -3191,6 +3184,459 @@ ul.error {
   font-weight: 400;
 }
 
+/* Main map controls sit below the map's own overlays when a screen has one (e.g. the competitor hint). */
+@media (max-width: 720px) {
+  .mapshell-map .maplibregl-ctrl-bottom-right {
+    top: 60px;
+  }
+
+  .mapshell-map:has(.map-overlay) .maplibregl-ctrl-bottom-right {
+    top: 160px;
+  }
+}
+
+/* Brand in the workspace: pin emblem in the rail, full logo in the panel heading. */
+.workspace-mark.tk-brand-mark {
+  border-color: transparent;
+  background: transparent;
+}
+
+.tk-emblem {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.workspace-heading .header {
+  align-items: center;
+  gap: 8px;
+}
+
+.mapshell button.chip.exit-demo {
+  min-height: 32px;
+  font-size: 12px;
+}
+
+/* ===== Landing brand skin on the workspace ===== */
+.mapshell {
+  --accent: #2f74f0;
+  font-family: 'Poppins', Inter, system-ui, sans-serif;
+}
+
+.mapshell-panel {
+  background:
+    linear-gradient(180deg, rgba(11, 25, 72, 0.9), rgba(9, 20, 58, 0.94)),
+    url('./assets/brand/bg-4.svg') center / cover;
+  backdrop-filter: blur(10px);
+}
+
+.workspace-rail {
+  background: linear-gradient(180deg, #0a1947 0%, #081133 100%);
+}
+
+.role-rail-button.active {
+  box-shadow: inset 3px 0 #3ee8ff, 0 0 12px rgba(62, 232, 255, 0.18);
+}
+
+.workspace-avatar.tk-eye-avatar {
+  background: rgba(59, 130, 255, 0.18);
+}
+
+/* Salary tags: square blue glass with the brand eye. Each pin gets its own shade of the landing palette. */
+.tanawkita-map-marker:has(.pay-pin) {
+  --hl: #3ee8ff;
+}
+
+.tanawkita-map-marker:has(.pay-pin):nth-of-type(8n + 1) { --hl: #ff8a3d; }
+.tanawkita-map-marker:has(.pay-pin):nth-of-type(8n + 2) { --hl: #ff4fa3; }
+.tanawkita-map-marker:has(.pay-pin):nth-of-type(8n + 3) { --hl: #3ee8ff; }
+.tanawkita-map-marker:has(.pay-pin):nth-of-type(8n + 4) { --hl: #ffc94a; }
+.tanawkita-map-marker:has(.pay-pin):nth-of-type(8n + 5) { --hl: #ffb27a; }
+.tanawkita-map-marker:has(.pay-pin):nth-of-type(8n + 6) { --hl: #ff8cc6; }
+.tanawkita-map-marker:has(.pay-pin):nth-of-type(8n + 7) { --hl: #8ff3ff; }
+.tanawkita-map-marker:has(.pay-pin):nth-of-type(8n + 8) { --hl: #ffe08f; }
+
+.tanawkita-map-marker:has(.pay-pin.selected) {
+  --hl: #ffc94a;
+}
+
+.mapshell .pay-pin,
+.mapshell .pay-pin.selected {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px 6px 8px;
+  border: 1px solid rgba(170, 205, 255, 0.45);
+  border-left: 3px solid var(--hl, #3ee8ff);
+  border-radius: 0;
+  background: linear-gradient(135deg, rgba(59, 130, 255, 0.62) 0%, rgba(16, 52, 150, 0.6) 100%);
+  backdrop-filter: blur(8px) saturate(140%);
+  -webkit-backdrop-filter: blur(8px) saturate(140%);
+  color: #fff;
+  font: 600 12px/1 'Poppins', system-ui, sans-serif;
+  letter-spacing: 0.01em;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.28);
+  transform: translate(-50%, calc(-100% - 14px));
+}
+
+.mapshell .pay-pin:hover {
+  transform: translate(-50%, calc(-100% - 14px)) scale(1.08);
+}
+
+.mapshell .pay-pin.selected {
+  border-color: rgba(255, 201, 74, 0.85);
+  background: linear-gradient(135deg, rgba(59, 130, 255, 0.85) 0%, rgba(20, 64, 180, 0.82) 100%);
+  transform: translate(-50%, calc(-100% - 14px)) scale(1.15);
+}
+
+/* The brand eye beside the salary (three layers of the Figma eye asset). */
+.mapshell .pay-pin::before {
+  content: '';
+  flex: 0 0 20px;
+  height: 11px;
+  background:
+    url('./assets/brand/icon-eye-star.png') 5.8px 1.3px / 8.4px 8.4px no-repeat,
+    url('./assets/brand/icon-eye-pupil.svg') 4.5px 0 / 11px 11px no-repeat,
+    url('./assets/brand/icon-eye-white.svg') 0 0 / 20px 11px no-repeat;
+}
+
+/* Leader line from the tag down to the highlighted spot. */
+.mapshell .pay-pin::after,
+.mapshell .pay-pin.selected::after {
+  left: 50%;
+  bottom: -15px;
+  width: 1px;
+  height: 14px;
+  border: 0;
+  background: var(--hl, #3ee8ff);
+  box-shadow: 0 0 6px var(--hl, #3ee8ff);
+  transform: translateX(-50%);
+}
+
+/* Extra roles at the same business stack above the first tag; only the bottom tag points at the ground. */
+.mapshell .tanawkita-map-marker.stacked .pay-pin::after {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mapshell .pay-pin {
+    transition: none;
+  }
+}
+
+/* ===== Flat panel: no rounded boxes; items are separated by light blue lines ===== */
+.mapshell {
+  --line: rgba(120, 190, 255, 0.28);
+  --hover: rgba(120, 190, 255, 0.08);
+}
+
+.mapshell-panel .card,
+.mapshell-panel .advisor-place,
+.mapshell-panel .advisor-filter-card,
+.mapshell-panel .advisor-market-snapshot > div,
+.mapshell-panel .advisor-selected-place,
+.mapshell-panel .advisor-loading,
+.mapshell-panel .business-context-card,
+.workspace-detail .selected-job-metrics > div {
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  transition: background-color 120ms ease;
+}
+
+.mapshell-panel .card:hover,
+.mapshell-panel .advisor-place:hover,
+.mapshell-panel .advisor-market-snapshot > div:hover,
+.mapshell-panel .business-context-card:hover,
+.workspace-detail .selected-job-metrics > div:hover {
+  border-color: var(--line);
+  background: var(--hover);
+  box-shadow: none;
+}
+
+/* Selected rows keep a clear marker without a box. */
+.mapshell-panel .job-card.selected,
+.mapshell-panel .advisor-place.selected,
+.mapshell-panel .advisor-selected-place {
+  background: rgba(62, 232, 255, 0.1);
+  box-shadow: inset 3px 0 #3ee8ff;
+}
+
+/* Verification status stays visible as a colored edge (business rule display, not decoration). */
+.mapshell-panel .status-card {
+  border-left: 4px solid var(--muted);
+}
+
+.mapshell-panel .status-card.verified {
+  border-left-color: var(--ok);
+}
+
+.mapshell-panel .status-card.pending {
+  border-left-color: #f9ab00;
+}
+
+.mapshell-panel .status-card.rejected,
+.mapshell-panel .status-card.none {
+  border-left-color: var(--error);
+}
+
+/* Square corners on the remaining controls and floating panels. */
+.workspace-avatar,
+.role-rail-button,
+.rail-toggle,
+.role-tooltip,
+.map-action-button,
+.mapshell .map-hint,
+.dev-role-menu,
+.dev-role-menu button,
+.workspace-detail,
+.workspace-detail-controls button,
+.mapshell .tabs,
+.mapshell button.tab,
+.advisor-tabs button,
+.advisor-radius,
+.advisor-refresh,
+.advisor-place-number,
+.advisor-error button {
+  border-radius: 0;
+}
+
+.mapshell-panel .workspace-heading {
+  border-bottom-color: var(--line);
+}
+
+
+/* ===== Selected business card (lower detail panel): tabs, heading chips, photo / hours / stats ===== */
+.competitor-detail {
+  display: grid;
+  gap: 12px;
+  padding-right: 140px;
+}
+
+.cd-tabs {
+  display: flex;
+  gap: 22px;
+  margin: -6px 0 0;
+  border-bottom: 1px solid var(--line, rgba(120, 190, 255, 0.28));
+}
+
+.cd-tabs button {
+  min-height: 36px;
+  padding: 0 2px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: none;
+  color: #8f9bb3;
+  font: 500 14px/1 'Poppins', system-ui, sans-serif;
+  cursor: pointer;
+}
+
+.cd-tabs button.active {
+  border-bottom-color: #f4f5f6;
+  color: #f4f5f6;
+}
+
+.cd-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 10px;
+}
+
+.workspace-detail .cd-heading h2 {
+  margin: 0;
+  font: 600 1.25rem/1.2 ui-monospace, 'SFMono-Regular', Consolas, monospace;
+  letter-spacing: 0.01em;
+}
+
+.cd-chip {
+  padding: 3px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.06);
+  color: #d7deea;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.cd-chip-category {
+  border-color: color-mix(in srgb, var(--cat) 60%, transparent);
+  background: color-mix(in srgb, var(--cat) 18%, transparent);
+  color: var(--cat);
+}
+
+.cd-chip-verified {
+  border-color: rgba(63, 185, 80, 0.6);
+  background: rgba(63, 185, 80, 0.16);
+  color: #6fdc7f;
+}
+
+.cd-chip-pending {
+  border-color: rgba(249, 171, 0, 0.6);
+  background: rgba(249, 171, 0, 0.14);
+  color: #ffc94a;
+}
+
+.cd-chip-rejected,
+.cd-chip-none {
+  border-color: rgba(255, 107, 97, 0.55);
+  background: rgba(255, 107, 97, 0.12);
+  color: #ff8a80;
+}
+
+.cd-grid {
+  display: grid;
+  grid-template-columns: minmax(200px, 1.1fr) minmax(200px, 1.3fr) minmax(160px, 0.9fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.cd-photo-block {
+  display: grid;
+  gap: 8px;
+}
+
+.cd-photo {
+  height: 96px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 2px;
+  border: 1px dashed color-mix(in srgb, var(--cat) 50%, transparent);
+  background:
+    repeating-linear-gradient(135deg, color-mix(in srgb, var(--cat) 14%, transparent) 0 6px, transparent 6px 12px),
+    rgba(0, 0, 0, 0.25);
+}
+
+.cd-photo span {
+  font-size: 38px;
+  line-height: 1;
+}
+
+.cd-photo small,
+.cd-identity span,
+.cd-years span,
+.cd-hours-top span,
+.cd-stats span {
+  color: #8f9bb3;
+  font-size: 12px;
+}
+
+.cd-identity {
+  display: grid;
+  gap: 2px;
+}
+
+.cd-identity strong {
+  color: #f4f5f6;
+  text-transform: capitalize;
+}
+
+.cd-middle {
+  display: grid;
+  gap: 14px;
+}
+
+.cd-years {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.cd-years strong {
+  color: var(--cat);
+  font: 600 1.1rem/1 'Poppins', system-ui, sans-serif;
+}
+
+.cd-hours {
+  display: grid;
+  gap: 6px;
+}
+
+.cd-hours-top,
+.cd-hours-ends {
+  display: flex;
+  justify-content: space-between;
+}
+
+.cd-hours-ends span {
+  color: #c4ccda;
+  font: 12px/1 ui-monospace, Consolas, monospace;
+}
+
+.cd-open {
+  color: #6fdc7f;
+  font-size: 12px;
+}
+
+.cd-closed {
+  color: #ff8a80;
+  font-size: 12px;
+}
+
+.cd-hours-track {
+  position: relative;
+  height: 6px;
+  background: repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.16) 0 calc(100% / 24 - 2px), transparent calc(100% / 24 - 2px) calc(100% / 24));
+}
+
+.cd-hours-fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: #f4f5f6;
+}
+
+.cd-hours-now {
+  position: absolute;
+  top: -4px;
+  width: 4px;
+  height: 14px;
+  margin-left: -2px;
+  background: #ffc94a;
+  box-shadow: 0 0 8px #ffc94a;
+}
+
+.cd-stats {
+  display: grid;
+  gap: 8px;
+}
+
+.cd-stats > div {
+  display: grid;
+  gap: 4px;
+  padding: 9px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.cd-stats strong {
+  color: #f4f5f6;
+}
+
+.cd-stats-row {
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  max-width: 420px;
+}
+
+.cd-hiring {
+  display: grid;
+  gap: 10px;
+}
+
+@media (max-width: 900px) {
+  .competitor-detail {
+    padding-right: 0;
+    padding-top: 28px;
+  }
+
+  .cd-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* Map salary tags: the brand eye, a light-blue divider, then the pay; a light-blue outline keeps
    overlapping pins apart. Pure CSS, so the shared map component is unchanged. */
 .mapshell .pay-pin {
@@ -3222,13 +3668,31 @@ ul.error {
   border-right-color: rgba(28, 32, 35, 0.45);
 }
 
-/* Main map controls sit below the map's own overlays when a screen has one (e.g. the competitor hint). */
+/* Main map: their 2D/3D switch sits under the zoom buttons (and under the compass, which only shows in 3D). */
+.mapshell-map .map-dimension-toggle {
+  top: 160px;
+  right: 10px;
+  bottom: auto;
+}
+
+.mapshell-map .maplibre-wrap:has(.map-dimension-toggle.is-3d) .map-dimension-toggle {
+  top: 210px;
+}
+
 @media (max-width: 720px) {
-  .mapshell-map .maplibregl-ctrl-bottom-right {
-    top: 60px;
+  .mapshell-map .map-dimension-toggle {
+    top: 156px;
   }
 
-  .mapshell-map:has(.map-overlay) .maplibregl-ctrl-bottom-right {
-    top: 160px;
+  .mapshell-map .maplibre-wrap:has(.map-dimension-toggle.is-3d) .map-dimension-toggle {
+    top: 206px;
+  }
+
+  .mapshell-map:has(.map-overlay) .map-dimension-toggle {
+    top: 256px;
+  }
+
+  .mapshell-map:has(.map-overlay) .maplibre-wrap:has(.map-dimension-toggle.is-3d) .map-dimension-toggle {
+    top: 306px;
   }
 }

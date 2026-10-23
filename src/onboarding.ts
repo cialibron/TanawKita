@@ -1,7 +1,7 @@
 // PROTOTYPE account setup shown after sign-in. Like employer verification, files never leave the browser:
 // only each file's name and size are kept, so nothing sensitive (ID photos, resumes) is stored or sent anywhere.
 import { useSyncExternalStore } from 'react'
-import { loadSession } from './auth'
+import { loadSession } from './pages/demoAuth'
 import type { Role } from './types'
 import { ID_TYPES } from './verification'
 

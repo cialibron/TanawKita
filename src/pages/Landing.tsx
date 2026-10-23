@@ -11,7 +11,8 @@ import {
 } from '../components/LandingIcons'
 import EyeIcon from '../components/EyeIcon'
 import LandingMap from '../components/LandingMap'
-import { PLACES, PlacesCaption, PlacesSlides, useSlide } from '../components/PlacesSlideshow'
+import { PlacesCaption, PlacesSlides } from '../components/PlacesSlideshow'
+import { PLACES, useSlide } from '../components/places'
 import background from '../assets/brand/bg-4.svg'
 import {
   emailError,
@@ -22,7 +23,7 @@ import {
   signIn,
   signInWith,
   type SignedInUser,
-} from '../auth'
+} from './demoAuth'
 import type { Role } from '../types'
 import '../landing.css'
 
@@ -47,13 +48,13 @@ const FEATURES = [
     Icon: ShieldCheckIcon,
     tone: 'violet',
     title: 'Verified employers',
-    text: 'Every employer shows a DTI, SEC or CDA record and a current Mayor’s permit.',
+    text: 'Verified employers show a DTI, SEC or CDA record and a current Mayor’s permit.',
   },
   {
     Icon: PesoShieldIcon,
     tone: 'gold',
     title: 'Fair pay check',
-    text: 'Posts below the daily minimum are blocked before anyone sees them.',
+    text: 'Job posts below the minimum daily pay are blocked before anyone sees them.',
   },
 ]
 
@@ -216,17 +217,20 @@ export default function Landing({ onEnter, onExplore }: Props) {
 
           <section className="landing-card" aria-labelledby="auth-title">
             <h2 id="auth-title">{title}</h2>
+            <p className="demo-banner" role="note">
+              <strong>Demo only.</strong> There are no real accounts yet: nothing is sent, saved on a server, or checked.
+            </p>
 
             {mode !== 'forgot' && (
               <>
                 <div className="sso">
                   <button type="button" className="sso-button" disabled={busy} onClick={() => sso('google')}>
                     {loading === 'google' ? <span className="spinner" /> : <GoogleIcon />}
-                    {loading === 'google' ? 'Signing in (demo)…' : 'Continue with Google (demo)'}
+                    {loading === 'google' ? 'Opening demo…' : 'Google (demo only)'}
                   </button>
                   <button type="button" className="sso-button" disabled={busy} onClick={() => sso('facebook')}>
                     {loading === 'facebook' ? <span className="spinner" /> : <FacebookIcon />}
-                    {loading === 'facebook' ? 'Signing in (demo)…' : 'Continue with Facebook (demo)'}
+                    {loading === 'facebook' ? 'Opening demo…' : 'Facebook (demo only)'}
                   </button>
                 </div>
                 <div className="divider">
@@ -418,7 +422,7 @@ export default function Landing({ onEnter, onExplore }: Props) {
               )}
             </p>
             <p className="card-hint">
-              Prototype: any email with a password of {MIN_PASSWORD}+ characters signs in.{' '}
+              Demo sign-in: any email with a password of {MIN_PASSWORD}+ characters opens the app.{' '}
               <button type="button" className="landing-link small" onClick={onExplore}>
                 Explore without an account
               </button>
@@ -426,14 +430,14 @@ export default function Landing({ onEnter, onExplore }: Props) {
           </section>
         </main>
         <PlacesCaption index={slide} />
+        <p className="landing-disclosure">
+          Sample businesses and jobseekers in this demo are synthetic. Map pins are approximate, not real storefronts or
+          homes.
+        </p>
         <p className="landing-map-credit">
-          Map:{' '}
+          Map ©{' '}
           <a href="https://openfreemap.org" target="_blank" rel="noreferrer">
             OpenFreeMap
-          </a>{' '}
-          ©{' '}
-          <a href="https://www.openmaptiles.org/" target="_blank" rel="noreferrer">
-            OpenMapTiles
           </a>{' '}
           ©{' '}
           <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">

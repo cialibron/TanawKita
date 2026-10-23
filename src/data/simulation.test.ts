@@ -4,10 +4,10 @@ import { seedState } from './seed'
 
 describe('CSV-backed synthetic simulation data', () => {
   it('loads the separate businesses and jobseeker sheets into the demo seed', () => {
-    expect(syntheticBusinesses).toHaveLength(300)
-    expect(syntheticJobseekers).toHaveLength(300)
-    expect(new Set(syntheticBusinesses.map((business) => business.id)).size).toBe(300)
-    expect(new Set(syntheticJobseekers.map((person) => person.userId)).size).toBe(300)
+    expect(syntheticBusinesses).toHaveLength(5)
+    expect(syntheticJobseekers).toHaveLength(2)
+    expect(new Set(syntheticBusinesses.map((business) => business.id)).size).toBe(5)
+    expect(new Set(syntheticJobseekers.map((person) => person.userId)).size).toBe(2)
   })
 
   it('adds the CSV records alongside the existing seed records', () => {
@@ -18,9 +18,9 @@ describe('CSV-backed synthetic simulation data', () => {
 
   it('creates diverse jobs and keeps richer jobseeker context', () => {
     const jobs = syntheticBusinesses.flatMap((business) => business.jobs)
-    expect(jobs.length).toBeGreaterThan(50)
+    // One job offer per business.
+    expect(jobs.length).toBe(5)
     expect(new Set(jobs.map((job) => job.jobType)).size).toBeGreaterThan(1)
-    expect(syntheticJobseekers.some((person) => person.certifications?.length)).toBe(true)
-    expect(syntheticJobseekers.some((person) => person.preferredRoles?.length)).toBe(true)
+        expect(syntheticJobseekers.some((person) => person.preferredRoles?.length)).toBe(true)
   })
 })
