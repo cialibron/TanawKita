@@ -2,8 +2,9 @@ import type { AppState, Application, ApplicationStatus, Business } from '../type
 import type { Verification } from '../verification'
 import { syntheticBusinesses, syntheticJobseekers } from './simulation'
 
-// Demo records for local testing only, all read from simulation-data/. Five fictional businesses
-// (Mandug, Buhangin, Puan, Roxas Ave, Matina) and two fictional jobseekers (Viola Co, Ana Reyes).
+// Demo records for local testing only, all read from simulation-data/. 60 fictional businesses and two
+// selectable fictional jobseekers (Viola Co, Ana Reyes). The sheet's other jobseeker profiles are background
+// data for the employer side (see systemJobseekers in src/area.ts) and are not demo accounts.
 // Map pins are approximate simulation points, not real addresses.
 const businesses: Record<string, Business> = {}
 const verifications: Record<string, Verification> = {}
@@ -14,11 +15,13 @@ for (const e of syntheticBusinesses) {
 const jobs = syntheticBusinesses.flatMap((e) => e.jobs)
 const cards = syntheticJobseekers
 
-// Each jobseeker has applied to the jobs that match their skills and age, with a mix of statuses.
+// Each jobseeker has applied to up to APPLICATIONS_EACH jobs that match their skills and age, with a mix of statuses.
+const APPLICATIONS_EACH = 6
 const STATUSES: ApplicationStatus[] = ['applied', 'shortlisted', 'applied', 'hired']
 const applications: Application[] = cards.flatMap((card) =>
   jobs
     .filter((job) => card.skills.some((skill) => job.skills.includes(skill)) && (card.age >= 18 || job.minorsAllowed))
+    .slice(0, APPLICATIONS_EACH)
     .map((job, k) => ({
       id: `app-${job.id}-${card.userId}`,
       jobId: job.id,

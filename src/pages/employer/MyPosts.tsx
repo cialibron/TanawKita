@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { barangayName } from '../../data/barangays'
 import { useSession, useStore } from '../../store'
 import { DAYS } from '../../rules'
+import { chosenSkills } from '../../components/skillCatalog'
 import type { JobPost, JobStatus } from '../../types'
 
 const JOB_STATUSES: JobStatus[] = ['open', 'paused', 'filled']
@@ -63,7 +64,7 @@ export default function MyPosts() {
                         {card.age >= 18 ? '18 and over' : 'Under 18'} · {barangayName(card.barangay)} · {card.hoursWanted} hrs/week
                       </div>
                       <div className="muted">
-                        Skills: {card.skills.join(', ')}
+                        Skills: {chosenSkills(card.skills).join(', ')}
                       </div>
                       <div className="muted">
                         Available: {DAYS.filter((d) => card.daysAvailable.includes(d)).join(', ')}

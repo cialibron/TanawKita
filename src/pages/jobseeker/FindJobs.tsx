@@ -9,6 +9,7 @@ import { employerPlaces, type CompetitorPlace } from '../../businessDirectory'
 import { blockedReason, distanceKm, matchScore } from '../../rules'
 import type { JobPost, JobType, View } from '../../types'
 import { VerificationBadge } from '../employer/Verify'
+import { chosenSkills } from '../../components/skillCatalog'
 
 function payLabel(job: JobPost): string {
   const unit = job.payUnit === 'task' ? 'task (pakyaw)' : job.payUnit
@@ -265,7 +266,7 @@ export default function FindJobs({ view, onViewChange, navigation, activeNavigat
       <div className="selected-job-footer">
         <div>
           <div className="detail-kicker">SKILLS</div>
-          <div className="skill-tags">{selectedEntry.job.skills.map((skill) => <span className="tag" key={skill}>{skill}</span>)}</div>
+          <div className="skill-tags">{chosenSkills(selectedEntry.job.skills).map((skill) => <span className="tag" key={skill}>{skill}</span>)}</div>
           {selectedEntry.match && <p className="muted">{selectedEntry.match.percent}% match · {selectedEntry.match.reasons.join(' · ') || 'No strong matches yet'}</p>}
           <VerificationBadge employerId={selectedEntry.job.employerId} />
         </div>

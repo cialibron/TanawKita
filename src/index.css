@@ -603,6 +603,7 @@ h3 {
 }
 
 
+
 /* Verification */
 .badge.verified {
   display: inline-block;
@@ -959,7 +960,7 @@ ul.error {
 }
 
 /* Detail-panel controls and MapLibre's map controls are excluded: they have their own navy styles below. */
-.mapshell button:not(.tab):not(.chip):not(.rail-toggle):not(.role-rail-button):not(.map-action-button):not(.detail-close):not(.detail-expand-button):not(.detail-collapse-button):not([class*='maplibregl-ctrl']) {
+.mapshell button:not(.tab):not(.chip):not(.rail-toggle):not(.role-rail-button):not(.map-action-button):not(.detail-close):not(.detail-expand-button):not(.detail-collapse-button):not([class*='maplibregl-ctrl']):not([class*='dash-']):not([class*='skill-picker']) {
   border-color: #293c78;
   background: #192852;
   color: #e8e9eb;
@@ -3695,4 +3696,903 @@ ul.error {
   .mapshell-map:has(.map-overlay) .maplibre-wrap:has(.map-dimension-toggle.is-3d) .map-dimension-toggle {
     top: 306px;
   }
+}
+
+/* ===== Full-screen menu: the rail widens to labeled buttons and the panel covers the map ===== */
+.rail-label {
+  display: none;
+}
+
+.workspace-rail.expanded {
+  flex-basis: 232px;
+  width: 232px;
+  align-items: stretch;
+  padding: 14px 12px;
+}
+
+.workspace-rail.expanded .workspace-mark,
+.workspace-rail.expanded .workspace-avatar {
+  align-self: flex-start;
+  margin-left: 4px;
+}
+
+.workspace-rail.expanded .rail-toggle,
+.workspace-rail.expanded .role-rail-button {
+  display: flex;
+  width: 100%;
+  min-height: 44px;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+  padding: 0 12px;
+  border-radius: 12px;
+  font-size: 18px;
+}
+
+.workspace-rail.expanded .rail-label {
+  display: inline;
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.mapshell.panel-fullscreen .mapshell-panel {
+  left: 232px;
+  width: calc(100vw - 232px);
+  max-width: none;
+}
+
+.mapshell.panel-fullscreen .mapshell-panel .panel-body {
+  width: 100%;
+  max-width: none;
+}
+
+/* Phones keep the icon rail; the panel takes the rest of the width. */
+@media (max-width: 720px) {
+  .workspace-rail.expanded {
+    flex-basis: 50px;
+    width: 50px;
+    align-items: center;
+    padding: 12px 0;
+  }
+
+  .workspace-rail.expanded .rail-label {
+    display: none;
+  }
+
+  .workspace-rail.expanded .rail-toggle,
+  .workspace-rail.expanded .role-rail-button {
+    width: 38px;
+    justify-content: center;
+    padding: 0;
+  }
+
+  .mapshell.panel-fullscreen .mapshell-panel {
+    left: 50px;
+    width: calc(100vw - 50px);
+  }
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* ===== Employer dashboards: light canvas inside the navy workspace, brand blue / cyan / gold accents ===== */
+.mapshell .dash {
+  --dash-ink: #161c2b;
+  --dash-gray: #626b7f;
+  --dash-blue: #2f74f0;
+  --dash-navy: #0a1947;
+  container-type: inline-size;
+  min-height: 100%;
+  margin: 0 -16px -24px;
+  padding: 22px 16px 32px;
+  border-radius: 22px 22px 0 0;
+  background: #f4f5f8;
+  color: var(--dash-ink);
+  font-family: 'Poppins', Inter, system-ui, sans-serif;
+}
+
+.mapshell .dash h1 {
+  margin: 2px 0 4px;
+  color: var(--dash-ink);
+  font-size: 1.45rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+
+.mapshell .dash h2 {
+  margin: 0;
+  color: var(--dash-ink);
+  font-size: 1rem;
+  font-weight: 650;
+}
+
+.mapshell .dash .muted,
+.dash-sub,
+.dash-note {
+  color: var(--dash-gray);
+}
+
+.dash-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.dash-eyebrow {
+  margin: 0;
+  color: var(--dash-blue);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.dash-sub {
+  margin: 0;
+  font-size: 13px;
+}
+
+.dash-note {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+/* Pill buttons */
+.mapshell button.dash-pill {
+  display: inline-flex;
+  min-height: 42px;
+  align-items: center;
+  gap: 8px;
+  padding: 0 18px;
+  border: 1px solid #dde1ea;
+  border-radius: 999px;
+  background: #fff;
+  color: var(--dash-ink);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 120ms ease, box-shadow 120ms ease;
+}
+
+.mapshell button.dash-pill:hover {
+  box-shadow: 0 4px 12px rgba(16, 24, 40, 0.08);
+}
+
+.mapshell button.dash-pill.primary {
+  border-color: var(--dash-blue);
+  background: var(--dash-blue);
+  color: #fff;
+}
+
+.mapshell button.dash-pill.active {
+  border-color: var(--dash-navy);
+  background: var(--dash-navy);
+  color: #fff;
+}
+
+.mapshell button.dash-pill:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* Capsule tabs */
+.dash-capsules {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  padding: 4px;
+  border-radius: 22px;
+  background: #e9ecf3;
+}
+
+.mapshell button.dash-capsule {
+  min-height: 36px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: #4c5468;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.mapshell button.dash-capsule.active {
+  background: #fff;
+  color: var(--dash-ink);
+  box-shadow: 0 1px 3px rgba(16, 24, 40, 0.12);
+}
+
+/* Circular icon badges, chips, tags */
+.dash-badge {
+  display: inline-grid;
+  flex: none;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border-radius: 50%;
+  background: #eef1f7;
+  color: var(--dash-ink);
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.dash-badge.small {
+  width: 32px;
+  height: 32px;
+  font-size: 14px;
+}
+
+.dash-badge.blue { background: rgba(47, 116, 240, 0.12); color: #1d4fb8; }
+.dash-badge.cyan { background: rgba(62, 232, 255, 0.22); color: #07707f; }
+.dash-badge.gold { background: rgba(255, 201, 74, 0.28); color: #7d5200; }
+.dash-badge.orange { background: rgba(255, 138, 61, 0.2); color: #a3420a; }
+
+.dash-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.dash-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 11px;
+  border-radius: 999px;
+  background: #eff1f6;
+  color: #3a4256;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.dash-chip.strong {
+  background: rgba(47, 116, 240, 0.12);
+  color: #1d4fb8;
+  font-weight: 600;
+}
+
+.dash-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: rgba(47, 116, 240, 0.1);
+  color: #1d4fb8;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.dash-tag.online,
+.dash-tag.ok { background: rgba(87, 184, 121, 0.16); color: #1c6b3d; }
+.dash-tag.warn { background: rgba(255, 201, 74, 0.3); color: #6e4800; }
+
+/* ----- Overview: bento grid ----- */
+.bento {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.bento-card {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid rgba(16, 24, 40, 0.04);
+  border-radius: 22px;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 10px 30px rgba(16, 24, 40, 0.06);
+}
+
+.span-all,
+.bento-hero,
+.bento-radius {
+  grid-column: 1 / -1;
+}
+
+.bento-hero {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.bento-hero-body {
+  display: grid;
+  gap: 8px;
+}
+
+.bento-hiring {
+  margin: 0;
+  color: var(--dash-ink);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.bento-radius {
+  gap: 12px;
+}
+
+.bento-stat strong {
+  color: var(--dash-ink);
+  font-size: 1.6rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+}
+
+.bento-stat > span:last-child {
+  color: var(--dash-gray);
+  font-size: 12.5px;
+  line-height: 1.35;
+}
+
+.bento-cta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-color: transparent;
+  background: linear-gradient(120deg, #0a1947, #12307f);
+}
+
+.bento-cta p {
+  margin: 0;
+  color: #dbe4ff;
+  font-size: 14px;
+}
+
+.bento-card-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.bento-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.bento-filters label {
+  display: grid;
+  flex: 1 1 160px;
+  gap: 4px;
+  color: var(--dash-gray);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.mapshell .dash select {
+  min-height: 42px;
+  padding: 0 14px;
+  border: 1px solid #dde1ea;
+  border-radius: 999px;
+  background: #fff;
+  color: var(--dash-ink);
+  font: inherit;
+  font-size: 14px;
+}
+
+.bento-profiles {
+  display: grid;
+  gap: 10px;
+}
+
+.bento-profile {
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+  border: 1px solid #edf0f5;
+  border-radius: 16px;
+  background: #fbfcfe;
+}
+
+.bento-profile-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.bento-profile-head strong {
+  flex: 1;
+  color: var(--dash-ink);
+}
+
+.bento-profile-summary {
+  margin: 0;
+  color: #3a4256;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.bento-profile-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+@container (min-width: 700px) {
+  .bento {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  .bento-hero,
+  .bento-radius {
+    grid-column: span 2;
+  }
+
+  .bento-profiles {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  }
+}
+
+/* ----- People looking for work: frosted glass cards on a soft light canvas ----- */
+.mapshell .dash-glass {
+  background:
+    radial-gradient(circle at 12% 0%, rgba(62, 232, 255, 0.22), transparent 42%),
+    radial-gradient(circle at 92% 18%, rgba(47, 116, 240, 0.16), transparent 46%),
+    radial-gradient(circle at 60% 100%, rgba(255, 201, 74, 0.14), transparent 50%),
+    #f3f5fa;
+}
+
+.dash-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.dash-metric {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px 8px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.66);
+  backdrop-filter: blur(14px) saturate(140%);
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 6px 18px rgba(16, 24, 40, 0.06);
+}
+
+.dash-metric::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--dot, var(--dash-blue));
+}
+
+.dash-metric.cyan { --dot: #18c3dc; }
+.dash-metric.gold { --dot: #f0b429; }
+.dash-metric.orange { --dot: #ff8a3d; }
+
+.dash-metric strong {
+  color: var(--dash-ink);
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+}
+
+.dash-metric span {
+  color: var(--dash-gray);
+  font-size: 12px;
+}
+
+.dash-grid {
+  display: grid;
+  gap: 14px;
+}
+
+.glass-card {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.62);
+  backdrop-filter: blur(16px) saturate(140%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 1px 2px rgba(16, 24, 40, 0.04),
+    0 8px 24px rgba(16, 24, 40, 0.06),
+    0 24px 48px rgba(16, 24, 40, 0.05);
+}
+
+.glass-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.dash-big {
+  margin: 0;
+  color: var(--dash-ink);
+  font-size: 2rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.dash-big span {
+  color: var(--dash-gray);
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.dash-glass .dash-capsules {
+  background: rgba(22, 28, 43, 0.06);
+}
+
+@container (min-width: 760px) {
+  .dash-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+  }
+
+  .dash-grid .span-wide {
+    grid-column: span 2;
+  }
+}
+
+/* Reach chart: one series, brand blue area on the light surface */
+.reach-chart {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+}
+
+.reach-plot {
+  position: relative;
+  height: 180px;
+}
+
+.reach-plot svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  cursor: crosshair;
+}
+
+.reach-line {
+  fill: none;
+  stroke: #2f74f0;
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
+
+.reach-grid {
+  stroke: rgba(22, 28, 43, 0.08);
+  stroke-width: 1;
+}
+
+.reach-cross {
+  stroke: rgba(22, 28, 43, 0.35);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+}
+
+.reach-y {
+  position: absolute;
+  top: -2px;
+  left: 0;
+  color: var(--dash-gray);
+  font-size: 11px;
+  pointer-events: none;
+}
+
+.reach-dot {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  background: #2f74f0;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.reach-tip {
+  position: absolute;
+  top: 8px;
+  display: grid;
+  gap: 2px;
+  padding: 8px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 6px 18px rgba(16, 24, 40, 0.12);
+  transform: translateX(10px);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.reach-tip.left {
+  transform: translateX(calc(-100% - 10px));
+}
+
+.reach-tip strong {
+  color: var(--dash-ink);
+  font-size: 14px;
+}
+
+.reach-tip span {
+  color: var(--dash-gray);
+  font-size: 11.5px;
+}
+
+.reach-x {
+  display: flex;
+  justify-content: space-between;
+  color: var(--dash-gray);
+  font-size: 11px;
+}
+
+/* Ranked barangay rows */
+.barangay-ranking {
+  display: grid;
+  gap: 10px;
+}
+
+.ranking-list {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.mapshell button.dash-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 6px 12px;
+  width: 100%;
+  min-height: 48px;
+  padding: 10px 12px;
+  border: 1px solid rgba(22, 28, 43, 0.06);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.72);
+  color: var(--dash-ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.mapshell button.dash-row:hover {
+  border-color: rgba(47, 116, 240, 0.4);
+}
+
+.mapshell button.dash-row.active {
+  border-color: #2f74f0;
+  background: rgba(47, 116, 240, 0.08);
+}
+
+.ranking-name {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.ranking-value {
+  font-size: 14px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.ranking-bar {
+  grid-column: 1 / -1;
+  height: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(22, 28, 43, 0.07);
+}
+
+.ranking-bar > span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #2f74f0, #3ee8ff);
+}
+
+.mapshell button.dash-link {
+  justify-self: start;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #1d4fb8;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.reach-hint {
+  margin: 10px 0 0;
+  font-size: 0.9rem;
+}
+
+/* Selected barangay shown inline when the menu is full screen */
+.dash-selected .selected-business-detail {
+  padding: 0;
+}
+
+.dash-selected .detail-kicker {
+  color: #1d4fb8;
+}
+
+.dash-selected .selected-job-metrics {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.dash-selected .selected-job-metrics > div {
+  border-color: rgba(22, 28, 43, 0.06);
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.dash-selected .selected-job-metrics span {
+  color: var(--dash-gray);
+}
+
+.dash-selected .selected-job-metrics strong,
+.dash-selected .reach-hint {
+  color: var(--dash-ink);
+}
+
+/* Employer map: wrapper only; the business callout replaces the plain business pin. */
+.area-map {
+  display: contents;
+}
+
+.area-map.has-callout .biz-pin {
+  display: none;
+}
+
+/* Type-to-add skill picker (skill card, post a job, employer filter). Inherits each page's colors. */
+.skill-picker {
+  display: grid;
+  gap: 8px;
+  margin: 8px 0 12px;
+}
+
+.skill-picker > label {
+  font-weight: 600;
+}
+
+.skill-picker input {
+  width: 100%;
+  min-height: 44px;
+  box-sizing: border-box;
+}
+
+.skill-picker-chosen {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.skill-picker-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 4px 4px 12px;
+  border: 1px solid rgba(47, 116, 240, 0.45);
+  border-radius: 999px;
+  background: rgba(47, 116, 240, 0.16);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.skill-picker-chip.custom {
+  border-style: dashed;
+  background: transparent;
+}
+
+.skill-picker-chip small {
+  opacity: 0.7;
+  font-size: 11px;
+}
+
+button.skill-picker-remove {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  min-height: 30px;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: inherit;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+button.skill-picker-remove:hover {
+  background: rgba(127, 140, 170, 0.22);
+}
+
+.skill-picker-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+button.skill-picker-option {
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid rgba(127, 140, 170, 0.45);
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 13.5px;
+  cursor: pointer;
+}
+
+button.skill-picker-option:hover,
+button.skill-picker-option:focus-visible {
+  border-color: #2f74f0;
+  background: rgba(47, 116, 240, 0.12);
+}
+
+button.skill-picker-option.custom {
+  border-style: dashed;
+}
+
+.skill-picker-hint {
+  margin: 0;
+  opacity: 0.75;
+  font-size: 12.5px;
+}
+
+.bento-skill-filter {
+  flex: 1 1 100%;
+}
+
+.mapshell .dash .skill-picker input {
+  padding: 0 16px;
+  border: 1px solid #dde1ea;
+  border-radius: 999px;
+  background: #fff;
+  color: var(--dash-ink);
+  font: inherit;
+  font-size: 14px;
+}
+
+.mapshell .dash .skill-picker > label {
+  color: var(--dash-gray);
+  font-size: 12px;
+  font-weight: 500;
 }

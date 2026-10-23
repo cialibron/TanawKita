@@ -16,13 +16,11 @@ import MyPosts from './pages/employer/MyPosts'
 import Overview from './pages/admin/Overview'
 import Verifications from './pages/admin/Verifications'
 import MyBusiness from './pages/employer/MyBusiness'
-import MarketResearch from './pages/employer/MarketResearch'
 import Verify from './pages/employer/Verify'
 import type { Role, View } from './types'
-import type { CompetitorPlace, CompetitorSearchMode } from './businessDirectory'
 
 type JobseekerSection = 'jobs' | 'applications' | 'skillcard'
-type EmployerSection = 'area' | 'franchise' | 'competitors' | 'post' | 'posts' | 'verify'
+type EmployerSection = 'area' | 'people' | 'post' | 'posts' | 'verify'
 type AdminSection = 'overview' | 'verifications'
 
 const JOBSEEKER_NAV: WorkspaceNavItem[] = [
@@ -33,8 +31,7 @@ const JOBSEEKER_NAV: WorkspaceNavItem[] = [
 
 const EMPLOYER_NAV: WorkspaceNavItem[] = [
   { id: 'area', label: 'Business overview', icon: '▦' },
-  { id: 'franchise', label: 'Franchise planning', icon: '✧' },
-  { id: 'competitors', label: 'Competitor map', icon: '◎' },
+  { id: 'people', label: 'People looking for work', icon: '◍' },
   { id: 'post', label: 'Post a job', icon: '+' },
   { id: 'posts', label: 'My job posts', icon: '▤' },
   { id: 'verify', label: 'Business verification', icon: '✓' },
@@ -90,9 +87,6 @@ export default function App() {
   const [jobseekerSection, setJobseekerSection] = useState<JobseekerSection>('jobs')
   const [employerSection, setEmployerSection] = useState<EmployerSection>('area')
   const [adminSection, setAdminSection] = useState<AdminSection>('overview')
-  const [competitorPlaces, setCompetitorPlaces] = useState<CompetitorPlace[]>([])
-  const [selectedCompetitor, setSelectedCompetitor] = useState<CompetitorPlace | null>(null)
-  const [competitorMode, setCompetitorMode] = useState<CompetitorSearchMode>('local')
   // Landing page first; a demo sign-in (or "Explore without an account") opens the workspace.
   const [entered, setEntered] = useState(() => loadSession() !== null)
   // Account setup panel: opened after sign-in, or for one step from a profile "Add" button.
@@ -177,19 +171,7 @@ export default function App() {
         onViewChange={changeView}
         navigation={EMPLOYER_NAV}
         activeNavigation={employerSection}
-        onNavigationChange={(id) => {
-          const section = id as EmployerSection
-          setEmployerSection(section)
-          if (section !== 'franchise' && section !== 'competitors') {
-            setCompetitorPlaces([])
-            setSelectedCompetitor(null)
-            setCompetitorMode('local')
-          }
-        }}
-        competitorPlaces={competitorPlaces}
-        selectedCompetitor={selectedCompetitor}
-        competitorMode={competitorMode}
-        onSelectedCompetitorChange={setSelectedCompetitor}
+        onNavigationChange={(id) => setEmployerSection(id as EmployerSection)}
         panelHeader={
           <>
             {shellHeader}
@@ -197,15 +179,7 @@ export default function App() {
           </>
         }
         panelContent={
-          employerSection === 'franchise' || employerSection === 'competitors' ? (
-            <MarketResearch
-              mode={employerSection === 'franchise' ? 'franchise' : 'city'}
-              business={state.businesses[state.employerId] ?? null}
-              onPlacesChange={setCompetitorPlaces}
-              onSelectedPlaceChange={setSelectedCompetitor}
-              onMapModeChange={setCompetitorMode}
-            />
-          ) : employerSection === 'post' ? (
+          employerSection === 'post' ? (
             <PostJob onGetVerified={() => setEmployerSection('verify')} />
           ) : employerSection === 'posts' ? (
             <MyPosts />

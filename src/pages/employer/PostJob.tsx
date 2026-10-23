@@ -2,7 +2,9 @@ import { useState, type FormEvent } from 'react'
 import BarangaySelect from '../../components/BarangaySelect'
 import JobMap from '../../components/JobMap'
 import { useSession, useStore } from '../../store'
-import { checkWage, SKILLS } from '../../rules'
+import { checkWage } from '../../rules'
+import SkillPicker from '../../components/SkillPicker'
+import { withMatchGroups } from '../../components/skillCatalog'
 import type { JobType, PayUnit } from '../../types'
 import { hasEmployerNumbers } from '../../verification'
 import { VerificationBadge } from './Verify'
@@ -35,10 +37,6 @@ export default function PostJob({ onGetVerified }: Props) {
   const amount = Number(payAmount)
   const wage = payAmount === '' ? null : checkWage(amount, payUnit)
 
-  function toggleSkill(s: string) {
-    setSkills(skills.includes(s) ? skills.filter((x) => x !== s) : [...skills, s])
-  }
-
   function submit(e: FormEvent) {
     e.preventDefault()
     setMessage('')
@@ -68,7 +66,7 @@ export default function PostJob({ onGetVerified }: Props) {
         payUnit,
         jobType,
         hoursPerWeek: Number(hoursPerWeek),
-        skills,
+        skills: withMatchGroups(skills),
         workers: Number(workers),
         startDate,
         minorsAllowed,
@@ -155,13 +153,7 @@ export default function PostJob({ onGetVerified }: Props) {
       <label htmlFor="start">Start date</label>
       <input id="start" type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
 
-      <h2>Skills wanted</h2>
-      {SKILLS.map((s) => (
-        <label key={s} className="inline">
-          <input type="checkbox" checked={skills.includes(s)} onChange={() => toggleSkill(s)} />
-          {s}
-        </label>
-      ))}
+      <SkillPicker value={skills} onChange={setSkills} label="Skills wanted" placeholder="Type a skill, e.g. barista" />
 
       <label className="inline toggle">
         <input type="checkbox" checked={minorsAllowed} onChange={(e) => setMinorsAllowed(e.target.checked)} />

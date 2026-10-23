@@ -1,7 +1,9 @@
 import { useState, type FormEvent } from 'react'
 import BarangaySelect from '../../components/BarangaySelect'
 import { useSession, useStore } from '../../store'
-import { ageGate, DAYS, SKILLS } from '../../rules'
+import { ageGate, DAYS } from '../../rules'
+import SkillPicker from '../../components/SkillPicker'
+import { chosenSkills, withMatchGroups } from '../../components/skillCatalog'
 import type { SkillCard } from '../../types'
 
 interface Props {
@@ -17,7 +19,7 @@ export default function SkillCardForm({ onSaved, onCancel }: Props = {}) {
 
   const [age, setAge] = useState(existing ? String(existing.age) : '')
   const [barangay, setBarangay] = useState(existing?.barangay ?? '116')
-  const [skills, setSkills] = useState<string[]>(existing?.skills ?? [])
+  const [skills, setSkills] = useState<string[]>(chosenSkills(existing?.skills ?? []))
   const [hoursWanted, setHoursWanted] = useState(existing ? String(existing.hoursWanted) : '24')
   const [days, setDays] = useState<string[]>(existing?.daysAvailable ?? [])
   const [expectedPay, setExpectedPay] = useState(existing?.expectedPay != null ? String(existing.expectedPay) : '')
@@ -48,7 +50,7 @@ export default function SkillCardForm({ onSaved, onCancel }: Props = {}) {
       name: session.name,
       age: ageNumber,
       barangay,
-      skills,
+      skills: withMatchGroups(skills),
       hoursWanted: Number(hoursWanted),
       daysAvailable: days,
       expectedPay: expectedPay === '' ? null : Number(expectedPay),
@@ -77,13 +79,7 @@ export default function SkillCardForm({ onSaved, onCancel }: Props = {}) {
       <label htmlFor="barangay">Barangay</label>
       <BarangaySelect id="barangay" value={barangay} onChange={setBarangay} />
 
-      <h2>Skills</h2>
-      {SKILLS.map((s) => (
-        <label key={s} className="inline">
-          <input type="checkbox" checked={skills.includes(s)} onChange={() => toggle(skills, s, setSkills)} />
-          {s}
-        </label>
-      ))}
+      <SkillPicker value={skills} onChange={setSkills} label="Skills" />
 
       <label htmlFor="hours">Hours I want per week</label>
       <input id="hours" type="number" min="1" max="112" value={hoursWanted} onChange={(e) => setHoursWanted(e.target.value)} />

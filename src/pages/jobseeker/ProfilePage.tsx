@@ -8,6 +8,7 @@ import { DAYS, usernameFor } from '../../rules'
 import { useSession, useStore } from '../../store'
 import type { PayUnit, View } from '../../types'
 import SkillCardForm from './SkillCardForm'
+import { chosenSkills } from '../../components/skillCatalog'
 import background from '../../assets/brand/bg-4.svg'
 // Shares the landing page's faint-map styles (.landing-map).
 import '../../landing.css'
@@ -193,7 +194,7 @@ export default function ProfilePage({ view, onViewChange, navigation, activeNavi
     content = (
       <Card title="Skills & experience" onEdit={edit}>
         <dl className="profile-grid">
-          <Field label="Skills"><Chips items={card.skills} /></Field>
+          <Field label="Skills"><Chips items={chosenSkills(card.skills)} /></Field>
           <Field label="Years of experience">{card.yearsExperience}</Field>
           <Field label="Certifications"><Chips items={card.certifications} /></Field>
           <Field label="About me">{card.profileSummary}</Field>
