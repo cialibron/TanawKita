@@ -42,6 +42,7 @@ const AREA_MIN_ZOOM = 13
 // Building outlines are looked up from this zoom; before it, store-sized buildings are under ~10 px.
 const BUILDING_MIN_ZOOM = 15.5
 const UNIT_SHORT = { day: 'day', hour: 'hr', task: 'task' } as const
+const JOB_PIN_SPACING_PX = 112
 
 interface Props {
   jobs?: JobPost[]
@@ -59,6 +60,8 @@ interface Props {
   places?: CompetitorPlace[]
   selectedPlaceId?: string | null
   onPlaceSelect?: (placeId: string) => void
+  // Business name cards and dots for `places`. Off on the job map, where the pay pins already label each business.
+  placeLabels?: boolean
   view?: { center: [number, number]; zoom: number }
 }
 
@@ -400,6 +403,7 @@ export default function MapLibreView({
   places = [],
   selectedPlaceId,
   onPlaceSelect,
+  placeLabels = true,
   view,
 }: Props) {
   const container = useRef<HTMLDivElement>(null)
@@ -553,13 +557,13 @@ export default function MapLibreView({
     const source = map.getSource(COMPETITOR_SOURCE) as GeoJSONSource | undefined
     source?.setData({
       type: 'FeatureCollection',
-      features: places.map((place) => ({
+      features: (placeLabels ? places : []).map((place) => ({
         type: 'Feature' as const,
         properties: { place_id: place.id, name: place.name, category: place.category, color: CATEGORY_STYLE[place.category].color, selected: place.id === selectedPlaceId },
         geometry: { type: 'Point' as const, coordinates: [place.lng, place.lat] },
       })),
     })
-  }, [map, places, selectedPlaceId])
+  }, [map, places, selectedPlaceId, placeLabels])
 
   // Reshape the shaded areas whenever the map settles: their precision depends on zoom and on loaded building tiles.
   useEffect(() => {
@@ -585,7 +589,7 @@ export default function MapLibreView({
 
   // Callout cards for businesses in view at street level (and always for the selected one).
   useEffect(() => {
-    if (!map || !places.length) return
+    if (!map || !places.length || !placeLabels) return
     const byId = new Map(places.map((place) => [place.id, place]))
     const markers = new Map<string, LibreMarker>()
     const render = () => {
@@ -621,7 +625,7 @@ export default function MapLibreView({
       map.off('moveend', render)
       markers.forEach((marker) => marker.remove())
     }
-  }, [map, places, selectedPlaceId, onPlaceSelect])
+  }, [map, places, selectedPlaceId, onPlaceSelect, placeLabels])
 
   useEffect(() => {
     if (!map || !onPlaceSelect) return
@@ -666,10 +670,16 @@ export default function MapLibreView({
   useEffect(() => {
     if (!map) return
     const markers: LibreMarker[] = []
+    // Jobs at the same spot (several roles at one business) sit side by side above it instead of stacking.
+    const atSpot = new Map<string, JobPost[]>()
+    for (const job of jobs) atSpot.set(`${job.lat},${job.lng}`, [...(atSpot.get(`${job.lat},${job.lng}`) ?? []), job])
     for (const job of jobs) {
       const selected = job.id === selectedId
+      const group = atSpot.get(`${job.lat},${job.lng}`) ?? [job]
+      const offsetX = (group.indexOf(job) - (group.length - 1) / 2) * JOB_PIN_SPACING_PX
       const element = markerElement(`pay-pin${selected ? ' selected' : ''}`, `₱${job.payAmount.toLocaleString()}/${UNIT_SHORT[job.payUnit]}`)
-      const marker = new LibreMarker({ element, anchor: 'bottom' })
+      if (selected) element.style.zIndex = '5'
+      const marker = new LibreMarker({ element, anchor: 'bottom', offset: [offsetX, 0] })
         .setLngLat([job.lng, job.lat])
         .addTo(map)
       if (onSelect) element.addEventListener('click', () => onSelect(job.id))

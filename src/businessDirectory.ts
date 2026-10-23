@@ -83,24 +83,36 @@ export async function searchCompetitors({
   const places: CompetitorPlace[] = syntheticBusinesses
     .filter((entry) => entry.business.category === category.csvCategory)
     .map((entry) => {
-      const point: [number, number] = [entry.business.lat, entry.business.lng]
-      const distance = distanceKm(center, point)
-      return {
-        id: entry.id,
-        name: entry.name,
-        category: category.id,
-        lat: point[0],
-        lng: point[1],
-        address: barangayName(entry.business.barangay),
-        ...(mode === 'local' ? { distanceKm: distance } : {}),
-        source: 'synthetic-simulation' as const,
-        profile: entry.business,
-        verificationStatus: entry.verification.status,
-      }
+      const place = toPlace(entry, category.id)
+      return mode === 'local' ? { ...place, distanceKm: distanceKm(center, [place.lat, place.lng]) } : place
     })
     .filter((place) => mode === 'city' || (place.distanceKm ?? Infinity) <= radiusKm)
 
   return places.sort((a, b) => mode === 'local'
     ? (a.distanceKm ?? Infinity) - (b.distanceKm ?? Infinity)
     : a.name.localeCompare(b.name))
+}
+
+function toPlace(entry: (typeof syntheticBusinesses)[number], category: BusinessCategoryId): CompetitorPlace {
+  return {
+    id: entry.id,
+    name: entry.name,
+    category,
+    lat: entry.business.lat,
+    lng: entry.business.lng,
+    address: barangayName(entry.business.barangay),
+    source: 'synthetic-simulation',
+    profile: entry.business,
+    verificationStatus: entry.verification.status,
+  }
+}
+
+// The simulation businesses behind a set of job posts, so the job map can show where each employer is.
+// Employers outside the simulation sheet (e.g. a business added in the demo) are skipped.
+export function employerPlaces(employerIds: string[]): CompetitorPlace[] {
+  const wanted = new Set(employerIds)
+  return syntheticBusinesses.flatMap((entry) => {
+    const category = BUSINESS_CATEGORIES.find((item) => item.csvCategory === entry.business.category)
+    return wanted.has(entry.id) && category ? [toPlace(entry, category.id)] : []
+  })
 }

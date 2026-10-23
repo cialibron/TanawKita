@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { BUSINESS_CATEGORIES, distanceKm, searchCompetitors } from './businessDirectory'
+import { BUSINESS_CATEGORIES, distanceKm, employerPlaces, searchCompetitors } from './businessDirectory'
+import { syntheticBusinesses } from './data/simulation'
 
 describe('competitor directory helpers', () => {
   it('includes cafe listings as the default business category', () => {
@@ -19,5 +20,12 @@ describe('competitor directory helpers', () => {
     expect(local.length).toBeGreaterThan(0)
     expect(city.length).toBeGreaterThan(local.length)
     expect(local.every((place) => place.source === 'synthetic-simulation')).toBe(true)
+  })
+
+  it('finds the simulation business behind each hiring employer and skips unknown ones', () => {
+    const places = employerPlaces([syntheticBusinesses[0].id, 'not-a-simulation-business'])
+    expect(places.map((place) => place.name)).toEqual(['Kape Mandug Roastery'])
+    expect(places[0].category).toBe('cafe')
+    expect(places[0].source).toBe('synthetic-simulation')
   })
 })

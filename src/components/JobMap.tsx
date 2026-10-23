@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { JobPost } from '../types'
+import type { CompetitorPlace } from '../businessDirectory'
 import MapLibreView from './MapLibreView'
 
 export const DAVAO_CENTER: [number, number] = [7.0731, 125.6128]
@@ -20,6 +21,10 @@ interface Props {
   height?: number
   // Fill the parent instead of a fixed-height rounded box.
   fill?: boolean
+  // Hiring businesses, drawn with the same glowing area as the competitor map.
+  places?: CompetitorPlace[]
+  selectedPlaceId?: string | null
+  placeLabels?: boolean
 }
 
 function metersBetween(a: JobPost, b: JobPost): number {

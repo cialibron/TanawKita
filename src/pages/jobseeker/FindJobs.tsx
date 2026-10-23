@@ -3,6 +3,7 @@ import JobMap from '../../components/JobMap'
 import MapShell, { type WorkspaceNavItem } from '../../components/MapShell'
 import { useSession, useStore } from '../../store'
 import { barangayName } from '../../data/barangays'
+import { distanceKm, employerPlaces, type CompetitorPlace } from '../../businessDirectory'
 import { blockedReason, matchScore } from '../../rules'
 import type { JobPost, JobType, View } from '../../types'
 import { VerificationBadge } from '../employer/Verify'
@@ -10,6 +11,14 @@ import { VerificationBadge } from '../employer/Verify'
 function payLabel(job: JobPost): string {
   const unit = job.payUnit === 'task' ? 'task (pakyaw)' : job.payUnit
   return `₱${job.payAmount.toLocaleString()} / ${unit}`
+}
+
+// Map places per set of hiring employers. Kept stable between renders so the map does not redraw its areas.
+const placesCache = new Map<string, CompetitorPlace[]>()
+function placesFor(employerIds: string[]): CompetitorPlace[] {
+  const key = [...new Set(employerIds)].sort().join('|')
+  if (!placesCache.has(key)) placesCache.set(key, employerPlaces(key.split('|')))
+  return placesCache.get(key)!
 }
 
 const TYPE_CHIPS: { id: JobType | 'all'; label: string }[] = [
@@ -70,6 +79,15 @@ export default function FindJobs({ view, onViewChange, navigation, activeNavigat
     )
     .map((job) => ({ job, match: card ? matchScore(job, card, true) : null }))
     .sort((a, b) => (b.match?.percent ?? 0) - (a.match?.percent ?? 0))
+
+  // Hiring businesses for the map, drawn like the competitor map. A job posted at its business (within 150 m)
+  // is pinned on that business so its pay tag sits right above the glowing area.
+  const places = placesFor(jobs.map(({ job }) => job.employerId))
+  const mapJobs = jobs.map(({ job }) => {
+    const place = places.find((item) => item.id === job.employerId)
+    return place && distanceKm([job.lat, job.lng], [place.lat, place.lng]) <= 0.15 ? { ...job, lat: place.lat, lng: place.lng } : job
+  })
+  const selectedEmployerId = jobs.find(({ job }) => job.id === selectedId)?.job.employerId ?? null
 
   const alreadyApplied = (jobId: string) =>
     state.applications.some((a) => a.jobId === jobId && a.userId === session.userId)
@@ -176,7 +194,7 @@ export default function FindJobs({ view, onViewChange, navigation, activeNavigat
       onViewChange={onViewChange}
       panelOpen={panelOpen}
       onPanelOpenChange={setPanelOpen}
-      map={<JobMap fill jobs={jobs.map((j) => j.job)} selectedId={selectedId} onSelect={select} me={me} />}
+      map={<JobMap fill jobs={mapJobs} selectedId={selectedId} onSelect={select} me={me} places={places} selectedPlaceId={selectedEmployerId} placeLabels={false} />}
       panel={
         <>
           {panelHeader}
