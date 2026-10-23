@@ -25,6 +25,7 @@ import {
   type SignedInUser,
 } from './demoAuth'
 import type { Role } from '../types'
+import { replayTutorial } from './tutorial'
 import '../landing.css'
 
 type Mode = 'signin' | 'signup' | 'forgot'
@@ -427,6 +428,10 @@ export default function Landing({ onEnter, onExplore }: Props) {
               Demo sign-in: any email with a password of {MIN_PASSWORD}+ characters opens the app.{' '}
               <button type="button" className="landing-link small" onClick={onExplore}>
                 Explore without an account
+              </button>{' '}
+              ·{' '}
+              <button type="button" className="landing-link small" onClick={replayTutorial}>
+                Take the site tour
               </button>
             </p>
           </section>

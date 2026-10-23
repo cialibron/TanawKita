@@ -1,6 +1,7 @@
 // First-visit tutorial: whether this browser has already seen it. Kept apart from the demo store, so resetting
 // the demo data does not bring the welcome back. Add ?welcome to the address to show it again.
-const STORAGE_KEY = 'tanawkita:tutorial-seen'
+// v2: the tour was rewritten (phone and desktop steps, shorter cards), so everyone sees it once more.
+const STORAGE_KEY = 'tanawkita:tutorial-seen-v2'
 const REPLAY_EVENT = 'tanawkita:replay-tutorial'
 
 export function tutorialSeen(): boolean {
@@ -63,7 +64,16 @@ const click = (selector: string) => () => document.querySelector<HTMLElement>(se
 // Part 1, on the landing page: signing in. The last step waits for the person to sign in; the app tour follows.
 export const LOGIN_TOUR: TourStep[] = [
   {
+    only: 'desktop',
     target: '.landing-card',
+    scroll: true,
+    title: 'Sign in',
+    text: 'Sign in here. It is a demo: nothing is sent or saved online.',
+  },
+  {
+    // Phones: the whole card is taller than the screen, so the spotlight goes on its heading.
+    only: 'phone',
+    target: '.landing-card .landing-card-head',
     scroll: true,
     title: 'Sign in',
     text: 'Sign in here. It is a demo: nothing is sent or saved online.',

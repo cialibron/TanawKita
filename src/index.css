@@ -6628,3 +6628,53 @@ button.skill-picker-option.custom {
 :root[data-theme='light'] .undo-toast button.undo-toast-close {
   color: var(--lt-muted);
 }
+
+/* ===== Tour on phones: the card is docked full width (top or bottom), with bigger text and thumb-sized buttons ===== */
+.tour-card.docked {
+  padding: 16px 16px calc(14px + env(safe-area-inset-bottom, 0px));
+  transition: top 200ms ease;
+}
+
+.tour-card.docked h2 {
+  font-size: 1.2rem;
+}
+
+.tour-card.docked > p:not(.tour-count) {
+  font-size: 1rem;
+}
+
+.tour-card.docked .tour-dots {
+  margin: 12px 0;
+}
+
+.tour-card.docked .tour-dots span {
+  flex: 1;
+  width: auto;
+}
+
+/* Skip on its own line as a quiet link; Back and Next side by side, Next taking the most room. */
+.tour-card.docked footer {
+  flex-direction: column-reverse;
+  align-items: stretch;
+  gap: 4px;
+}
+
+.tour-card.docked .tour-nav {
+  width: 100%;
+  margin-left: 0;
+}
+
+.tour-card.docked .tour-nav button {
+  min-height: 48px;
+  font-size: 1rem;
+}
+
+.tour-card.docked .tour-nav .tour-next {
+  flex: 1;
+}
+
+:root .tour-card.docked button.tour-skip {
+  align-self: center;
+  min-height: 44px;
+  padding: 0 12px;
+}

@@ -4,6 +4,7 @@ import EyeIcon from './EyeIcon'
 import { BrandEmblem } from './Logo'
 import SettingsPanel from './SettingsPanel'
 import { setPreferences, usePreferences } from '../preferences'
+import { replayTutorial } from '../pages/tutorial'
 import type { View } from '../types'
 
 export interface WorkspaceNavItem {
@@ -165,6 +166,16 @@ function RailEyeMenu() {
             }}
           >
             <span aria-hidden="true" className="rail-eye-icon">⚙</span> Settings
+          </button>
+          <button
+            type="button"
+            role="menuitem"
+            onClick={() => {
+              setOpen(false)
+              replayTutorial()
+            }}
+          >
+            <span aria-hidden="true" className="rail-eye-icon">?</span> Site tour
           </button>
           <button type="button" role="menuitemcheckbox" aria-checked={light} onClick={() => setPreferences({ theme: light ? 'dark' : 'light' })}>
             <span aria-hidden="true" className="rail-eye-icon">{light ? '☀' : '☾'}</span>

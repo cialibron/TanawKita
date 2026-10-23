@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import type { TourStep } from './tutorial'
+import { isPhone, type TourStep } from './tutorial'
 
 interface Props {
   steps: TourStep[]
@@ -46,6 +46,18 @@ function targetBox(selector?: string): Box | null {
 const same = (a: Box | null, b: Box | null) =>
   a === b || (a !== null && b !== null && a.top === b.top && a.left === b.left && a.width === b.width && a.height === b.height)
 
+// The visible screen height: on phones the on-screen keyboard shrinks it, and the card must stay above it.
+const screenHeight = () => window.visualViewport?.height ?? window.innerHeight
+
+// Phones: the card is docked full width, at the bottom where a thumb reaches it, so it does not jump around.
+// It moves to the top when the control being explained is in the lower half of the screen, or when the step
+// needs the keyboard (which comes up from the bottom).
+function dockedPosition(box: Box | null, cardH: number, keyboard: boolean): { top: number; left: number } {
+  const vh = screenHeight()
+  const low = box !== null && box.top + box.height / 2 > vh / 2
+  return { top: low || keyboard ? 8 : Math.max(vh - cardH - 8, 8), left: 8 }
+}
+
 // The step card goes beside the spotlight: below it if there is room, else above, else to its side.
 function cardPosition(box: Box | null, cardH: number): { top: number; left: number } {
   const vw = window.innerWidth
@@ -74,14 +86,28 @@ export default function GuidedTour({ steps, onDone, numbering }: Props) {
   const total = numbering?.total ?? steps.length
   // Steps the person does themselves (signing in) have no Next; the tour moves on when they do it.
   const waiting = Boolean(step.waitForUser)
+  const phone = isPhone()
+  // Re-place the card when the visible screen changes size, e.g. when the phone keyboard opens or closes.
+  const [, setViewport] = useState(0)
+  useEffect(() => {
+    const viewport = window.visualViewport
+    const onResize = () => setViewport((n) => n + 1)
+    viewport?.addEventListener('resize', onResize)
+    window.addEventListener('resize', onResize)
+    return () => {
+      viewport?.removeEventListener('resize', onResize)
+      window.removeEventListener('resize', onResize)
+    }
+  }, [])
 
   // Follow the control as the page settles, scrolls or resizes.
   useEffect(() => {
-    // Scroll the control into view inside its panel, without moving the page itself.
+    // Scroll the control into view inside its panel, without moving the page itself. On phones it goes to the
+    // middle of the screen, clear of the card docked at the top or bottom.
     if (step.target && step.scroll) {
       const page = document.scrollingElement
       const pageTop = page?.scrollTop ?? 0
-      document.querySelector(step.target)?.scrollIntoView({ block: 'nearest' })
+      document.querySelector(step.target)?.scrollIntoView({ block: isPhone() ? 'center' : 'nearest' })
       if (page) page.scrollTop = pageTop
     }
     let frame = 0
@@ -100,7 +126,9 @@ export default function GuidedTour({ steps, onDone, numbering }: Props) {
 
   useEffect(() => {
     // A text field, or the button the person has to press themselves, gets the focus; otherwise Next does.
-    const field = (step.focusTarget || step.waitForUser) && step.target ? document.querySelector(step.target) : null
+    // Not text fields on phones: focusing one pops the keyboard up over the screen before the person has read the
+    // card. They tap the field themselves when ready.
+    const field = ((step.focusTarget && !isPhone()) || step.waitForUser) && step.target ? document.querySelector(step.target) : null
     const control = field?.matches('input, select, textarea, button') ? field : field?.querySelector('input, select, textarea')
     if (control instanceof HTMLElement) control.focus()
     else nextRef.current?.focus()
@@ -128,7 +156,7 @@ export default function GuidedTour({ steps, onDone, numbering }: Props) {
     ? `, ${box.left}px ${box.top}px, ${box.left + box.width}px ${box.top}px, ${box.left + box.width}px ${box.top + box.height}px, ${box.left}px ${box.top + box.height}px, ${box.left}px ${box.top}px`
     : ''
   const dimClip = `polygon(evenodd, 0 0, 100vw 0, 100vw 100vh, 0 100vh, 0 0${hole})`
-  const position = cardPosition(box, cardH)
+  const position = phone ? dockedPosition(box, cardH, Boolean(step.focusTarget)) : cardPosition(box, cardH)
 
   return (
     <div className="tour">
@@ -136,12 +164,12 @@ export default function GuidedTour({ steps, onDone, numbering }: Props) {
       {box && <div className="tour-spotlight" style={box} aria-hidden="true" />}
       <section
         ref={cardRef}
-        className="tour-card"
+        className={`tour-card${phone ? ' docked' : ''}`}
         role="dialog"
         aria-modal="false"
         aria-labelledby="tour-title"
         aria-describedby="tour-text"
-        style={{ top: position.top, left: position.left, width: Math.min(CARD_W, window.innerWidth - 32) }}
+        style={{ top: position.top, left: position.left, width: phone ? window.innerWidth - 16 : Math.min(CARD_W, window.innerWidth - 32) }}
       >
         <p className="tour-count">
           Step {before + index + 1} of {total}
