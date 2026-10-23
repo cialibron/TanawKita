@@ -79,7 +79,7 @@ export default function MapShell({
           <section className={`workspace-detail${detailOpen ? ' detail-open' : ' detail-minimized'}${detailExpanded ? ' detail-expanded' : ''}`} aria-label="Selected item details">
             <div className="workspace-detail-controls">
               <button type="button" className="detail-expand-button" onClick={() => setDetailExpanded(!detailExpanded)}>
-                {detailExpanded ? 'Minimize details' : 'Expand details'}
+                {detailExpanded ? 'Show less ↓' : 'Expand details ↑'}
               </button>
               <button type="button" className="detail-collapse-button" onClick={() => setDetailOpen(!detailOpen)} aria-label={detailOpen ? 'Minimize selected details' : 'Show selected details'}>
                 {detailOpen ? '⌄' : '⌃'}
