@@ -3670,30 +3670,30 @@ ul.error {
 }
 
 /* Main map: their 2D/3D switch sits under the zoom buttons (and under the compass, which only shows in 3D). */
-.mapshell-map .map-dimension-toggle {
+.mapshell-map .map-view-controls {
   top: 160px;
   right: 10px;
   bottom: auto;
 }
 
-.mapshell-map .maplibre-wrap:has(.map-dimension-toggle.is-3d) .map-dimension-toggle {
+.mapshell-map .maplibre-wrap:has(.map-dimension-toggle.is-3d) .map-view-controls {
   top: 210px;
 }
 
 @media (max-width: 720px) {
-  .mapshell-map .map-dimension-toggle {
+  .mapshell-map .map-view-controls {
     top: 156px;
   }
 
-  .mapshell-map .maplibre-wrap:has(.map-dimension-toggle.is-3d) .map-dimension-toggle {
+  .mapshell-map .maplibre-wrap:has(.map-dimension-toggle.is-3d) .map-view-controls {
     top: 206px;
   }
 
-  .mapshell-map:has(.map-overlay) .map-dimension-toggle {
+  .mapshell-map:has(.map-overlay) .map-view-controls {
     top: 256px;
   }
 
-  .mapshell-map:has(.map-overlay) .maplibre-wrap:has(.map-dimension-toggle.is-3d) .map-dimension-toggle {
+  .mapshell-map:has(.map-overlay) .maplibre-wrap:has(.map-dimension-toggle.is-3d) .map-view-controls {
     top: 306px;
   }
 }
@@ -4476,9 +4476,19 @@ ul.error {
 
 /* ---------- Find jobs: expanded detail fills the map, with more details and a location photo ---------- */
 
-/* Expanded: grow upward until the panel covers the whole map area. */
+/* Expanded: grow upward until the panel covers the whole map area, and scroll its content inside. */
 .workspace-detail.detail-expanded {
+  display: flex;
+  flex-direction: column;
   max-height: calc(100% - 32px);
+}
+
+.workspace-detail.detail-expanded .workspace-detail-content {
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: none;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 @media (max-width: 720px) {
@@ -4558,7 +4568,15 @@ ul.error {
   line-height: 1.45;
 }
 
+/* Spot and area photos side by side; stacked on narrow screens. */
+.location-photos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px;
+}
+
 .location-photo {
+  min-width: 0;
   margin: 0;
 }
 

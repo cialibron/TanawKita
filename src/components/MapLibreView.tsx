@@ -575,6 +575,24 @@ export default function MapLibreView({
     }
   }, [map, zoom, view?.center[0], view?.center[1], view?.zoom])
 
+  // Default zoom: the zoom the map opens at (or the page's current view). The reset button shows once the
+  // user zooms away from it and eases back to it, keeping the current center.
+  const defaultZoom = view?.zoom ?? zoom ?? (fill ? 14 : 13.5)
+  const [zoomedAway, setZoomedAway] = useState(false)
+  useEffect(() => {
+    if (!map) return
+    // The map opens at the default zoom, so this only needs to run after each zoom.
+    const check = () => setZoomedAway(Math.abs(map.getZoom() - defaultZoom) > 0.05)
+    map.on('zoomend', check)
+    return () => {
+      map.off('zoomend', check)
+    }
+  }, [map, defaultZoom])
+
+  function resetZoom() {
+    map?.easeTo({ zoom: defaultZoom, duration: 600 })
+  }
+
   useEffect(() => {
     if (!map || !focus || view) return
     map.flyTo({ center: [focus[1], focus[0]], zoom: Math.max(map.getZoom(), 14), duration: 700 })
@@ -817,17 +835,24 @@ export default function MapLibreView({
     >
       <div ref={container} className="maplibre-canvas" aria-label="Interactive map of Davao City" />
       {map && (
-        <button
-          type="button"
-          className={`map-dimension-toggle${is3d ? ' is-3d' : ''}`}
-          onClick={() => switchMode(is3d ? '2d' : '3d')}
-          aria-pressed={is3d}
-          aria-label={is3d ? 'Map is 3D. Switch to flat 2D map' : 'Map is 2D. Switch to 3D buildings'}
-          title={is3d ? 'Switch to flat 2D map' : 'Show 3D buildings'}
-        >
-          <span className={is3d ? '' : 'active'}>2D</span>
-          <span className={is3d ? 'active' : ''}>3D</span>
-        </button>
+        <div className="map-view-controls">
+          <button
+            type="button"
+            className={`map-dimension-toggle${is3d ? ' is-3d' : ''}`}
+            onClick={() => switchMode(is3d ? '2d' : '3d')}
+            aria-pressed={is3d}
+            aria-label={is3d ? 'Map is 3D. Switch to flat 2D map' : 'Map is 2D. Switch to 3D buildings'}
+            title={is3d ? 'Switch to flat 2D map' : 'Show 3D buildings'}
+          >
+            <span className={is3d ? '' : 'active'}>2D</span>
+            <span className={is3d ? 'active' : ''}>3D</span>
+          </button>
+          {zoomedAway && (
+            <button type="button" className="map-zoom-reset" onClick={resetZoom} aria-label="Zoom back to the default view" title="Default zoom">
+              <span aria-hidden="true">⤢</span> Default zoom
+            </button>
+          )}
+        </div>
       )}
       {error && <div className="maplibre-error" role="status">Map unavailable: {error}</div>}
     </div>

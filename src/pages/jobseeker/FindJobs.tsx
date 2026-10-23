@@ -90,7 +90,16 @@ function MoreJobDetails({ job, business }: { job: JobPost; business?: Business }
 
       <section>
         <div className="detail-kicker">LOCATION</div>
-        <LocationPhoto lat={job.lat} lng={job.lng} label={`${job.employerName}, ${barangayName(job.barangay)}`} />
+        <div className="location-photos">
+          <LocationPhoto lat={job.lat} lng={job.lng} label={`${job.employerName}, ${barangayName(job.barangay)}`} />
+          <LocationPhoto
+            lat={job.lat}
+            lng={job.lng}
+            zoom={15}
+            label={`the area around ${barangayName(job.barangay)}`}
+            caption={`The area · around ${barangayName(job.barangay)}`}
+          />
+        </div>
       </section>
     </div>
   )

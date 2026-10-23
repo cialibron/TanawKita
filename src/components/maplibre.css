@@ -91,12 +91,19 @@
   filter: drop-shadow(0 1px 2px #fff);
 }
 
-/* ===== 2D / 3D switch (bottom-right, above the zoom buttons) ===== */
-.map-dimension-toggle {
+/* ===== 2D / 3D switch and default-zoom button (bottom-right, above the zoom buttons) ===== */
+.map-view-controls {
   position: absolute;
   right: 10px;
   bottom: 132px;
   z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.map-dimension-toggle {
   display: flex;
   padding: 3px;
   border: 1px solid rgba(120, 190, 255, 0.4);
@@ -120,6 +127,41 @@
 .map-dimension-toggle span.active {
   background: #ffc94a;
   color: #111b39;
+}
+
+/* Shown only when the map is zoomed away from its starting zoom. */
+.map-zoom-reset {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 38px;
+  padding: 0 11px;
+  border: 1px solid rgba(120, 190, 255, 0.4);
+  background: rgba(17, 27, 57, 0.92);
+  color: #eaf4ff;
+  font: 700 12px/1 'Poppins', system-ui, sans-serif;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+  animation: map-zoom-reset-in 180ms ease-out both;
+}
+
+.map-zoom-reset:hover,
+.map-zoom-reset:focus-visible {
+  border-color: #ffc94a;
+}
+
+@keyframes map-zoom-reset-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .map-zoom-reset {
+    animation: none;
+  }
 }
 
 /* Ctrl + scroll hint shown by MapLibre's cooperative gestures. */
