@@ -28,12 +28,15 @@ interface RailProps {
   onNavigationChange: (id: string) => void
   // The minimize/maximize control, shown only on screens that have a left menu to collapse.
   menu?: { open: boolean; onOpenChange: (open: boolean) => void }
+  // Full-screen menu: the rail widens to labeled buttons and the panel covers the map.
+  fullScreen?: { on: boolean; onChange: (on: boolean) => void }
 }
 
 // The left icon rail: the current role's real navigation (never role switching).
-export function WorkspaceRail({ view, navigation, activeNavigation, onNavigationChange, menu }: RailProps) {
+export function WorkspaceRail({ view, navigation, activeNavigation, onNavigationChange, menu, fullScreen }: RailProps) {
+  const expanded = fullScreen?.on ?? false
   return (
-    <nav className="workspace-rail" aria-label={`${VIEW_LABEL[view]} navigation`}>
+    <nav className={`workspace-rail${expanded ? ' expanded' : ''}`} aria-label={`${VIEW_LABEL[view]} navigation`}>
       <div className="workspace-mark tk-brand-mark" title="TanawKita"><BrandEmblem height={30} /></div>
       {menu && (
         <button
@@ -42,9 +45,29 @@ export function WorkspaceRail({ view, navigation, activeNavigation, onNavigation
           aria-label={menu.open ? 'Minimize left menu' : 'Maximize left menu'}
           aria-expanded={menu.open}
           title={menu.open ? 'Minimize menu' : 'Maximize menu'}
-          onClick={() => menu.onOpenChange(!menu.open)}
+          onClick={() => {
+            menu.onOpenChange(!menu.open)
+            if (menu.open) fullScreen?.onChange(false)
+          }}
         >
-          {menu.open ? '‹' : '›'}
+          <span aria-hidden="true">{menu.open ? '‹' : '›'}</span>
+          <span className="rail-label">Minimize menu</span>
+        </button>
+      )}
+      {fullScreen && (
+        <button
+          type="button"
+          className="rail-toggle rail-fullscreen"
+          aria-label={expanded ? 'Exit full-screen menu' : 'Show menu full screen'}
+          aria-pressed={expanded}
+          title={expanded ? 'Exit full screen' : 'Full-screen menu'}
+          onClick={() => {
+            fullScreen.onChange(!expanded)
+            if (!expanded && menu && !menu.open) menu.onOpenChange(true)
+          }}
+        >
+          <span aria-hidden="true">{expanded ? '⤡' : '⤢'}</span>
+          <span className="rail-label">{expanded ? 'Exit full screen' : 'Full screen'}</span>
         </button>
       )}
       <div className="rail-divider" />
@@ -63,7 +86,7 @@ export function WorkspaceRail({ view, navigation, activeNavigation, onNavigation
             }}
           >
             <span aria-hidden="true">{item.icon}</span>
-            <span className="role-tooltip" role="tooltip">{item.label}</span>
+            {expanded ? <span className="rail-label">{item.label}</span> : <span className="role-tooltip" role="tooltip">{item.label}</span>}
           </button>
         ))}
       </div>

@@ -16,6 +16,9 @@ interface Props {
   panelOpen?: boolean
   onPanelOpenChange?: (open: boolean) => void
   detail?: ReactNode
+  // Full-screen menu, controlled by the page when it needs to know (otherwise kept here).
+  panelFullScreen?: boolean
+  onPanelFullScreenChange?: (on: boolean) => void
 }
 
 // A map-first workspace. The role switch is deliberately a developer-only convenience in the top-right;
@@ -32,6 +35,8 @@ export default function MapShell({
   panelOpen,
   onPanelOpenChange,
   detail,
+  panelFullScreen,
+  onPanelFullScreenChange,
 }: Props) {
   const [ownOpen, setOwnOpen] = useState(true)
   const [mapFullScreen, setMapFullScreen] = useState(false)
@@ -39,9 +44,12 @@ export default function MapShell({
   const [detailOpen, setDetailOpen] = useState(true)
   const open = panelOpen ?? ownOpen
   const setOpen = onPanelOpenChange ?? setOwnOpen
+  const [ownFull, setOwnFull] = useState(false)
+  const full = (panelFullScreen ?? ownFull) && open
+  const setFull = onPanelFullScreenChange ?? setOwnFull
 
   return (
-    <main className={`mapshell${open ? ' menu-open' : ' menu-minimized'}${mapFullScreen ? ' map-fullscreen' : ''}`}>
+    <main className={`mapshell${open ? ' menu-open' : ' menu-minimized'}${mapFullScreen ? ' map-fullscreen' : ''}${full ? ' panel-fullscreen' : ''}`}>
       {!mapFullScreen && (
         <WorkspaceRail
           view={view}
@@ -49,6 +57,7 @@ export default function MapShell({
           activeNavigation={activeNavigation}
           onNavigationChange={onNavigationChange}
           menu={{ open, onOpenChange: setOpen }}
+          fullScreen={{ on: full, onChange: setFull }}
         />
       )}
 
@@ -75,7 +84,7 @@ export default function MapShell({
           </button>
         </div>
 
-        {detail && !mapFullScreen && (
+        {detail && !mapFullScreen && !full && (
           <section className={`workspace-detail${detailOpen ? ' detail-open' : ' detail-minimized'}${detailExpanded ? ' detail-expanded' : ''}`} aria-label="Selected item details">
             <div className="workspace-detail-controls">
               <button type="button" className="detail-expand-button" onClick={() => setDetailExpanded(!detailExpanded)}>
