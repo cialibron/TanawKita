@@ -233,20 +233,20 @@ export default function App() {
     )
   }
 
-  return (
-    <>
-      {screen}
-      {setupRequest && (
-        <SetupPanel
-          key={`${setupRequest.startAt ?? 'all'}-${accountKey()}`}
-          accountKey={accountKey()}
-          accountName={loadSession()?.name ?? null}
-          initialRole={setupRequest.initialRole}
-          startAt={setupRequest.startAt}
-          single={setupRequest.single}
-          onClose={() => setSetupRequest(null)}
-        />
-      )}
-    </>
-  )
+  // Account setup is its own full page; it replaces the workspace until closed.
+  if (setupRequest) {
+    return (
+      <SetupPanel
+        key={`${setupRequest.startAt ?? 'all'}-${accountKey()}`}
+        accountKey={accountKey()}
+        accountName={loadSession()?.name ?? null}
+        initialRole={setupRequest.initialRole}
+        startAt={setupRequest.startAt}
+        single={setupRequest.single}
+        onClose={() => setSetupRequest(null)}
+      />
+    )
+  }
+
+  return screen
 }

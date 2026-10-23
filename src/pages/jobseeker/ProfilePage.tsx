@@ -119,47 +119,55 @@ export default function ProfilePage({ view, onViewChange, navigation, activeNavi
   const payUnit = card?.expectedPayUnit ?? 'day'
   const pay = card?.expectedPay != null ? `₱${card.expectedPay.toLocaleString('en-PH')} / ${UNIT_LABEL[payUnit]}` : undefined
 
+  const setupCard = (
+    <Card title="Account setup">
+      <dl className="setup-rows">
+        <SetupRow
+          label="Account type"
+          value={setup.role === 'employer' ? 'Employer' : setup.role === 'jobseeker' ? 'Jobseeker' : null}
+          onAdd={() => onOpenSetup('role')}
+        />
+        <SetupRow
+          label="Valid ID"
+          value={setup.validId && `${setup.validId.idType} · ${setup.validId.back ? 'front and back' : 'front'} added`}
+          onAdd={() => onOpenSetup('id')}
+        />
+        <SetupRow
+          label="Resume"
+          value={
+            setup.resume && (
+              <Chips items={[...setup.resume.files.map((f) => f.fileName), ...setup.resume.links.map(linkLabel)]} />
+            )
+          }
+          onAdd={() => onOpenSetup('resume')}
+        />
+      </dl>
+    </Card>
+  )
+
   let content: ReactNode
   if (editing || !card) {
     content = (
-      <section className="profile-card profile-form-card">
-        {!card && !editing ? (
-          <div className="profile-empty">
-            <h3>No skill card yet</h3>
-            <p>Create your skill card so employers near you can find you and jobs can be matched to your skills.</p>
-            <button type="button" className="primary" onClick={edit}>Create skill card</button>
-          </div>
-        ) : (
-          <SkillCardForm key={session.userId} onSaved={() => setEditing(false)} onCancel={() => setEditing(false)} />
-        )}
-      </section>
+      <>
+        {/* Setup parts can be added even before there is a skill card. */}
+        {!card && !editing && section === 'profile' && setupCard}
+        <section className="profile-card profile-form-card">
+          {!card && !editing ? (
+            <div className="profile-empty">
+              <h3>No skill card yet</h3>
+              <p>Create your skill card so employers near you can find you and jobs can be matched to your skills.</p>
+              <button type="button" className="primary" onClick={edit}>Create skill card</button>
+            </div>
+          ) : (
+            <SkillCardForm key={session.userId} onSaved={() => setEditing(false)} onCancel={() => setEditing(false)} />
+          )}
+        </section>
+      </>
     )
   } else if (section === 'profile') {
     content = (
       <>
-        <Card title="Account setup">
-          <dl className="setup-rows">
-            <SetupRow
-              label="Account type"
-              value={setup.role === 'employer' ? 'Employer' : setup.role === 'jobseeker' ? 'Jobseeker' : null}
-              onAdd={() => onOpenSetup('role')}
-            />
-            <SetupRow
-              label="Valid ID"
-              value={setup.validId && `${setup.validId.idType} · ${setup.validId.back ? 'front and back' : 'front'} added`}
-              onAdd={() => onOpenSetup('id')}
-            />
-            <SetupRow
-              label="Resume"
-              value={
-                setup.resume && (
-                  <Chips items={[...setup.resume.files.map((f) => f.fileName), ...setup.resume.links.map(linkLabel)]} />
-                )
-              }
-              onAdd={() => onOpenSetup('resume')}
-            />
-          </dl>
-        </Card>
+        {setupCard}
         <Card title="Personal information" onEdit={edit}>
           <dl className="profile-grid">
             <Field label="Full name">{card.name}</Field>

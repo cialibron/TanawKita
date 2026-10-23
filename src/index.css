@@ -2419,13 +2419,6 @@ ul.error {
   margin-top: auto;
 }
 
-@media (max-width: 720px) {
-  /* Below the search bar and filter chips. */
-  .mapshell-map .maplibregl-ctrl-bottom-right {
-    top: 160px;
-  }
-}
-
 /* 2D/3D toggle under the map compass (same navy button style as the zoom controls). */
 .maplibre-wrap .maplibregl-ctrl-group button.maplibregl-ctrl-pitch-toggle {
   color: #fff;
@@ -2494,69 +2487,68 @@ ul.error {
   background: rgba(62, 232, 255, 0.24);
 }
 
-/* Account setup panel shown after sign-in, over the landing page's photo slideshow. */
-.setup-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 3000;
-  display: grid;
-  place-items: center;
-  padding: 24px;
-  background: rgba(3, 8, 26, 0.62);
-  backdrop-filter: blur(4px);
-}
-
-.setup-panel {
-  --card: rgba(6, 18, 58, 0.62);
+/* Account setup: a full page of its own after sign-in. Plain navy, no photo or boxed containers. */
+.setup-page {
+  --bg: #0a1128;
+  --card: #111a36;
   --text: #f4f8ff;
-  --muted: #c9d6ee;
-  --border: rgba(185, 200, 230, 0.35);
+  --muted: #a9bcdc;
+  --border: rgba(185, 200, 230, 0.22);
   --accent: #48a9f5;
   --accent-text: #fff;
   --ok: #7ee2a0;
-  --error: #ffb4ad;
-  position: relative;
-  width: min(780px, 100%);
-  height: min(860px, calc(100dvh - 48px));
-  overflow: hidden;
-  border: 1px solid rgba(92, 225, 255, 0.35);
-  border-radius: 22px;
-  background: #06123a;
-  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55);
+  --error: #ff8a80;
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
   color: var(--text);
+  background: var(--bg);
   font-family: 'Poppins', Inter, system-ui, -apple-system, 'Segoe UI', sans-serif;
 }
 
+.setup-topbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+.setup-topbar .badge {
+  background: rgba(72, 169, 245, 0.12);
+  border-color: rgba(72, 169, 245, 0.35);
+  color: #9fd4ff;
+}
+
+.setup-later {
+  margin-left: auto;
+  min-height: 40px;
+  padding: 8px 16px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.setup-later:hover {
+  border-color: rgba(92, 225, 255, 0.6);
+}
+
+.setup-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
 .setup-inner {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  height: 100%;
-  box-sizing: border-box;
-  flex-direction: column;
-  padding: 24px 28px 14px;
-}
-
-/* Drop shadows keep text readable over any photo. */
-.setup-panel h1,
-.setup-panel h2,
-.setup-panel label,
-.setup-panel legend,
-.setup-kicker,
-.setup-lead,
-.setup-progress,
-.setup-summary,
-.setup-note,
-.setup-credit,
-.setup-panel .muted {
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.85), 0 0 2px rgba(0, 0, 0, 0.7);
-}
-
-.setup-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 16px;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 28px 24px 24px;
 }
 
 .setup-kicker {
@@ -2573,24 +2565,11 @@ ul.error {
   font-weight: 700;
 }
 
-.setup-later {
-  flex-shrink: 0;
-  min-height: 40px;
-  padding: 8px 14px;
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  border-radius: 999px;
-  background: rgba(6, 18, 58, 0.45);
-  color: #fff;
-  font: inherit;
-  font-size: 0.85rem;
-  cursor: pointer;
-}
-
 .setup-progress {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin: 16px 0 6px;
+  margin: 18px 0 8px;
   padding: 0;
   list-style: none;
   font-size: 0.82rem;
@@ -2601,10 +2580,9 @@ ul.error {
   align-items: center;
   gap: 6px;
   padding: 5px 12px 5px 6px;
-  border: 1px solid rgba(255, 255, 255, 0.28);
+  border: 1px solid var(--border);
   border-radius: 999px;
-  background: rgba(6, 18, 58, 0.45);
-  color: #d8e3f7;
+  color: var(--muted);
 }
 
 .setup-progress li span {
@@ -2613,15 +2591,14 @@ ul.error {
   height: 22px;
   place-items: center;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.1);
   font-size: 0.75rem;
   font-weight: 700;
-  text-shadow: none;
 }
 
 .setup-progress li.current {
   border-color: #5ce1ff;
-  background: rgba(62, 232, 255, 0.2);
+  background: rgba(62, 232, 255, 0.12);
   color: #fff;
   font-weight: 600;
 }
@@ -2632,81 +2609,20 @@ ul.error {
   color: #fff;
 }
 
-.setup-body {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-  padding: 8px 2px 4px;
-}
-
 .setup-body h2 {
-  margin: 10px 0 6px;
-  font-size: 1.35rem;
+  margin: 18px 0 6px;
+  font-size: 1.3rem;
   font-weight: 700;
 }
 
 .setup-lead {
-  margin: 0 0 16px;
-  color: #e6eefc;
+  margin: 0 0 18px;
+  color: var(--muted);
 }
 
-.setup-roles {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
-}
-
-.setup-role {
-  display: grid;
-  justify-items: start;
-  gap: 6px;
-  padding: 18px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 16px;
-  background: rgba(6, 18, 58, 0.55);
-  backdrop-filter: blur(6px);
-  color: #fff;
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-}
-
-.setup-role strong {
-  font-size: 1.05rem;
-}
-
-.setup-role > span:last-child {
-  color: #d3def3;
-  font-size: 0.88rem;
-}
-
-.setup-role-icon {
-  display: grid;
-  width: 42px;
-  height: 42px;
-  place-items: center;
-  border-radius: 12px;
-  background: rgba(72, 169, 245, 0.25);
-  font-size: 1.3rem;
-}
-
-.setup-role:hover {
-  border-color: rgba(92, 225, 255, 0.7);
-}
-
-.setup-role.selected {
-  border-color: #5ce1ff;
-  background: rgba(19, 36, 90, 0.82);
-  box-shadow: 0 0 0 2px rgba(92, 225, 255, 0.35);
-}
-
-/* Form areas sit on a frosted navy card so fields stay readable over the photos. */
+/* Content sits directly on the page, separated by thin lines rather than boxed in. */
 .setup-form {
-  padding: 18px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 16px;
-  background: rgba(6, 18, 58, 0.62);
-  backdrop-filter: blur(8px);
+  padding-top: 4px;
 }
 
 .setup-form h1 {
@@ -2717,10 +2633,64 @@ ul.error {
   margin-top: 0;
 }
 
-.setup-panel input,
-.setup-panel select,
-.setup-panel textarea {
+.setup-page input,
+.setup-page select,
+.setup-page textarea {
   font-size: 16px;
+}
+
+.setup-roles {
+  display: grid;
+  border-top: 1px solid var(--border);
+}
+
+.setup-role {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  column-gap: 14px;
+  align-items: center;
+  padding: 16px 6px;
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  border-radius: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.setup-role-icon {
+  display: grid;
+  grid-row: span 2;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(72, 169, 245, 0.18);
+  font-size: 1.2rem;
+}
+
+.setup-role strong {
+  font-size: 1.05rem;
+}
+
+.setup-role > span:last-child {
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.setup-role:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.setup-role.selected {
+  box-shadow: inset 3px 0 #5ce1ff;
+  background: rgba(62, 232, 255, 0.08);
+}
+
+.setup-role.selected .setup-role-icon {
+  background: #48a9f5;
 }
 
 .setup-uploads {
@@ -2730,6 +2700,7 @@ ul.error {
   margin-top: 14px;
 }
 
+/* Upload targets stay visible as dashed drop zones (they are inputs, not containers). */
 .setup-drop {
   position: relative;
   display: grid;
@@ -2737,9 +2708,8 @@ ul.error {
   gap: 4px;
   margin: 0;
   padding: 16px;
-  border: 1.5px dashed rgba(92, 225, 255, 0.6);
-  border-radius: 14px;
-  background: rgba(62, 232, 255, 0.08);
+  border: 1.5px dashed rgba(92, 225, 255, 0.55);
+  border-radius: 12px;
   cursor: pointer;
 }
 
@@ -2750,7 +2720,7 @@ ul.error {
 .setup-drop:hover,
 .setup-drop:focus-within {
   border-color: #5ce1ff;
-  background: rgba(62, 232, 255, 0.16);
+  background: rgba(62, 232, 255, 0.06);
 }
 
 .setup-drop:focus-within {
@@ -2769,7 +2739,7 @@ ul.error {
 }
 
 .setup-drop > span {
-  color: #c9d6ee;
+  color: var(--muted);
   font-size: 0.82rem;
 }
 
@@ -2788,13 +2758,13 @@ ul.error {
   padding: 5px 6px 5px 10px;
   border: 1px solid rgba(72, 169, 245, 0.45);
   border-radius: 999px;
-  background: rgba(72, 169, 245, 0.18);
+  background: rgba(72, 169, 245, 0.14);
   font-size: 0.82rem;
   overflow-wrap: anywhere;
 }
 
 .setup-file-size {
-  color: #a9bcdc;
+  color: var(--muted);
 }
 
 .setup-file button,
@@ -2809,7 +2779,7 @@ ul.error {
   padding: 0;
   border: 0;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.1);
   color: #fff;
   cursor: pointer;
 }
@@ -2831,10 +2801,10 @@ ul.error {
 
 .setup-links {
   display: grid;
-  gap: 8px;
   margin: 12px 0 0;
   padding: 0;
   list-style: none;
+  border-top: 1px solid var(--border);
 }
 
 .setup-links li {
@@ -2842,10 +2812,8 @@ ul.error {
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: 10px;
-  padding: 8px 8px 8px 12px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.06);
+  padding: 10px 2px;
+  border-bottom: 1px solid var(--border);
 }
 
 .setup-links a {
@@ -2857,24 +2825,22 @@ ul.error {
 
 .setup-summary {
   display: grid;
-  gap: 8px;
   margin: 0;
   padding: 0;
   list-style: none;
+  border-top: 1px solid var(--border);
 }
 
 .setup-summary li {
   display: flex;
   justify-content: space-between;
   gap: 12px;
-  padding: 12px 16px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 12px;
-  background: rgba(6, 18, 58, 0.55);
+  padding: 14px 2px;
+  border-bottom: 1px solid var(--border);
 }
 
 .setup-summary .ok {
-  color: #7ee2a0;
+  color: var(--ok);
 }
 
 .setup-summary .skipped {
@@ -2882,17 +2848,13 @@ ul.error {
 }
 
 .setup-error {
-  margin: 12px 0 0;
-  padding: 10px 14px;
-  border: 1px solid rgba(255, 155, 148, 0.6);
-  border-radius: 10px;
-  background: rgba(80, 10, 20, 0.6);
-  color: #ffd5d1;
+  margin: 14px 0 0;
+  color: #ffb4ad;
 }
 
 .setup-note {
-  margin: 14px 0 0;
-  color: #d3def3;
+  margin: 18px 0 0;
+  color: var(--muted);
   font-size: 0.78rem;
 }
 
@@ -2900,7 +2862,11 @@ ul.error {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding-top: 14px;
+  width: 100%;
+  max-width: 760px;
+  box-sizing: border-box;
+  margin: 0 auto;
+  padding: 14px 24px 18px;
 }
 
 .setup-spacer {
@@ -2918,63 +2884,351 @@ ul.error {
 
 .setup-back,
 .setup-skip {
-  border: 1px solid rgba(255, 255, 255, 0.45);
-  background: rgba(6, 18, 58, 0.5);
-  color: #fff;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
 }
 
 .setup-next {
   border: 0;
   background: #fff;
   color: #0b1c48;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
 }
 
 .setup-next:hover {
   background: #e6f4ff;
 }
 
-.setup-credit {
-  align-self: flex-end;
-  margin-top: 8px;
-  color: rgba(255, 255, 255, 0.75);
-  font-size: 0.7rem;
-}
-
 @media (max-width: 720px) {
-  .setup-backdrop {
-    padding: 0;
-  }
-
-  .setup-panel {
-    width: 100%;
-    height: 100dvh;
-    border: 0;
-    border-radius: 0;
+  .setup-topbar {
+    padding: 10px 14px;
   }
 
   .setup-inner {
-    padding: 18px 16px 10px;
+    padding: 20px 16px 16px;
   }
 
   .setup-header h1 {
     font-size: 1.35rem;
   }
 
-  .setup-progress li {
-    padding-right: 8px;
-  }
-
-  .setup-roles,
   .setup-uploads {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .setup-footer {
+    padding: 12px 16px 16px;
+    border-top: 1px solid var(--border);
   }
 
   .setup-footer button {
     padding: 10px 16px;
   }
+}
 
-  .setup-back {
-    padding: 10px 12px;
+/* Find jobs list, styled like a tracking list: header, search, chips, then one card per job. */
+.job-list-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 6px 0 12px;
+}
+
+.job-list-header h2 {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.job-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 9px;
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.07);
+  color: #b8bcc3;
+  font-size: 0.8rem;
+}
+
+.mapshell button.job-locate {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  min-height: 38px;
+  margin-left: auto;
+  place-items: center;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  background: transparent;
+  color: #e8e9eb;
+  font-size: 1.25rem;
+}
+
+.mapshell button.job-locate:hover {
+  border-color: #34383d;
+  background: #24272b;
+}
+
+.job-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 12px;
+  padding: 0 12px;
+  border: 1px solid #2d3035;
+  border-radius: 10px;
+  background: #1c1e22;
+  color: #8f949b;
+}
+
+.job-search:focus-within {
+  border-color: #8fd8ff;
+}
+
+.job-search input {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  padding: 11px 0;
+  border: 0;
+  background: transparent;
+  color: #f1f2f3;
+  font-size: 16px;
+  outline: none;
+}
+
+.job-chips {
+  display: flex;
+  gap: 8px;
+  margin: 0 -4px 14px;
+  padding: 0 4px 2px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.job-chips::-webkit-scrollbar {
+  display: none;
+}
+
+.mapshell .job-chips button.chip {
+  flex-shrink: 0;
+  min-height: 38px;
+  padding: 8px 14px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: #24272b;
+  color: #a7abb1;
+  font-weight: 600;
+}
+
+.mapshell .job-chips button.chip.active {
+  border-color: #fff;
+  background: #fff;
+  color: #111317;
+}
+
+.job-note {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-left: 3px solid #8fd8ff;
+  background: rgba(143, 216, 255, 0.08);
+  color: #d6e9f7;
+  font-size: 0.88rem;
+}
+
+.job-rows {
+  display: grid;
+  gap: 10px;
+}
+
+.mapshell button.job-row {
+  display: grid;
+  gap: 10px;
+  width: 100%;
+  padding: 16px 18px;
+  border: 1px solid #26292e;
+  border-radius: 14px;
+  background: #1a1c20;
+  color: #f1f2f3;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.mapshell button.job-row:hover {
+  border-color: #3a3f46;
+  background: #1f2226;
+}
+
+.mapshell button.job-row.selected {
+  border-color: #8fd8ff;
+  background: #20242a;
+  box-shadow: 0 0 0 1px rgba(143, 216, 255, 0.35);
+}
+
+.job-row-top,
+.job-row-places,
+.job-row-meta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.job-row-pay {
+  font: 600 1.05rem/1.2 ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  letter-spacing: 0.02em;
+}
+
+.job-badge {
+  flex-shrink: 0;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.job-badge.good {
+  background: rgba(87, 184, 121, 0.18);
+  color: #8fe0a8;
+}
+
+.job-badge.fair {
+  background: rgba(72, 169, 245, 0.2);
+  color: #9fd4ff;
+}
+
+.job-badge.low,
+.job-badge.type {
+  background: rgba(242, 189, 63, 0.16);
+  color: #f4cf7a;
+}
+
+.job-badge.type {
+  background: rgba(143, 216, 255, 0.14);
+  color: #b9e6ff;
+}
+
+/* Route from the jobseeker to the job: light-blue dotted then solid line, the brand eye, distance, arrow. */
+.job-route {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #8b9097;
+  font: 500 0.75rem/1 ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+}
+
+.job-route-code {
+  flex-shrink: 0;
+  letter-spacing: 0.04em;
+}
+
+.job-route-dots {
+  flex: 0 0 26px;
+  border-top: 2px dotted #8fd8ff;
+  opacity: 0.8;
+}
+
+.job-route .tk-eye-icon {
+  flex-shrink: 0;
+}
+
+.job-route-line {
+  position: relative;
+  flex: 1;
+  min-width: 12px;
+  border-top: 1px solid #8fd8ff;
+  opacity: 0.85;
+}
+
+.job-route-line.arrow::after {
+  content: '';
+  position: absolute;
+  right: -1px;
+  top: -4px;
+  width: 6px;
+  height: 6px;
+  border-top: 1px solid #8fd8ff;
+  border-right: 1px solid #8fd8ff;
+  transform: rotate(45deg);
+}
+
+.job-route-chip {
+  flex-shrink: 0;
+  padding: 3px 6px;
+  border-radius: 5px;
+  background: rgba(143, 216, 255, 0.14);
+  color: #cdeeff;
+}
+
+.job-row-places {
+  font-size: 0.98rem;
+  font-weight: 500;
+}
+
+.job-row-places span:last-child {
+  flex-shrink: 0;
+  text-align: right;
+}
+
+.job-row-meta {
+  color: #8b9097;
+  font-size: 0.8rem;
+}
+
+.job-row-meta span:last-child {
+  flex-shrink: 0;
+  color: #e9eaec;
+  font-weight: 600;
+}
+
+.job-row-label {
+  color: #8b9097;
+  font-weight: 400;
+}
+
+/* Map salary tags: the brand eye, a light-blue divider, then the pay; a light-blue outline keeps
+   overlapping pins apart. Pure CSS, so the shared map component is unchanged. */
+.mapshell .pay-pin {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #8fd8ff;
+}
+
+.mapshell .pay-pin::before {
+  content: '';
+  width: 19px;
+  height: 14px;
+  margin-right: 6px;
+  padding-right: 6px;
+  border-right: 1px solid #b9e6ff;
+  /* Three layers of the eye asset, scaled to 60%: star, pupil, then the white of the eye. */
+  background:
+    url('./assets/brand/icon-eye-star.png') 5.4px 3.2px / 7.8px 7.8px no-repeat,
+    url('./assets/brand/icon-eye-pupil.svg') 4.2px 2px / 10.2px 10.2px no-repeat,
+    url('./assets/brand/icon-eye-white.svg') 0 2px / 18.6px 10.2px no-repeat;
+  background-origin: content-box;
+}
+
+.mapshell .pay-pin.selected {
+  border-color: #fff;
+}
+
+.mapshell .pay-pin.selected::before {
+  border-right-color: rgba(28, 32, 35, 0.45);
+}
+
+/* Main map controls sit below the map's own overlays when a screen has one (e.g. the competitor hint). */
+@media (max-width: 720px) {
+  .mapshell-map .maplibregl-ctrl-bottom-right {
+    top: 60px;
+  }
+
+  .mapshell-map:has(.map-overlay) .maplibregl-ctrl-bottom-right {
+    top: 160px;
   }
 }

@@ -1,5 +1,5 @@
 import { useState, type ChangeEvent, type ReactNode } from 'react'
-import { PLACES, PlacesSlides, useSlide } from '../components/PlacesSlideshow'
+import Logo from '../components/Logo'
 import {
   ID_ACCEPT,
   JOBSEEKER_ID_TYPES,
@@ -20,8 +20,6 @@ import type { Role } from '../types'
 import { MAX_UPLOAD_KB } from '../verification'
 import Verify from './employer/Verify'
 import SkillCardForm from './jobseeker/SkillCardForm'
-// Shares the landing page's slideshow styles (.places-slides).
-import '../landing.css'
 
 interface Props {
   accountKey: string
@@ -63,14 +61,14 @@ function FileChip({ file, onRemove }: { file: StoredFile; onRemove?: () => void 
   )
 }
 
-// Post-sign-in setup: account type, then ID, resume and skill card for jobseekers, or business verification for
-// employers. Every step can be skipped; anything skipped can be added later from the profile.
+// Post-sign-in setup page (a full screen of its own, not a pop-up): account type, then ID, resume and skill card
+// for jobseekers, or business verification for employers. Every step can be skipped; anything skipped can be
+// added later from the profile.
 export default function SetupPanel({ accountKey, accountName, initialRole, startAt, single = false, onClose }: Props) {
   const { state, dispatch } = useStore()
   const setup = useAccountSetup(accountKey)
   const jobseeker = useSession('jobseeker')
   const employer = useSession('employer')
-  const slide = useSlide(PLACES.length)
 
   const [role, setRole] = useState<Role | null>(setup.role ?? initialRole ?? null)
   // The role the remaining steps follow; when the account type is skipped, use the interface already open.
@@ -351,24 +349,24 @@ export default function SetupPanel({ accountKey, accountName, initialRole, start
     )
   }
 
-  const credit = PLACES[slide]
-
   return (
-    <div className="setup-backdrop" role="dialog" aria-modal="true" aria-labelledby="setup-title">
-      <section className="setup-panel">
-        <PlacesSlides index={slide} />
+    <main className="setup-page" aria-labelledby="setup-title">
+      <header className="setup-topbar">
+        <Logo height={40} />
+        <span className="badge">Demo</span>
+        {!done && (
+          <button type="button" className="setup-later" onClick={single ? onClose : finishLater}>
+            {single ? 'Close' : 'Finish later'}
+          </button>
+        )}
+      </header>
+
+      <div className="setup-scroll">
         <div className="setup-inner">
-          <header className="setup-header">
-            <div>
-              <span className="setup-kicker">{single ? 'Update your account' : 'Set up your account'}</span>
-              <h1 id="setup-title">{done ? 'Setup complete' : stepTitle(step)}</h1>
-            </div>
-            {!done && (
-              <button type="button" className="setup-later" onClick={single ? onClose : finishLater}>
-                {single ? 'Close' : 'Finish later'}
-              </button>
-            )}
-          </header>
+          <div className="setup-header">
+            <span className="setup-kicker">{single ? 'Update your account' : 'Set up your account'}</span>
+            <h1 id="setup-title">{done ? 'Setup complete' : stepTitle(step)}</h1>
+          </div>
 
           {!single && !done && (
             <ol className="setup-progress" aria-label="Setup steps">
@@ -385,29 +383,25 @@ export default function SetupPanel({ accountKey, accountName, initialRole, start
             {error && <p className="setup-error" role="alert">{error}</p>}
             <p className="setup-note">Prototype: files stay on this device. Only their names are kept, and nothing is checked or sent.</p>
           </div>
-
-          <footer className="setup-footer">
-            {done ? (
-              <button type="button" className="setup-next" onClick={onClose}>Start using TanawKita</button>
-            ) : (
-              <>
-                {!single && index > 0 && (
-                  <button type="button" className="setup-back" onClick={() => { setError(''); setIndex(index - 1) }}>Back</button>
-                )}
-                <span className="setup-spacer" />
-                <button type="button" className="setup-skip" onClick={skip}>Skip</button>
-                <button type="button" className="setup-next" onClick={next}>
-                  {single ? 'Save' : index + 1 < steps.length ? 'Next' : 'Finish'}
-                </button>
-              </>
-            )}
-          </footer>
-
-          <a className="setup-credit" href={credit.source} target="_blank" rel="noreferrer">
-            Photo: {credit.name}, {credit.credit}, CC BY-SA 4.0
-          </a>
         </div>
-      </section>
-    </div>
+      </div>
+
+      <footer className="setup-footer">
+        {done ? (
+          <button type="button" className="setup-next" onClick={onClose}>Start using TanawKita</button>
+        ) : (
+          <>
+            {!single && index > 0 && (
+              <button type="button" className="setup-back" onClick={() => { setError(''); setIndex(index - 1) }}>Back</button>
+            )}
+            <span className="setup-spacer" />
+            <button type="button" className="setup-skip" onClick={skip}>Skip</button>
+            <button type="button" className="setup-next" onClick={next}>
+              {single ? 'Save' : index + 1 < steps.length ? 'Next' : 'Finish'}
+            </button>
+          </>
+        )}
+      </footer>
+    </main>
   )
 }
