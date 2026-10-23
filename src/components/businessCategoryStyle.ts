@@ -35,6 +35,13 @@ export function estimatedFootprintMeters(employeeCountRange: string | undefined)
 }
 
 // Short value for the map card, e.g. "4 yrs".
+// Year opened and age for the map card, e.g. "2022 · 4 yrs". The sheet lists whole years in business,
+// so the year is counted back from the current year.
+export function openedLabel(years: number | undefined, now = new Date()): string {
+  if (years === undefined) return 'Not listed'
+  return `${now.getFullYear() - Math.floor(years)} · ${yearsInBusinessLabel(years)}`
+}
+
 export function yearsInBusinessLabel(years: number | undefined): string {
   if (years === undefined) return 'Not listed'
   if (years < 1) return 'Under 1 yr'

@@ -14,9 +14,10 @@ interface Props {
   height?: number
   // Fill the parent instead of a fixed-height rounded box.
   fill?: boolean
-  // Hiring businesses, each drawn as a glowing circle under its pay tags (and its building colored in 3D).
+  // Hiring businesses, each drawn as a callout over a glowing circle (and its building colored in 3D).
   places?: CompetitorPlace[]
   selectedPlaceId?: string | null
+  onPlaceSelect?: (placeId: string) => void
   placeLabels?: boolean
 }
 

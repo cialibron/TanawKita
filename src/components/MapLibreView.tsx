@@ -6,7 +6,7 @@ import './maplibre.css'
 import type { JobPost } from '../types'
 import type { Feature, MultiPolygon, Polygon } from 'geojson'
 import type { CompetitorPlace } from '../businessDirectory'
-import { CATEGORY_STYLE, categoryLabel, estimatedFootprintMeters, yearsInBusinessLabel } from './businessCategoryStyle'
+import { CATEGORY_STYLE, categoryLabel, estimatedFootprintMeters, openedLabel } from './businessCategoryStyle'
 import { APPROX_RADIUS_PX, areaSquareMeters, areaTier, growOutline, metersPerPixel, pickBuilding, sizeMeters, splitBuildings, type AreaShape } from './buildingHighlight'
 import { BUILDINGS_3D_LAYER, FLAT_BUILDINGS_LAYER, TANAWKITA_MAP_STYLE } from './tanawkitaMapStyle'
 
@@ -391,7 +391,9 @@ function businessCallout(place: CompetitorPlace, selected: boolean, onClick?: ()
   const button = document.createElement('button')
   button.type = 'button'
   button.className = `biz-callout${selected ? ' selected' : ''}`
-  const spokenYears = years === undefined ? 'years open not listed' : years < 1 ? 'under 1 year in business' : `${years} year${years === 1 ? '' : 's'} in business`
+  const spokenYears = years === undefined
+    ? 'year opened not listed'
+    : `opened in ${new Date().getFullYear() - Math.floor(years)}, ${years < 1 ? 'under 1 year' : `${years} year${years === 1 ? '' : 's'}`} in business`
   button.setAttribute('aria-label', `${place.name}, ${categoryLabel(place.category)}, ${spokenYears}, demo business`)
   button.setAttribute('aria-pressed', String(selected))
   const span = (className: string, text?: string) => {
@@ -407,7 +409,7 @@ function businessCallout(place: CompetitorPlace, selected: boolean, onClick?: ()
   const name = document.createElement('strong')
   name.className = 'biz-callout-name'
   name.textContent = place.name
-  head.append(name, span('biz-callout-dot'))
+  head.append(name, span('biz-callout-hex'))
   const row = (label: string, value: string) => {
     const element = span('biz-callout-row')
     const val = document.createElement('b')
@@ -415,7 +417,7 @@ function businessCallout(place: CompetitorPlace, selected: boolean, onClick?: ()
     element.append(span('', label), val)
     return element
   }
-  card.append(span('biz-callout-tag', 'Demo'), head, row('Type', style.short), row('In business', yearsInBusinessLabel(years)))
+  card.append(span('biz-callout-tag', 'Demo'), head, row('Type', style.short), row('Opened', openedLabel(years)))
   button.append(span('biz-callout-line'), pin, card)
   if (onClick) {
     button.addEventListener('click', (event) => {
@@ -452,6 +454,12 @@ export default function MapLibreView({
   const [map, setMap] = useState<LibreMap | null>(null)
   const [error, setError] = useState('')
   const [mode, setMode] = useState<MapMode>('2d')
+  // Latest place-select handler, so callouts are not rebuilt when a page passes a new function each render.
+  const placeSelect = useRef(onPlaceSelect)
+  useEffect(() => {
+    placeSelect.current = onPlaceSelect
+  }, [onPlaceSelect])
+  const canSelectPlace = Boolean(onPlaceSelect)
   const modeRef = useRef<MapMode>('2d')
   const compassRef = useRef<NavigationControl | null>(null)
   const is3d = mode === '3d'
@@ -655,7 +663,7 @@ export default function MapLibreView({
         const place = byId.get(id)
         if (!place || markers.has(id)) continue
         const selected = id === selectedPlaceId
-        const element = businessCallout(place, selected, onPlaceSelect ? () => onPlaceSelect(id) : undefined)
+        const element = businessCallout(place, selected, canSelectPlace ? () => placeSelect.current?.(id) : undefined)
         if (selected) element.style.zIndex = '5'
         markers.set(id, new LibreMarker({ element, anchor: 'bottom' }).setLngLat([place.lng, place.lat]).addTo(map))
       }
@@ -666,7 +674,7 @@ export default function MapLibreView({
       map.off('moveend', render)
       markers.forEach((marker) => marker.remove())
     }
-  }, [map, places, selectedPlaceId, onPlaceSelect, placeLabels])
+  }, [map, places, selectedPlaceId, canSelectPlace, placeLabels])
 
   useEffect(() => {
     if (!map || !onPlaceSelect) return

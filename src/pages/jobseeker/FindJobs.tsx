@@ -80,15 +80,22 @@ export default function FindJobs({ view, onViewChange, navigation, activeNavigat
     .map((job) => ({ job, match: card ? matchScore(job, card, true) : null }))
     .sort((a, b) => (b.match?.percent ?? 0) - (a.match?.percent ?? 0))
 
-  // Hiring businesses for the map. Demo-sheet jobs always sit on their business, so the pay tag points at its
-  // circle even if saved data holds an older location; other jobs snap only when posted within 150 m of it.
+  // Hiring businesses for the map, each shown as a business callout over its glowing circle. A job at its
+  // business (every demo-sheet job, or one posted within 150 m) is reached through that callout; a job posted
+  // somewhere else keeps its own pay tag.
   const places = placesFor(jobs.map(({ job }) => job.employerId))
-  const mapJobs = jobs.map(({ job }) => {
+  const isAtBusiness = (job: JobPost) => {
     const place = places.find((item) => item.id === job.employerId)
-    const atBusiness = place && (job.id.startsWith('SYN-JOB-') || distanceKm([job.lat, job.lng], [place.lat, place.lng]) <= 0.15)
-    return place && atBusiness ? { ...job, lat: place.lat, lng: place.lng } : job
-  })
-  const selectedEmployerId = jobs.find(({ job }) => job.id === selectedId)?.job.employerId ?? null
+    return Boolean(place && (job.id.startsWith('SYN-JOB-') || distanceKm([job.lat, job.lng], [place.lat, place.lng]) <= 0.15))
+  }
+  const jobsAtBusiness = jobs.filter(({ job }) => isAtBusiness(job)).map(({ job }) => job)
+  const mapJobs = jobs.filter(({ job }) => !isAtBusiness(job)).map(({ job }) => job)
+  const businessPlaces = places.filter((place) => jobsAtBusiness.some((job) => job.employerId === place.id))
+  const selectedEmployerId = jobsAtBusiness.find((job) => job.id === selectedId)?.employerId ?? null
+  const selectBusiness = (placeId: string) => {
+    const job = jobsAtBusiness.find((item) => item.employerId === placeId)
+    if (job) select(job.id)
+  }
 
   const alreadyApplied = (jobId: string) =>
     state.applications.some((a) => a.jobId === jobId && a.userId === session.userId)
@@ -195,7 +202,7 @@ export default function FindJobs({ view, onViewChange, navigation, activeNavigat
       onViewChange={onViewChange}
       panelOpen={panelOpen}
       onPanelOpenChange={setPanelOpen}
-      map={<JobMap fill jobs={mapJobs} selectedId={selectedId} onSelect={select} me={me} places={places} selectedPlaceId={selectedEmployerId} placeLabels={false} />}
+      map={<JobMap fill jobs={mapJobs} selectedId={selectedId} onSelect={select} me={me} places={businessPlaces} selectedPlaceId={selectedEmployerId} onPlaceSelect={selectBusiness} />}
       panel={
         <>
           {panelHeader}
