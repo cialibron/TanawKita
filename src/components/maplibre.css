@@ -146,13 +146,14 @@
   animation: biz-callout-in 260ms ease-out both;
 }
 
+/* Leader line along the card's left edge, from its top corner down to the business point (8 px below the card). */
 .biz-callout-line {
   position: absolute;
-  left: -1px;
-  bottom: 0;
+  left: -4px;
+  top: 0;
+  bottom: -8px;
   width: 2px;
-  height: 64px;
-  background: linear-gradient(to top, var(--cat), transparent 140%);
+  background: linear-gradient(to top, var(--cat), rgba(255, 255, 255, 0.85));
   box-shadow: 0 0 6px var(--cat);
 }
 
@@ -168,11 +169,12 @@
   box-shadow: 0 0 8px var(--cat);
 }
 
-/* TanawKita pin (the logo's pin and eye) sitting on top of the leader line, scaled from 43 x 52 to 32 x 39. */
+/* TanawKita pin (the logo's pin and eye) on the card's top-left corner, its tip on the leader line.
+   Scaled from 43 x 52 to 32 x 39 and centered on the line (line center is 3 px left of the card). */
 .biz-callout-pin {
   position: absolute;
-  left: -16px;
-  bottom: 58px;
+  left: -19px;
+  bottom: 100%;
   width: 32px;
   height: 39px;
   filter: drop-shadow(0 0 6px rgba(62, 232, 255, 0.55)) drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5));
@@ -279,7 +281,6 @@
 
 .biz-callout:hover .biz-callout-card,
 .biz-callout:focus-visible .biz-callout-card {
-  transform: translateY(-2px);
   border-color: var(--cat);
 }
 

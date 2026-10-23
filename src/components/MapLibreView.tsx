@@ -453,7 +453,10 @@ function businessCallout(place: CompetitorPlace, selected: boolean, onClick?: ()
     return element
   }
   card.append(span('biz-callout-tag', 'Demo'), head, row('Type', style.short), row('Opened', openedLabel(years)))
-  button.append(span('biz-callout-line'), pin, card)
+  // Pin and leader line hang off the card, so the pin always sits on the card's top-left corner and the line
+  // runs down its left edge to the business point, whatever the card's height.
+  card.append(span('biz-callout-line'), pin)
+  button.append(card)
   if (onClick) {
     button.addEventListener('click', (event) => {
       event.stopPropagation()
