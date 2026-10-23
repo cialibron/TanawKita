@@ -426,3 +426,21 @@
 .biz-callout.compact .biz-callout-head {
   padding: 10px 10px 8px;
 }
+
+/* Zoom readout under the zoom buttons (100% = starting view). Same width as the zoom buttons. */
+.map-zoom-level {
+  width: 40px;
+  padding: 3px 0;
+  border: 1px solid rgba(120, 190, 255, 0.4);
+  background: rgba(17, 27, 57, 0.92);
+  color: #eaf4ff;
+  font: 700 11px/1.2 'Poppins', system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+}
+
+:root[data-theme='light'] .map-zoom-level {
+  border-color: var(--lt-line);
+  background: var(--lt-float);
+}

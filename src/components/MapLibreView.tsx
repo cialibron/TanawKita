@@ -734,6 +734,21 @@ export default function MapLibreView({
     map?.easeTo({ zoom: defaultZoom, duration: 600 })
   }
 
+  // Zoom readout under the zoom buttons: 100% at the default zoom, doubling with each zoom level in.
+  // Written straight to the element on every zoom frame, so the map component does not re-render while zooming.
+  const zoomLevel = useRef<HTMLSpanElement>(null)
+  useEffect(() => {
+    if (!map) return
+    const show = () => {
+      if (zoomLevel.current) zoomLevel.current.textContent = `${Math.round(2 ** (map.getZoom() - defaultZoom) * 100)}%`
+    }
+    show()
+    map.on('zoom', show)
+    return () => {
+      map.off('zoom', show)
+    }
+  }, [map, defaultZoom])
+
   // Pins shrink as the map zooms out: callouts and pay tags read this size from the map container.
   useEffect(() => {
     if (!map) return
@@ -1065,6 +1080,7 @@ export default function MapLibreView({
       <div ref={container} className="maplibre-canvas" aria-label="Interactive map of Davao City" />
       {map && (
         <div className="map-view-controls">
+          <span ref={zoomLevel} className="map-zoom-level" role="status" aria-live="off" title="Zoom compared with the starting view" />
           <button
             type="button"
             className={`map-dimension-toggle${is3d ? ' is-3d' : ''}`}
