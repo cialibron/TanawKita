@@ -129,8 +129,10 @@
   font: 600 15px/1.4 'Poppins', system-ui, sans-serif;
 }
 
-/* ===== Business callouts: category pin, leader line, three-line card ===== */
+/* ===== Business callouts: category pin with white badge, leader line, card with a type tab =====
+   Card: name + dot, a Demo tab on the top-right edge, cyan-barred rows for business type and years open. */
 .biz-callout {
+  --cyan: #3ee8ff;
   position: absolute;
   left: 0;
   bottom: 0;
@@ -149,7 +151,7 @@
   left: -1px;
   bottom: 0;
   width: 2px;
-  height: 70px;
+  height: 64px;
   background: linear-gradient(to top, var(--cat), transparent 140%);
   box-shadow: 0 0 6px var(--cat);
 }
@@ -166,72 +168,128 @@
   box-shadow: 0 0 8px var(--cat);
 }
 
+/* Teardrop pin in the category color, pointing down at the leader line. */
 .biz-callout-pin {
   position: absolute;
-  left: -19px;
-  bottom: 66px;
-  width: 38px;
-  height: 38px;
+  left: -21px;
+  bottom: 60px;
+  width: 42px;
+  height: 42px;
   display: grid;
   place-items: center;
-  border: 2px solid #fff;
   border-radius: 50% 50% 50% 0;
   background: var(--cat);
-  font-size: 18px;
-  line-height: 1;
   transform: rotate(-45deg);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45);
+  box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.18), 0 6px 14px rgba(0, 0, 0, 0.5);
 }
 
-/* Keep the glyph upright inside the rotated teardrop. */
-.biz-callout-pin > span {
+/* White round badge inside the pin, holding the business-type icon upright. */
+.biz-callout-badge {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #fff;
+  font-size: 15px;
+  line-height: 1;
   transform: rotate(45deg);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
 }
 
 .biz-callout-card {
   position: absolute;
-  left: 8px;
-  bottom: 12px;
-  min-width: 176px;
-  max-width: 230px;
+  left: 14px;
+  bottom: 10px;
+  min-width: 190px;
+  max-width: 240px;
   display: grid;
-  gap: 4px;
-  padding: 0 0 6px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(8, 13, 30, 0.9);
+  gap: 5px;
+  padding: 0 0 7px;
+  border: 1px solid rgba(120, 190, 255, 0.16);
+  background: rgba(13, 21, 44, 0.94);
   backdrop-filter: blur(6px);
   color: #eef1f6;
   text-align: left;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.5);
   transition: transform 160ms ease, border-color 160ms ease;
 }
 
-.biz-callout-name {
+/* "Demo" tab on the card's top-right edge: these businesses are fictional. */
+.biz-callout-tag {
+  position: absolute;
+  right: 8px;
+  top: -10px;
+  max-width: calc(100% - 16px);
   overflow: hidden;
-  padding: 7px 10px 6px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  background: #000;
-  font: 600 14px/1.15 'Poppins', system-ui, sans-serif;
+  padding: 2px 8px;
+  border-radius: 3px;
+  background: var(--cat);
+  color: #0b1226;
+  font: 700 11.5px/1.4 'Poppins', system-ui, sans-serif;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.biz-callout-row {
+.biz-callout-head {
   display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  margin: 0 8px;
-  padding: 3px 6px;
-  border-left: 3px solid var(--cat);
-  background: rgba(255, 255, 255, 0.04);
-  color: #b9c3d6;
-  font-size: 11.5px;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 10px 7px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(4, 8, 20, 0.7);
+}
+
+.biz-callout-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  font: 600 15px/1.2 'Poppins', system-ui, sans-serif;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
+/* Decorative dot in the category color. */
+.biz-callout-dot {
+  flex: none;
+  width: 11px;
+  height: 11px;
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  border-radius: 50%;
+  background: var(--cat);
+  box-shadow: 0 0 8px var(--cat);
+}
+
+.biz-callout-row {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  margin: 0 8px;
+  padding: 4px 8px 4px 14px;
+  background: rgba(255, 255, 255, 0.07);
+  color: #e6ecf7;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+/* Rounded cyan bar on the left of each row. */
+.biz-callout-row::before {
+  content: '';
+  position: absolute;
+  left: 3px;
+  top: 4px;
+  bottom: 4px;
+  width: 4px;
+  border-radius: 2px;
+  background: var(--cyan);
+  box-shadow: 0 0 6px color-mix(in srgb, var(--cyan) 60%, transparent);
+}
+
 .biz-callout-row b {
-  color: var(--cat);
+  color: var(--cyan);
   font-weight: 700;
+  font-variant-numeric: tabular-nums;
 }
 
 .biz-callout:hover .biz-callout-card,
@@ -244,13 +302,17 @@
   outline: none;
 }
 
+.biz-callout:focus-visible .biz-callout-card {
+  box-shadow: 0 0 0 2px #fff, 0 10px 24px rgba(0, 0, 0, 0.5);
+}
+
 .biz-callout.selected .biz-callout-card {
   border-color: var(--cat);
-  box-shadow: 0 0 0 1px var(--cat), 0 0 22px color-mix(in srgb, var(--cat) 55%, transparent), 0 8px 20px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0 0 1px var(--cat), 0 0 22px color-mix(in srgb, var(--cat) 55%, transparent), 0 10px 24px rgba(0, 0, 0, 0.5);
 }
 
 .biz-callout.selected .biz-callout-pin {
-  box-shadow: 0 0 0 4px color-mix(in srgb, var(--cat) 40%, transparent), 0 4px 12px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--cat) 40%, transparent), 0 6px 14px rgba(0, 0, 0, 0.5);
 }
 
 @keyframes biz-callout-in {
@@ -262,7 +324,11 @@
 
 @media (max-width: 640px) {
   .biz-callout-card {
-    min-width: 150px;
+    min-width: 160px;
+  }
+
+  .biz-callout-name {
+    font-size: 14px;
   }
 }
 

@@ -98,7 +98,7 @@ export default function CompetitorDetail({ place }: { place: CompetitorPlace }) 
           <div className="cd-stats">
             <div><span>Team size</span><strong>{profile.employeeCountRange ?? '—'} people</strong></div>
             <div><span>Branches in Davao</span><strong>{profile.branchesInDavao ?? 1}</strong></div>
-            <div><span>Shaded area</span><strong>~{estimatedFootprintMeters(profile.employeeCountRange)} m wide</strong></div>
+            <div><span>Estimated size</span><strong>~{estimatedFootprintMeters(profile.employeeCountRange)} m wide</strong></div>
           </div>
         </div>
       ) : (
@@ -124,7 +124,7 @@ export default function CompetitorDetail({ place }: { place: CompetitorPlace }) 
         </div>
       )}
 
-      <p className="advisor-synthetic-note">Fictional simulation business · approximate location · shaded area is a size estimate from team size, not a real lot</p>
+      <p className="advisor-synthetic-note">Fictional simulation business · approximate location · up close, the shading follows the nearest mapped building as a guide only, not this business's real storefront</p>
     </div>
   )
 }

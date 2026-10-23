@@ -34,6 +34,13 @@ export function estimatedFootprintMeters(employeeCountRange: string | undefined)
   return 55
 }
 
+// Short value for the map card, e.g. "4 yrs".
+export function yearsInBusinessLabel(years: number | undefined): string {
+  if (years === undefined) return 'Not listed'
+  if (years < 1) return 'Under 1 yr'
+  return `${years} yr${years === 1 ? '' : 's'}`
+}
+
 export function yearsOpenLabel(years: number | undefined): string {
   if (years === undefined) return 'Years open not listed'
   if (years < 1) return 'Opened this year'

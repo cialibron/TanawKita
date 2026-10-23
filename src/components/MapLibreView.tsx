@@ -4,9 +4,10 @@ import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?url'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import './maplibre.css'
 import type { JobPost } from '../types'
-import type { Feature, Polygon } from 'geojson'
+import type { Feature, MultiPolygon, Polygon } from 'geojson'
 import type { CompetitorPlace } from '../businessDirectory'
-import { CATEGORY_STYLE, categoryLabel, estimatedFootprintMeters, yearsOpenLabel } from './businessCategoryStyle'
+import { CATEGORY_STYLE, categoryLabel, estimatedFootprintMeters, yearsInBusinessLabel } from './businessCategoryStyle'
+import { APPROX_RADIUS_PX, areaSquareMeters, areaTier, metersPerPixel, pickBuilding, sizeMeters, splitBuildings, type AreaShape } from './buildingHighlight'
 
 const DAVAO_CENTER: [number, number] = [7.0731, 125.6128]
 
@@ -22,6 +23,10 @@ const BUILDINGS_LAYER = 'tanawkita-3d-buildings'
 const LABEL_ZOOM = 15
 const MAX_LABELS = 24
 const PITCH_3D = 55
+// Shaded business areas start at this zoom, the same zoom building tiles start.
+const AREA_MIN_ZOOM = 13
+// Building outlines are looked up from this zoom; before it, store-sized buildings are under ~10 px.
+const BUILDING_MIN_ZOOM = 15.5
 const UNIT_SHORT = { day: 'day', hour: 'hr', task: 'task' } as const
 
 interface Props {
@@ -125,8 +130,12 @@ function tintBaseStyle(map: LibreMap) {
   }
 }
 
-function addDataLayers(map: LibreMap) {
-  if (map.getSource(HEAT_SOURCE)) return
+// Adds TanawKita's layers and returns the base style's flat building layers, used to find a pin's building.
+function addDataLayers(map: LibreMap): string[] {
+  const buildingLayers = map.getStyle().layers
+    .filter((layer) => layer.type === 'fill' && 'source-layer' in layer && layer['source-layer'] === 'building')
+    .map((layer) => layer.id)
+  if (map.getSource(HEAT_SOURCE)) return buildingLayers
   tintBaseStyle(map)
   for (const [category, style] of Object.entries(CATEGORY_STYLE)) {
     if (!map.hasImage(`tk-hatch-${category}`)) map.addImage(`tk-hatch-${category}`, hatchImage(style.color))
@@ -308,44 +317,82 @@ function addDataLayers(map: LibreMap) {
     },
     labelsStart,
   )
+  return buildingLayers
 }
 
-// Map callout for one business: category pin, leader line, and a card with name, type, and years open.
+// Shaded area for each business, as precise as the zoom allows: a soft circle when zoomed out, a square sized
+// from team size in between, and the outline of the mapped building nearest the pin once it is big enough to see.
+// The businesses are fictional, so a matched building is a visual guide only, not the business's real storefront.
+// Returns the features plus a short signature, so callers can skip updates when nothing changed.
+function businessAreas(map: LibreMap, places: CompetitorPlace[], selectedPlaceId: string | null | undefined, buildingLayers: string[]) {
+  const zoom = map.getZoom()
+  if (zoom < AREA_MIN_ZOOM) return { features: [], signature: 'hidden' }
+  const bounds = map.getBounds()
+  // One query for the whole view, split into single outlines once. Below this zoom no store-sized building is
+  // big enough on screen to outline, so the query is skipped.
+  const buildings = buildingLayers.length && zoom >= BUILDING_MIN_ZOOM
+    ? splitBuildings(map.queryRenderedFeatures({ layers: buildingLayers })
+      .map((feature) => feature.geometry)
+      .filter((geometry): geometry is AreaShape => geometry.type === 'Polygon' || geometry.type === 'MultiPolygon'))
+    : []
+  const signature: string[] = [zoom.toFixed(2)]
+  const features = places.map((place): Feature<Polygon | MultiPolygon> => {
+    const properties = { category: place.category, color: CATEGORY_STYLE[place.category].color, selected: place.id === selectedPlaceId }
+    const mpp = metersPerPixel(place.lat, zoom)
+    const footprint = estimatedFootprintMeters(place.profile.employeeCountRange)
+    const building = buildings.length && bounds.contains([place.lng, place.lat]) ? pickBuilding(buildings, [place.lng, place.lat]) : null
+    const buildingSize = building ? sizeMeters(building) : null
+    const tier = areaTier({
+      buildingMinSidePx: buildingSize ? Math.min(buildingSize.width, buildingSize.height) / mpp : undefined,
+      buildingAreaM2: building ? areaSquareMeters(building.coordinates) : undefined,
+      footprintMeters: footprint,
+      estimateSidePx: footprint / mpp,
+    })
+    signature.push(`${place.id}:${tier}:${properties.selected ? 1 : 0}:${building ? `${building.minLng},${building.minLat}` : ''}`)
+    if (tier === 'building' && building) return { type: 'Feature', properties: { ...properties, tier }, geometry: { type: 'Polygon', coordinates: building.coordinates } }
+    if (tier === 'estimate') return squareFeature(place.lat, place.lng, footprint, { ...properties, tier })
+    return { ...circleFeature(place.lat, place.lng, (APPROX_RADIUS_PX * mpp) / 1000), properties: { ...properties, tier } }
+  })
+  return { features, signature: signature.join('|') }
+}
+
+// Map callout for one business: a category pin with a white badge, and a card with the business name,
+// type, and how long it has been open. The tab marks it as demo data, since these businesses are fictional.
 function businessCallout(place: CompetitorPlace, selected: boolean, onClick?: () => void): HTMLDivElement {
   const style = CATEGORY_STYLE[place.category]
-  const years = yearsOpenLabel(place.profile.yearsOperating)
+  const years = place.profile.yearsOperating
   const container = document.createElement('div')
   container.className = 'tanawkita-map-marker'
   container.style.setProperty('--cat', style.color)
   const button = document.createElement('button')
   button.type = 'button'
   button.className = `biz-callout${selected ? ' selected' : ''}`
-  button.setAttribute('aria-label', `${place.name}, ${categoryLabel(place.category)}, ${years}`)
+  const spokenYears = years === undefined ? 'years open not listed' : years < 1 ? 'under 1 year in business' : `${years} year${years === 1 ? '' : 's'} in business`
+  button.setAttribute('aria-label', `${place.name}, ${categoryLabel(place.category)}, ${spokenYears}, demo business`)
   button.setAttribute('aria-pressed', String(selected))
-  const line = document.createElement('span')
-  line.className = 'biz-callout-line'
-  const pin = document.createElement('span')
-  pin.className = 'biz-callout-pin'
-  const glyph = document.createElement('span')
-  glyph.textContent = style.glyph
-  pin.append(glyph)
-  const card = document.createElement('span')
-  card.className = 'biz-callout-card'
+  const span = (className: string, text?: string) => {
+    const element = document.createElement('span')
+    element.className = className
+    if (text) element.textContent = text
+    return element
+  }
+  const pin = span('biz-callout-pin')
+  pin.append(span('biz-callout-badge', style.glyph))
+  const card = span('biz-callout-card')
+  const head = span('biz-callout-head')
   const name = document.createElement('strong')
   name.className = 'biz-callout-name'
   name.textContent = place.name
+  head.append(name, span('biz-callout-dot'))
   const row = (label: string, value: string) => {
-    const element = document.createElement('span')
-    element.className = 'biz-callout-row'
-    const key = document.createElement('span')
-    key.textContent = label
+    const element = span('biz-callout-row')
     const val = document.createElement('b')
     val.textContent = value
-    element.append(key, val)
+    element.append(span('', label), val)
     return element
   }
-  card.append(name, row('Type', style.short), row('Open', years.replace(/^Open /, '')))
-  button.append(line, pin, card)
+  card.append(span('biz-callout-tag', 'Demo'), head, row('Type', style.short), row('In business', yearsInBusinessLabel(years)))
+  button.append(span('biz-callout-line'), pin, card)
   if (onClick) {
     button.addEventListener('click', (event) => {
       event.stopPropagation()
@@ -376,6 +423,7 @@ export default function MapLibreView({
 }: Props) {
   const container = useRef<HTMLDivElement>(null)
   const mapRef = useRef<LibreMap | null>(null)
+  const buildingLayers = useRef<string[]>([])
   const [map, setMap] = useState<LibreMap | null>(null)
   const [error, setError] = useState('')
   const [is3d, setIs3d] = useState(false)
@@ -410,7 +458,7 @@ export default function MapLibreView({
     })
     instance.on('pitchend', () => setIs3d(instance.getPitch() > 5))
     instance.on('load', () => {
-      addDataLayers(instance)
+      buildingLayers.current = addDataLayers(instance)
       setMap(instance)
     })
     instance.on('error', (event) => {
@@ -495,15 +543,28 @@ export default function MapLibreView({
         geometry: { type: 'Point' as const, coordinates: [place.lng, place.lat] },
       })),
     })
-    const areas = map.getSource(COMPETITOR_AREA_SOURCE) as GeoJSONSource | undefined
-    areas?.setData({
-      type: 'FeatureCollection',
-      features: places.map((place) => squareFeature(place.lat, place.lng, estimatedFootprintMeters(place.profile.employeeCountRange), {
-        category: place.category,
-        color: CATEGORY_STYLE[place.category].color,
-        selected: place.id === selectedPlaceId,
-      })),
-    })
+  }, [map, places, selectedPlaceId])
+
+  // Reshape the shaded areas whenever the map settles: their precision depends on zoom and on loaded building tiles.
+  useEffect(() => {
+    if (!map) return
+    const source = map.getSource(COMPETITOR_AREA_SOURCE) as GeoJSONSource | undefined
+    let last = ''
+    const update = () => {
+      const { features, signature } = businessAreas(map, places, selectedPlaceId, buildingLayers.current)
+      // Updating the source triggers another idle event; skip it when nothing changed so this does not loop.
+      if (signature === last) return
+      last = signature
+      source?.setData({ type: 'FeatureCollection', features })
+    }
+    update()
+    // moveend reshapes right after a zoom; idle catches building tiles that finish loading later.
+    map.on('moveend', update)
+    map.on('idle', update)
+    return () => {
+      map.off('moveend', update)
+      map.off('idle', update)
+    }
   }, [map, places, selectedPlaceId])
 
   // Callout cards for businesses in view at street level (and always for the selected one).
