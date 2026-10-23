@@ -2,7 +2,6 @@ import businessesCsv from '../../simulation-data/businesses.csv?raw'
 import jobseekersCsv from '../../simulation-data/jobseekers.csv?raw'
 import { DAYS, userIdFor } from '../rules'
 import { requiredDocs, type EmployerKind, type UploadedDoc, type Verification } from '../verification'
-import { mockSeekers } from './mockSeekers'
 import type { Business, JobPost, JobType, PayUnit, SkillCard } from '../types'
 
 interface CsvRow {
@@ -172,12 +171,7 @@ export const syntheticBusinesses: SyntheticBusiness[] = parseCsv(businessesCsv).
   return { id, name: row.business_name, business, verification: verificationFor(row, index), jobs: jobsFor(row, id, index) }
 })
 
-const usedJobseekerIds = new Set([
-  ...mockSeekers().map((person) => person.userId),
-  userIdFor('jobseeker', 'Ana Reyes'),
-  userIdFor('jobseeker', 'Jun Dela Cruz'),
-  userIdFor('jobseeker', 'Lea Mae'),
-])
+const usedJobseekerIds = new Set<string>()
 
 export const syntheticJobseekers: SkillCard[] = parseCsv(jobseekersCsv).map((row) => {
   const name = usedJobseekerIds.has(userIdFor('jobseeker', row.full_name))

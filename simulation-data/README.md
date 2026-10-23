@@ -4,8 +4,8 @@ These CSVs are **new, separate demo sheets**. The app reads them as additive syn
 
 ## Files
 
-- `businesses.csv` — 300 fictional Davao-area businesses across 14 sectors, including business model, approximate location, sample hiring status, job roles, and pay examples. Appended urban clusters make local competitor searches useful in the demo.
-- `jobseekers.csv` — 300 fictional jobseeker profiles with varied ages, work status, education, experience, skills, training, availability, preferences, pay expectations, languages, and commute/access patterns.
+- `businesses.csv` — 5 fictional demo businesses, one each in Mandug, Buhangin, Puan (Talomo), Roxas Ave (Barangay 8-A) and Matina Crossing, with business model, approximate location, sample hiring status, job roles, and pay examples.
+- `jobseekers.csv` — 2 fictional jobseeker profiles: Viola Co (19, 2nd-year BS Data Science student, part-time) and Ana Reyes (24, adult jobseeker in food service).
 
 ## Important simulation and privacy notes
 
