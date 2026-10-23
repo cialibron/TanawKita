@@ -9,6 +9,11 @@ import type { CompetitorPlace } from '../businessDirectory'
 import { CATEGORY_STYLE, categoryLabel, estimatedFootprintMeters, openedLabel } from './businessCategoryStyle'
 import { APPROX_RADIUS_PX, areaSquareMeters, areaTier, growOutline, metersPerPixel, pickBuilding, sizeMeters, splitBuildings, type AreaShape } from './buildingHighlight'
 import { BUILDINGS_3D_LAYER, FLAT_BUILDINGS_LAYER, TANAWKITA_MAP_STYLE } from './tanawkitaMapStyle'
+import brandPin from '../assets/brand/pin.svg'
+import brandEyeWhite from '../assets/brand/eye-white.svg'
+import brandEyeMask from '../assets/brand/eye-mask.svg'
+import brandPupil from '../assets/brand/pupil.svg'
+import brandPupilStar from '../assets/brand/pupil-star.png'
 
 const DAVAO_CENTER: [number, number] = [7.0731, 125.6128]
 
@@ -380,8 +385,38 @@ function pinCircles(map: LibreMap, places: CompetitorPlace[], selectedPlaceId: s
   return { features, signature: signature.join('|') }
 }
 
-// Map callout for one business: a category pin with a white badge, and a card with the business name,
-// type, and how long it has been open. The tab marks it as demo data, since these businesses are fictional.
+// The TanawKita pin-and-eye mark (43 x 52 in Figma, same parts as BrandEmblem in Logo.tsx), built as DOM
+// for a map marker. The eye looks around like the logo's, unless the user prefers reduced motion.
+function brandPinElement(): HTMLSpanElement {
+  const image = (src: string, width: number, height: number, left: number, top: number, className?: string) => {
+    const element = document.createElement('img')
+    element.src = src
+    element.width = width
+    element.height = height
+    element.alt = ''
+    element.style.left = `${left}px`
+    element.style.top = `${top}px`
+    if (className) element.className = className
+    return element
+  }
+  const art = document.createElement('span')
+  art.className = 'tk-logo-art biz-callout-pin-art'
+  const eye = document.createElement('span')
+  eye.className = 'tk-logo-eye'
+  eye.style.left = '7px'
+  eye.style.top = '11px'
+  eye.style.maskImage = `url("${brandEyeMask}")`
+  eye.style.webkitMaskImage = `url("${brandEyeMask}")`
+  const look = document.createElement('span')
+  look.className = 'tk-logo-look'
+  look.append(image(brandPupil, 17, 17, 7, 0), image(brandPupilStar, 13, 13, 9, 2, 'tk-logo-star'))
+  eye.append(look)
+  art.append(image(brandPin, 43, 52, 0, 0), image(brandEyeWhite, 31, 17, 7, 11), eye)
+  return art
+}
+
+// Map callout for one business: the TanawKita pin above a card with the business name, type, and the year it
+// opened with its age. The tab marks it as demo data, since these businesses are fictional.
 function businessCallout(place: CompetitorPlace, selected: boolean, onClick?: () => void): HTMLDivElement {
   const style = CATEGORY_STYLE[place.category]
   const years = place.profile.yearsOperating
@@ -403,7 +438,7 @@ function businessCallout(place: CompetitorPlace, selected: boolean, onClick?: ()
     return element
   }
   const pin = span('biz-callout-pin')
-  pin.append(span('biz-callout-badge', style.glyph))
+  pin.append(brandPinElement())
   const card = span('biz-callout-card')
   const head = span('biz-callout-head')
   const name = document.createElement('strong')

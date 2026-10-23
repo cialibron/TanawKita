@@ -129,7 +129,7 @@
   font: 600 15px/1.4 'Poppins', system-ui, sans-serif;
 }
 
-/* ===== Business callouts: white pin with the type icon, leader line, card with a tab =====
+/* ===== Business callouts: TanawKita pin, leader line, card with a tab =====
    Card: name + hexagon, a Demo tab on the top-right edge, rows with bars in the business-type color
    for business type and year opened. */
 .biz-callout {
@@ -168,32 +168,20 @@
   box-shadow: 0 0 8px var(--cat);
 }
 
-/* White teardrop pin pointing down at the leader line, ringed in the business-type color. */
+/* TanawKita pin (the logo's pin and eye) sitting on top of the leader line, scaled from 43 x 52 to 32 x 39. */
 .biz-callout-pin {
   position: absolute;
-  left: -21px;
-  bottom: 60px;
-  width: 42px;
-  height: 42px;
-  display: grid;
-  place-items: center;
-  border-radius: 50% 50% 50% 0;
-  background: #fff;
-  transform: rotate(-45deg);
-  box-shadow: 0 0 0 2px var(--cat), 0 6px 14px rgba(0, 0, 0, 0.5);
+  left: -16px;
+  bottom: 58px;
+  width: 32px;
+  height: 39px;
+  filter: drop-shadow(0 0 6px rgba(62, 232, 255, 0.55)) drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5));
 }
 
-/* Dark round badge inside the pin, holding the business-type icon upright. */
-.biz-callout-badge {
-  width: 30px;
-  height: 30px;
-  display: grid;
-  place-items: center;
-  border-radius: 50%;
-  background: #0b1226;
-  font-size: 15px;
-  line-height: 1;
-  transform: rotate(45deg);
+.biz-callout-pin .biz-callout-pin-art {
+  width: 43px;
+  height: 52px;
+  transform: scale(0.75);
 }
 
 .biz-callout-card {
@@ -309,7 +297,7 @@
 }
 
 .biz-callout.selected .biz-callout-pin {
-  box-shadow: 0 0 0 4px color-mix(in srgb, var(--cat) 40%, transparent), 0 6px 14px rgba(0, 0, 0, 0.5);
+  filter: drop-shadow(0 0 10px var(--cat)) drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5));
 }
 
 @keyframes biz-callout-in {
