@@ -59,6 +59,8 @@ export default function MyBusiness({ view, onViewChange, navigation, activeNavig
   // Profiles inside the search radius, by real distance from the business, nearest first.
   const nearby = useMemo(() => (business ? seekersWithin(seekers, [business.lat, business.lng], radiusKm) : []), [seekers, business, radiusKm])
   const stats = here ? areaStats(nearby) : null
+  // Where those profiles are, as dots inside the circle. Points are approximate simulation locations, not homes.
+  const nearbyPoints = useMemo(() => nearby.map((p) => p.point), [nearby])
   const job = myJobs.find((j) => j.id === jobId)
   // Drop the selection once its barangay leaves the radius or another tab is open.
   const barangay = activeNavigation === 'people' && selectedBarangay && stats?.barangays.includes(selectedBarangay) ? selectedBarangay : null
@@ -286,6 +288,7 @@ export default function MyBusiness({ view, onViewChange, navigation, activeNavig
           selectedPlaceId={placeSelected ? ownPlaces[0]?.id : null}
           onPlaceSelect={() => setPlaceSelected(true)}
           jobs={onMapTab ? awayJobs : []}
+          people={onMapTab ? nearbyPoints : []}
           onPick={pick}
         />
       }
@@ -312,7 +315,12 @@ export default function MyBusiness({ view, onViewChange, navigation, activeNavig
             )}
           </div>
           {moving && <div className="map-hint">Tap the map where your business is.</div>}
-          {!moving && business && <div className="map-hint">Store location and building are approximate · demo data</div>}
+          {!moving && business && (
+            <div className="map-hint">
+              <span className="map-hint-dot" aria-hidden="true" /> {nearby.length} demo jobseeker profiles in the circle · store, building and
+              profile locations are approximate demo data
+            </div>
+          )}
           {activeNavigation === 'people' && showHeat && (
             <div className="heat-legend">
               <span>Fewer</span>

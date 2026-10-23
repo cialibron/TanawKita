@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import EyeIcon from './EyeIcon'
 import { BrandEmblem } from './Logo'
 import SettingsPanel from './SettingsPanel'
@@ -99,16 +100,27 @@ export function WorkspaceRail({ view, navigation, activeNavigation, onNavigation
 }
 
 // The eye button at the bottom of the rail: opens a small menu with Settings and a dark/light mode switch.
+// The menu and the Settings panel are rendered on the page body, so they sit above every other open panel.
 function RailEyeMenu() {
   const { theme } = usePreferences()
   const [open, setOpen] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
+  // Where the menu opens: beside the eye button, bottom-aligned with it.
+  const [anchor, setAnchor] = useState<{ left: number; bottom: number } | null>(null)
   const wrap = useRef<HTMLDivElement>(null)
+  const menu = useRef<HTMLDivElement>(null)
+
+  function toggle() {
+    const box = wrap.current?.getBoundingClientRect()
+    if (box) setAnchor({ left: box.right + 12, bottom: window.innerHeight - box.bottom })
+    setOpen(!open)
+  }
 
   // Close the menu on a click outside it or on Escape.
   useEffect(() => {
     if (!open) return
-    const onPointer = (e: PointerEvent) => !wrap.current?.contains(e.target as Node) && setOpen(false)
+    const inside = (target: Node) => Boolean(wrap.current?.contains(target) || menu.current?.contains(target))
+    const onPointer = (e: PointerEvent) => !inside(e.target as Node) && setOpen(false)
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setOpen(false)
     document.addEventListener('pointerdown', onPointer)
     document.addEventListener('keydown', onKey)
@@ -128,12 +140,12 @@ function RailEyeMenu() {
         aria-expanded={open}
         aria-label="Settings and theme"
         title="Settings and theme"
-        onClick={() => setOpen(!open)}
+        onClick={toggle}
       >
         <EyeIcon width={22} />
       </button>
-      {open && (
-        <div className="rail-eye-menu" role="menu" aria-label="Settings and theme">
+      {open && anchor && createPortal(
+        <div ref={menu} className="rail-eye-menu" role="menu" aria-label="Settings and theme" style={{ left: anchor.left, bottom: anchor.bottom }}>
           <button
             type="button"
             role="menuitem"
@@ -149,9 +161,10 @@ function RailEyeMenu() {
             Light mode
             <span aria-hidden="true" className={`settings-switch small${light ? ' on' : ''}`}><span /></span>
           </button>
-        </div>
+        </div>,
+        document.body,
       )}
-      {settingsOpen && <SettingsPanel onClose={() => setSettingsOpen(false)} />}
+      {settingsOpen && createPortal(<SettingsPanel onClose={() => setSettingsOpen(false)} />, document.body)}
     </div>
   )
 }

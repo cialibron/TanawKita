@@ -5,6 +5,7 @@ import pupil from '../assets/brand/pupil.svg'
 import pupilStar from '../assets/brand/pupil-star.png'
 import smallEyeWhite from '../assets/brand/small-eye-white.svg'
 import smallEyePupil from '../assets/brand/small-eye-pupil.svg'
+import './eyeTracking'
 
 // Figma "Logo" frame (10:78), measured from its top-left content corner (42, 82). Design size 239 x 67.
 const DESIGN_WIDTH = 239
@@ -12,7 +13,7 @@ const DESIGN_HEIGHT = 67
 
 interface Props {
   height?: number
-  // The pin's eye looks around (Figma motion: 4.2 s loop). Off for users who prefer reduced motion.
+  // The pin's eye follows the cursor (see eyeTracking.ts). Still for users who prefer reduced motion.
   animated?: boolean
 }
 

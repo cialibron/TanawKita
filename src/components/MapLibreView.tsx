@@ -50,6 +50,7 @@ class DavaoHomeControl implements IControl {
 setWorkerUrl(workerUrl)
 
 const HEAT_SOURCE = 'tanawkita-seeker-heat'
+const PEOPLE_SOURCE = 'tanawkita-people'
 const RADIUS_SOURCE = 'tanawkita-business-radius'
 const COMPETITOR_SOURCE = 'tanawkita-competitors'
 const COMPETITOR_AREA_SOURCE = 'tanawkita-competitor-areas'
@@ -114,6 +115,14 @@ interface Props {
   // How business areas are drawn; see AreaStyle.
   areaStyle?: AreaStyle
   view?: { center: [number, number]; zoom: number }
+  // Zoom from which business callouts show over their dots (defaults to city zoom).
+  labelMinZoom?: number
+  // Businesses whose callouts show at any zoom, e.g. the cluster picked in a filter.
+  alwaysLabelIds?: string[]
+  // When set, the map fits these points (changing `key` refits). Used to pan to a picked cluster.
+  fitTo?: { key: string; points: [number, number][] } | null
+  // Small dots for people, e.g. demo jobseeker profiles inside the employer's search circle.
+  people?: [number, number][]
 }
 
 function markerElement(className: string, text?: string): HTMLDivElement {
@@ -157,6 +166,22 @@ function addDataLayers(map: LibreMap) {
     data: { type: 'FeatureCollection', features: [] },
   })
   const labelsStart = map.getStyle().layers.find((layer) => layer.type === 'symbol')?.id
+  map.addSource(PEOPLE_SOURCE, { type: 'geojson', data: { type: 'FeatureCollection', features: [] } })
+  map.addLayer(
+    {
+      id: 'tanawkita-people-points',
+      type: 'circle',
+      source: PEOPLE_SOURCE,
+      paint: {
+        'circle-color': '#3ee8ff',
+        'circle-radius': ['interpolate', ['linear'], ['zoom'], 11, 2.5, 15, 5],
+        'circle-stroke-color': '#0b1c48',
+        'circle-stroke-width': 1,
+        'circle-opacity': 0.9,
+      },
+    },
+    labelsStart,
+  )
   map.addLayer(
     {
       id: 'tanawkita-seeker-heat-layer',
@@ -432,7 +457,7 @@ function pinCircles(map: LibreMap, places: CompetitorPlace[], selectedPlaceId: s
 }
 
 // The TanawKita pin-and-eye mark (43 x 52 in Figma, same parts as BrandEmblem in Logo.tsx), built as DOM
-// for a map marker. The eye looks around like the logo's, unless the user prefers reduced motion.
+// for a map marker. The eye follows the cursor like the logo's (eyeTracking.ts), unless the user prefers reduced motion.
 function brandPinElement(): HTMLSpanElement {
   const image = (src: string, width: number, height: number, left: number, top: number, className?: string) => {
     const element = document.createElement('img')
@@ -532,6 +557,10 @@ export default function MapLibreView({
   placeLabels = true,
   areaStyle = 'zoom-tiers',
   view,
+  labelMinZoom = LABEL_ZOOM,
+  alwaysLabelIds,
+  fitTo,
+  people,
 }: Props) {
   const container = useRef<HTMLDivElement>(null)
   const mapRef = useRef<LibreMap | null>(null)
@@ -714,6 +743,49 @@ export default function MapLibreView({
 
   useEffect(() => {
     if (!map) return
+    const source = map.getSource(PEOPLE_SOURCE) as GeoJSONSource | undefined
+    source?.setData({
+      type: 'FeatureCollection',
+      features: (people ?? []).map(([lat, lng]) => ({
+        type: 'Feature' as const,
+        properties: {},
+        geometry: { type: 'Point' as const, coordinates: [lng, lat] },
+      })),
+    })
+  }, [map, people])
+
+  // Fit the map to a set of points (a picked cluster), leaving room for the left menu, the top buttons and the
+  // callout cards that stand above each point.
+  const fitKey = fitTo?.key
+  const fitPoints = useRef(fitTo?.points)
+  useEffect(() => {
+    fitPoints.current = fitTo?.points
+  })
+  // Clearing the fit (e.g. the cluster filter) flies back to the default view, so the callouts go back to dots.
+  const lastFitKey = useRef<string | undefined>(undefined)
+  useEffect(() => {
+    if (!map) return
+    const cleared = Boolean(lastFitKey.current) && !fitKey
+    lastFitKey.current = fitKey
+    if (cleared) homeRef.current()
+  }, [map, fitKey])
+  useEffect(() => {
+    const points = fitPoints.current
+    if (!map || !fitKey || !points?.length) return
+    const lngs = points.map((p) => p[1])
+    const lats = points.map((p) => p[0])
+    const wide = map.getContainer().clientWidth > 720
+    map.fitBounds(
+      [
+        [Math.min(...lngs), Math.min(...lats)],
+        [Math.max(...lngs), Math.max(...lats)],
+      ],
+      { padding: wide ? { top: 240, bottom: 90, left: 410, right: 160 } : { top: 200, bottom: 60, left: 30, right: 30 }, maxZoom: 16, duration: 900 },
+    )
+  }, [map, fitKey])
+
+  useEffect(() => {
+    if (!map) return
     const source = map.getSource(RADIUS_SOURCE) as GeoJSONSource | undefined
     source?.setData({
       type: 'FeatureCollection',
@@ -761,14 +833,16 @@ export default function MapLibreView({
     if (!map || !places.length || !placeLabels) return
     const byId = new Map(places.map((place) => [place.id, place]))
     const markers = new Map<string, LibreMarker>()
+    const always = alwaysLabelIds ?? []
     const render = () => {
-      const wanted: string[] = []
-      if (map.getZoom() >= LABEL_ZOOM) {
+      const wanted: string[] = always.filter((id) => byId.has(id))
+      if (map.getZoom() >= labelMinZoom) {
         const bounds = map.getBounds()
         const center = map.getCenter()
         wanted.push(...places
           .filter((place) => bounds.contains([place.lng, place.lat]))
           .sort((a, b) => Math.hypot(a.lng - center.lng, a.lat - center.lat) - Math.hypot(b.lng - center.lng, b.lat - center.lat))
+          .filter((place) => !wanted.includes(place.id))
           .slice(0, MAX_LABELS)
           .map((place) => place.id))
       }
@@ -794,7 +868,7 @@ export default function MapLibreView({
       map.off('moveend', render)
       markers.forEach((marker) => marker.remove())
     }
-  }, [map, places, selectedPlaceId, canSelectPlace, placeLabels])
+  }, [map, places, selectedPlaceId, canSelectPlace, placeLabels, labelMinZoom, alwaysLabelIds])
 
   useEffect(() => {
     if (!map || !onPlaceSelect) return

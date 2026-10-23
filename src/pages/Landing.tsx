@@ -182,11 +182,6 @@ export default function Landing({ onEnter, onExplore }: Props) {
               <span className="brand-sub">Davao City • CBMS Innovation Challenge</span>
             </div>
           </div>
-          {mode !== 'signup' && (
-            <button type="button" className="landing-link" onClick={() => switchMode('signup')}>
-              Create an account
-            </button>
-          )}
         </header>
 
         <main className="landing-main">
@@ -216,7 +211,14 @@ export default function Landing({ onEnter, onExplore }: Props) {
           </section>
 
           <section className="landing-card" aria-labelledby="auth-title">
-            <h2 id="auth-title">{title}</h2>
+            <div className="landing-card-head">
+              <h2 id="auth-title">{title}</h2>
+              {mode !== 'signup' && (
+                <button type="button" className="landing-link landing-card-signup" onClick={() => switchMode('signup')}>
+                  Create an account
+                </button>
+              )}
+            </div>
             <p className="demo-banner" role="note">
               <strong>Demo only.</strong> There are no real accounts yet: nothing is sent, saved on a server, or checked.
             </p>

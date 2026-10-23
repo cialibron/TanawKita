@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react'
+import { useMemo, useState, type ReactNode } from 'react'
 import JobMap from '../../components/JobMap'
 import MapShell, { type WorkspaceNavItem } from '../../components/MapShell'
 import { useSession, useStore } from '../../store'
@@ -109,6 +109,47 @@ function placesFor(employerIds: string[]): CompetitorPlace[] {
   return placesCache.get(key)!
 }
 
+// Job clusters: jobs within CLUSTER_KM of each other (chained) form one group, named after the barangay with the
+// most jobs in it. Grouped from the demo job locations, not official city districts.
+const CLUSTER_KM = 3
+
+interface JobCluster {
+  id: string
+  name: string
+  jobIds: Set<string>
+  points: [number, number][]
+}
+
+function jobClusters(jobs: JobPost[]): JobCluster[] {
+  const groups: JobPost[][] = []
+  const seen = new Set<string>()
+  for (const start of jobs) {
+    if (seen.has(start.id)) continue
+    seen.add(start.id)
+    const group = [start]
+    for (let i = 0; i < group.length; i++) {
+      for (const other of jobs) {
+        if (seen.has(other.id) || distanceKm([group[i].lat, group[i].lng], [other.lat, other.lng]) > CLUSTER_KM) continue
+        seen.add(other.id)
+        group.push(other)
+      }
+    }
+    groups.push(group)
+  }
+  return groups
+    .map((group) => {
+      const counts = new Map<string, number>()
+      for (const job of group) counts.set(job.barangay, (counts.get(job.barangay) ?? 0) + 1)
+      const top = [...counts.entries()].sort((a, b) => b[1] - a[1])[0][0]
+      const name = counts.size > 1 ? `${place(top)} area` : place(top)
+      return { id: group.map((job) => job.id).sort().join('|'), name, jobIds: new Set(group.map((job) => job.id)), points: group.map((job): [number, number] => [job.lat, job.lng]) }
+    })
+    .sort((a, b) => b.jobIds.size - a.jobIds.size || a.name.localeCompare(b.name))
+}
+
+// Callouts show over their dots from about 3x closer than the map's starting zoom (14 + log2(3)).
+const CALLOUT_ZOOM = 14 + Math.log2(3)
+
 const TYPE_CHIPS: { id: JobType | 'all'; label: string }[] = [
   { id: 'all', label: 'All jobs' },
   { id: 'short-term', label: 'Short-term' },
@@ -137,6 +178,7 @@ export default function FindJobs({ view, onViewChange, navigation, activeNavigat
   const [query, setQuery] = useState('')
   const [type, setType] = useState<JobType | 'all'>('all')
   const [moreHours, setMoreHours] = useState(false)
+  const [clusterId, setClusterId] = useState('')
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [me, setMe] = useState<[number, number] | null>(null)
   const [locError, setLocError] = useState('')
@@ -152,11 +194,13 @@ export default function FindJobs({ view, onViewChange, navigation, activeNavigat
   }
 
   const q = query.trim().toLowerCase()
+  // Only verified employers' open jobs are shown to jobseekers; clusters are grouped from all of them.
+  const visibleJobs = state.jobs.filter((j) => j.status === 'open' && isVerified(j.employerId))
+  const clusters = jobClusters(visibleJobs)
+  const cluster = clusters.find((c) => c.id === clusterId) ?? null
   // Without a skill card the map and list still show, but there is no match score and no applying.
-  const jobs = state.jobs
-    .filter((j) => j.status === 'open')
-    // Only verified employers' jobs are shown to jobseekers.
-    .filter((j) => isVerified(j.employerId))
+  const jobs = visibleJobs
+    .filter((j) => !cluster || cluster.jobIds.has(j.id))
     .filter((j) => type === 'all' || j.jobType === type)
     .filter((j) => !moreHours || j.jobType !== 'full-time')
     .filter((j) => !card || card.age >= 18 || j.minorsAllowed)
@@ -180,6 +224,9 @@ export default function FindJobs({ view, onViewChange, navigation, activeNavigat
   const mapJobs = jobs.filter(({ job }) => !isAtBusiness(job)).map(({ job }) => job)
   const businessPlaces = places.filter((place) => jobsAtBusiness.some((job) => job.employerId === place.id))
   const selectedEmployerId = jobsAtBusiness.find((job) => job.id === selectedId)?.employerId ?? null
+  // Callouts for a picked cluster show at any zoom. Keyed by id so the map does not rebuild them every render.
+  const clusterLabelKey = cluster ? businessPlaces.map((p) => p.id).join('|') : ''
+  const clusterLabelIds = useMemo(() => (clusterLabelKey ? clusterLabelKey.split('|') : undefined), [clusterLabelKey])
   const selectBusiness = (placeId: string) => {
     const job = jobsAtBusiness.find((item) => item.employerId === placeId)
     if (job) select(job.id)
@@ -254,6 +301,30 @@ export default function FindJobs({ view, onViewChange, navigation, activeNavigat
         <button type="button" className={`chip${moreHours ? ' active' : ''}`} aria-pressed={moreHours} onClick={() => setMoreHours(!moreHours)}>
           More hours
         </button>
+      </div>
+
+      <div className="job-cluster-filter">
+        <label htmlFor="job-cluster">Area</label>
+        <select
+          id="job-cluster"
+          value={cluster?.id ?? ''}
+          onChange={(e) => {
+            setClusterId(e.target.value)
+            setSelectedId(null)
+          }}
+        >
+          <option value="">All of Davao City</option>
+          {clusters.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.name} · {c.jobIds.size} {c.jobIds.size === 1 ? 'job' : 'jobs'}
+            </option>
+          ))}
+        </select>
+        {cluster && (
+          <button type="button" className="job-cluster-clear" onClick={() => setClusterId('')}>
+            Clear
+          </button>
+        )}
       </div>
 
       {locError && <p className="error">{locError}</p>}
@@ -362,7 +433,21 @@ export default function FindJobs({ view, onViewChange, navigation, activeNavigat
       onViewChange={onViewChange}
       panelOpen={panelOpen}
       onPanelOpenChange={setPanelOpen}
-      map={<JobMap fill jobs={mapJobs} selectedId={selectedId} onSelect={select} me={me} places={businessPlaces} selectedPlaceId={selectedEmployerId} onPlaceSelect={selectBusiness} />}
+      map={
+        <JobMap
+          fill
+          jobs={mapJobs}
+          selectedId={selectedId}
+          onSelect={select}
+          me={me}
+          places={businessPlaces}
+          selectedPlaceId={selectedEmployerId}
+          onPlaceSelect={selectBusiness}
+          labelMinZoom={CALLOUT_ZOOM}
+          alwaysLabelIds={clusterLabelIds}
+          fitTo={cluster ? { key: cluster.id, points: cluster.points } : null}
+        />
+      }
       panel={
         <>
           {panelHeader}

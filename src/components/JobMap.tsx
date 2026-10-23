@@ -19,6 +19,9 @@ interface Props {
   selectedPlaceId?: string | null
   onPlaceSelect?: (placeId: string) => void
   placeLabels?: boolean
+  labelMinZoom?: number
+  alwaysLabelIds?: string[]
+  fitTo?: { key: string; points: [number, number][] } | null
 }
 
 export default function JobMap(props: Props) {

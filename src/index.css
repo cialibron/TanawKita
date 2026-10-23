@@ -1875,10 +1875,11 @@ ul.error {
   -webkit-mask-repeat: no-repeat;
 }
 
-.tk-logo-look {
+.tk-logo-look,
+.tk-eye-look {
   position: absolute;
   inset: 0;
-  animation: tk-look 4.2s infinite;
+  transition: transform 120ms ease-out;
 }
 
 .tk-logo-star {
@@ -1886,19 +1887,6 @@ ul.error {
   box-shadow: inset 0 0 2px #fffefe;
 }
 
-/* Same keyframes as the Figma timeline: hold, left, right, up, down-left, center. */
-@keyframes tk-look {
-  0%, 9.5% { transform: translate(0, 0); }
-  16.7%, 31% { transform: translate(-5px, 0); }
-  40.5%, 54.8% { transform: translate(5px, 0); }
-  61.9%, 71.4% { transform: translate(1.5px, -2.5px); }
-  78.6%, 85.7% { transform: translate(-2.5px, 2.5px); }
-  92.9%, 100% { transform: translate(0, 0); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .tk-logo-look { animation: none; }
-}
 
 .tk-logo-word {
   position: absolute;
@@ -4795,10 +4783,8 @@ button.skill-picker-option.custom {
 }
 
 .rail-eye-menu {
-  position: absolute;
-  bottom: 0;
-  left: calc(100% + 12px);
-  z-index: 1010;
+  position: fixed;
+  z-index: 3100;
   display: grid;
   min-width: 200px;
   padding: 6px;
@@ -4807,7 +4793,7 @@ button.skill-picker-option.custom {
   box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
 }
 
-.workspace-rail .rail-eye-menu button {
+.rail-eye-menu button {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -4823,8 +4809,8 @@ button.skill-picker-option.custom {
   cursor: pointer;
 }
 
-.workspace-rail .rail-eye-menu button:hover,
-.workspace-rail .rail-eye-menu button:focus-visible {
+.rail-eye-menu button:hover,
+.rail-eye-menu button:focus-visible {
   background: #1d2f66;
 }
 
@@ -5151,7 +5137,7 @@ button.skill-picker-option.custom {
 
 :root[data-theme='light'] .dev-role-menu button:hover,
 :root[data-theme='light'] .dev-role-menu button.active,
-:root[data-theme='light'] .workspace-rail .rail-eye-menu button:hover {
+:root[data-theme='light'] .rail-eye-menu button:hover {
   background: #3a5ca6;
 }
 
@@ -5288,17 +5274,31 @@ button.skill-picker-option.custom {
    Brand rule: square corners everywhere — boxes, panels, tabs, buttons, inputs, menus, chips, avatars.
    Only artwork keeps its shape: the logo and eye icon, and the pins and dots drawn on the map.
    ===================================================================================================== */
-*:not(.tk-logo, .tk-logo *, .tk-emblem, .tk-emblem *, .tk-eye-icon, .tk-eye-icon *, .user-position-dot, .location-photo-pin, .map-dot, .glow-particle, .spinner),
+*:not(.tk-logo, .tk-logo *, .tk-emblem, .tk-emblem *, .tk-eye-icon, .tk-eye-icon *, .user-position-dot, .location-photo-pin, .map-dot, .glow-particle, .spinner, .maplibregl-ctrl-attrib-button, .map-hint-dot),
 *:not(.tk-logo *, .tk-emblem *, .tk-eye-icon *)::before,
 *:not(.tk-logo *, .tk-emblem *, .tk-eye-icon *, .biz-callout-line, .map-dot)::after {
   border-radius: 0 !important;
 }
 
 /* =====================================================================================================
-   Brand rule: a button with a text label shows only its label. Its box is still there to click, but it
-   only becomes visible on hover or keyboard focus. Icon-only buttons, job cards and map markers keep
-   their frames, and a selected chip or tab keeps its fill to show which one is on.
+   Brand rule: a button with a text label has no filled box, only thin light-blue corner marks. The full
+   box appears on hover or keyboard focus. Icon-only buttons, job cards, map markers and inline text links
+   are left as they are, and a selected chip or tab keeps its fill to show which one is on.
    ===================================================================================================== */
+:root {
+  --corner: #8cc4ff;
+  --corner-len: 7px;
+  --corner-marks:
+    linear-gradient(var(--corner), var(--corner)) left top / var(--corner-len) 1px no-repeat,
+    linear-gradient(var(--corner), var(--corner)) left top / 1px var(--corner-len) no-repeat,
+    linear-gradient(var(--corner), var(--corner)) right top / var(--corner-len) 1px no-repeat,
+    linear-gradient(var(--corner), var(--corner)) right top / 1px var(--corner-len) no-repeat,
+    linear-gradient(var(--corner), var(--corner)) left bottom / var(--corner-len) 1px no-repeat,
+    linear-gradient(var(--corner), var(--corner)) left bottom / 1px var(--corner-len) no-repeat,
+    linear-gradient(var(--corner), var(--corner)) right bottom / var(--corner-len) 1px no-repeat,
+    linear-gradient(var(--corner), var(--corner)) right bottom / 1px var(--corner-len) no-repeat;
+}
+
 :is(button, .location-photo-link):not(
     .rail-toggle,
     .role-rail-button,
@@ -5311,13 +5311,15 @@ button.skill-picker-option.custom {
     .settings-switch,
     .job-row,
     .biz-callout,
+    .landing-link:not(.landing-card-signup),
+    .toggle-password,
     .active,
     [aria-pressed='true'],
     [aria-checked='true'],
     :disabled
   ) {
   border-color: transparent !important;
-  background: transparent !important;
+  background: var(--corner-marks) !important;
   box-shadow: none !important;
   backdrop-filter: none !important;
 }
@@ -5334,12 +5336,14 @@ button.skill-picker-option.custom {
     .settings-switch,
     .job-row,
     .biz-callout,
+    .landing-link:not(.landing-card-signup),
+    .toggle-password,
     .active,
     [aria-pressed='true'],
     [aria-checked='true'],
     :disabled
   ):is(:hover, :focus-visible) {
-  background: rgba(120, 190, 255, 0.14) !important;
+  background: var(--corner-marks), rgba(120, 190, 255, 0.14) !important;
   box-shadow: inset 0 0 0 1px #6fa8ee !important;
 }
 
@@ -5370,4 +5374,93 @@ button.skill-picker-option.custom {
   .mapshell.menu-open .map-overlay {
     left: 376px;
   }
+}
+
+/* Landing: "Create an account" sits at the top right of the sign-in card, level with its heading. */
+.landing-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.landing-card .landing-card-head h2 {
+  margin: 0;
+}
+
+.landing-card-signup {
+  flex-shrink: 0;
+  min-height: 40px;
+  padding: 0 12px;
+}
+
+/* Map info button (bottom right): only the round (i), no white box behind it. Opened, the credits sit on navy. */
+.maplibre-wrap .maplibregl-ctrl-attrib.maplibregl-compact {
+  border: 0;
+  background: transparent !important;
+  box-shadow: none;
+}
+
+.maplibre-wrap .maplibregl-ctrl-attrib.maplibregl-compact-show {
+  background: rgba(11, 28, 72, 0.88) !important;
+  color: #dfe9ff;
+}
+
+.maplibre-wrap .maplibregl-ctrl-attrib.maplibregl-compact-show a {
+  color: #8fd8ff;
+}
+
+.maplibre-wrap .maplibregl-ctrl-attrib-button {
+  border-radius: 50% !important;
+  background-color: #eaf4ff !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+
+/* Small dot beside the employer map notice, matching the jobseeker dots on the map. */
+.map-hint-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 4px;
+  border: 1px solid #0b1c48;
+  border-radius: 50%;
+  background: #3ee8ff;
+  vertical-align: middle;
+}
+
+/* Find jobs: area (cluster) filter under the type chips. */
+.job-cluster-filter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line, rgba(120, 190, 255, 0.28));
+}
+
+.job-cluster-filter label {
+  flex-shrink: 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.job-cluster-filter select {
+  flex: 1;
+  min-width: 0;
+  min-height: 40px;
+  font-size: 15px;
+}
+
+.job-cluster-clear {
+  flex-shrink: 0;
+  min-height: 40px;
+  padding: 0 12px;
+  color: inherit;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
 }

@@ -16,6 +16,8 @@ interface Props {
   selectedPlaceId?: string | null
   onPlaceSelect?: (placeId: string) => void
   jobs?: JobPost[]
+  // Demo jobseeker profiles (synthetic) inside the search circle, drawn as small dots.
+  people?: [number, number][]
 }
 
 // Employer map: business search radius and workforce heat, drawn in the job map's style.
