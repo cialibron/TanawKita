@@ -444,3 +444,25 @@
   border-color: var(--lt-line);
   background: var(--lt-float);
 }
+
+/* Zoomed out below 50%: only the eye pin, its tip on the business point. The card keeps its place in the
+   layout but shows nothing, so the pin (which hangs off the card's corner) stays centred on the point. */
+.biz-callout.pin-only .biz-callout-card {
+  bottom: 0;
+  width: 0;
+  min-width: 0;
+  height: 0;
+  padding: 0;
+  overflow: visible;
+  /* !important: the light theme also styles the card's frame. */
+  border: 0 !important;
+  background: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none;
+  /* Scale around the business point, which is now the card's own corner. */
+  transform-origin: -3px 0;
+}
+
+.biz-callout.pin-only .biz-callout-card > :not(.biz-callout-pin) {
+  display: none;
+}

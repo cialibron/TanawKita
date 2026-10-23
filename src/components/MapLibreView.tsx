@@ -94,10 +94,13 @@ function coveredAreas(map: LibreMap): Box[] {
   })
 }
 
-function layoutCallouts(map: LibreMap, entries: { place: CompetitorPlace; element: HTMLElement }[]) {
+// Below this zoom (more than one level out from the starting view, i.e. under 50%), callouts drop their card
+// and show only the TanawKita eye pin on the business point.
+function layoutCallouts(map: LibreMap, entries: { place: CompetitorPlace; element: HTMLElement }[], pinOnlyBelow: number) {
   const zoom = map.getZoom()
   const scale = pinScale(zoom)
   const compact = zoom < COMPACT_ZOOM
+  const pinOnly = zoom < pinOnlyBelow
   const placed: Box[] = []
   const covers = coveredAreas(map)
   const { clientWidth: viewWidth, clientHeight: viewHeight } = map.getContainer()
@@ -109,6 +112,13 @@ function layoutCallouts(map: LibreMap, entries: { place: CompetitorPlace; elemen
     const button = element.querySelector<HTMLElement>('.biz-callout')
     const card = element.querySelector<HTMLElement>('.biz-callout-card')
     if (!button || !card) continue
+    button.classList.toggle('pin-only', pinOnly)
+    if (pinOnly) {
+      // Just the pin, standing on its point: no card to place around the others.
+      button.classList.remove('flip')
+      button.style.setProperty('--lift', '0px')
+      continue
+    }
     button.classList.toggle('compact', compact)
     // Unscaled card size (transforms do not change offset sizes); the pin adds ~34 px above the card.
     const width = card.offsetWidth
@@ -734,6 +744,12 @@ export default function MapLibreView({
     map?.easeTo({ zoom: defaultZoom, duration: 600 })
   }
 
+  // Callouts become pins only below 50% (one zoom level out from the default); read by the callout layout.
+  const pinOnlyZoom = useRef(defaultZoom - 1)
+  useEffect(() => {
+    pinOnlyZoom.current = defaultZoom - 1
+  }, [defaultZoom])
+
   // Zoom readout under the zoom buttons: 100% at the default zoom, doubling with each zoom level in.
   // Written straight to the element on every zoom frame, so the map component does not re-render while zooming.
   const zoomLevel = useRef<HTMLSpanElement>(null)
@@ -982,6 +998,7 @@ export default function MapLibreView({
           const marker = markers.get(id)
           return place && marker ? [{ place, element: marker.getElement() }] : []
         }),
+        pinOnlyZoom.current,
       )
     }
     render()
