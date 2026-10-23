@@ -19,8 +19,8 @@ const RADIUS_SOURCE = 'tanawkita-business-radius'
 const COMPETITOR_SOURCE = 'tanawkita-competitors'
 const COMPETITOR_AREA_SOURCE = 'tanawkita-competitor-areas'
 const BUILDINGS_LAYER = 'tanawkita-3d-buildings'
-// Business callouts show from street level, nearest to the map center first, capped to keep phones fast.
-const LABEL_ZOOM = 15
+// Business callouts show from city zoom, nearest to the map center first, capped to keep phones fast.
+const LABEL_ZOOM = 11
 const MAX_LABELS = 24
 const PITCH_3D = 55
 // Shaded business areas start at this zoom, the same zoom building tiles start.
