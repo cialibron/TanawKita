@@ -25,3 +25,5 @@ dist-ssr
 
 # CBMS insight CSVs stay on this device (not published)
 data/insights/
+.vercel
+.env*
