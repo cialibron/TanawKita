@@ -534,6 +534,8 @@ export default function MapLibreView({
 }: Props) {
   const container = useRef<HTMLDivElement>(null)
   const mapRef = useRef<LibreMap | null>(null)
+  // "Back to Davao" action for the home map control, which is created once with the map.
+  const homeRef = useRef(() => {})
   const [map, setMap] = useState<LibreMap | null>(null)
   const [error, setError] = useState('')
   const [mode, setMode] = useState<MapMode>('2d')
@@ -625,8 +627,6 @@ export default function MapLibreView({
   }
 
   // Default Davao view: the page's own view when it sets one, otherwise the city center at the default zoom.
-  // Kept in a ref because the map control is created once, before this function exists.
-  const homeRef = useRef(() => {})
   useEffect(() => {
     homeRef.current = () => {
       const center = view?.center ?? DAVAO_CENTER
