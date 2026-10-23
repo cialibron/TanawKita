@@ -1949,3 +1949,373 @@ ul.error {
   box-shadow: 0 0 0 1.5px #0b1c48;
   transform: rotate(-32deg);
 }
+
+/* Jobseeker "My profile / skill card" page: an account-settings layout in TanawKita's navy brand palette. */
+.profile-shell {
+  --bg: #0a1128;
+  --card: #111a36;
+  --text: #f4f8ff;
+  --muted: #9fb0d0;
+  --border: rgba(185, 200, 230, 0.16);
+  --accent: #48a9f5;
+  --accent-text: #fff;
+  --ok: #57b879;
+  --error: #ff8a80;
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  overflow: hidden;
+  color: var(--text);
+  background: radial-gradient(120% 80% at 100% 0%, #13245a 0%, var(--bg) 55%);
+  font-family: 'Poppins', Inter, system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+.profile-main {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+}
+
+.profile-topbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+.profile-topbar .badge {
+  background: rgba(72, 169, 245, 0.12);
+  border-color: rgba(72, 169, 245, 0.35);
+  color: #9fd4ff;
+}
+
+.profile-topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: auto;
+}
+
+.profile-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+}
+
+.profile-content h1 {
+  margin: 0 0 18px;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.profile-panel {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  max-width: 1120px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: rgba(10, 18, 44, 0.72);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
+}
+
+.profile-sidebar {
+  padding: 22px 16px;
+  border-right: 1px solid var(--border);
+}
+
+.profile-acting .acting-as {
+  display: grid;
+  gap: 6px;
+  margin: 0 0 18px;
+}
+
+.profile-acting select {
+  width: 100%;
+}
+
+.profile-sections {
+  display: grid;
+  gap: 4px;
+}
+
+.profile-sections button {
+  min-height: 42px;
+  padding: 8px 14px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.profile-sections button:hover {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.profile-sections button.active {
+  background: rgba(72, 169, 245, 0.16);
+  color: #8fd0ff;
+  font-weight: 600;
+}
+
+.profile-sections button.danger {
+  margin-top: 18px;
+  color: var(--error);
+}
+
+.profile-body {
+  display: grid;
+  align-content: start;
+  gap: 16px;
+  min-width: 0;
+  padding: 22px 24px 28px;
+}
+
+.profile-body h2 {
+  margin: 0 0 2px;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.profile-card {
+  padding: 20px 22px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--card);
+}
+
+.profile-card > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.profile-card h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.profile-edit {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 38px;
+  padding: 6px 14px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.profile-edit:hover {
+  border-color: rgba(72, 169, 245, 0.6);
+  color: var(--text);
+}
+
+.profile-summary {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.profile-summary > div {
+  display: grid;
+  flex: 1;
+  gap: 2px;
+  min-width: 0;
+}
+
+.profile-summary strong {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.profile-avatar {
+  display: grid;
+  flex-shrink: 0;
+  width: 72px;
+  height: 72px;
+  place-items: center;
+  border: 2px solid #3ee8ff;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #2f7df0, #0b1c48);
+  box-shadow: 0 0 18px rgba(62, 232, 255, 0.35);
+  color: #fff;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.profile-avatar.small {
+  width: 38px;
+  height: 38px;
+  border-width: 1px;
+  font-size: 0.85rem;
+}
+
+.profile-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px 24px;
+  margin: 0;
+}
+
+.profile-field {
+  min-width: 0;
+}
+
+.profile-field dt {
+  margin-bottom: 4px;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.profile-field dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.profile-field dd.not-set {
+  color: #6f7f9f;
+  font-style: italic;
+}
+
+.profile-chips,
+.profile-days {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.profile-chip,
+.profile-day {
+  padding: 4px 10px;
+  border: 1px solid rgba(72, 169, 245, 0.35);
+  border-radius: 999px;
+  background: rgba(72, 169, 245, 0.12);
+  color: #cfe8ff;
+  font-size: 0.82rem;
+}
+
+.profile-day {
+  border-color: var(--border);
+  background: transparent;
+  color: #6f7f9f;
+}
+
+.profile-day.on {
+  border-color: rgba(62, 232, 255, 0.55);
+  background: rgba(62, 232, 255, 0.14);
+  color: #e6fbff;
+}
+
+.profile-empty p {
+  color: var(--muted);
+}
+
+.profile-form-card .skill-card-form h1 {
+  display: none;
+}
+
+.profile-form-card .skill-card-form > label:first-child {
+  margin-top: 0;
+}
+
+.profile-form-card .skill-card-form .section {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+@media (max-width: 860px) {
+  .profile-panel {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .profile-sidebar {
+    padding: 16px 16px 0;
+    border-right: 0;
+  }
+
+  /* Sections become a horizontal, scrollable tab row above the cards. */
+  .profile-sections {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .profile-sections button {
+    flex-shrink: 0;
+  }
+
+  .profile-sections button.danger {
+    margin-top: 0;
+  }
+}
+
+@media (max-width: 720px) {
+  .profile-shell .workspace-rail {
+    flex-basis: 50px;
+    width: 50px;
+  }
+
+  .profile-topbar {
+    gap: 8px;
+    padding: 10px 12px;
+  }
+
+  .profile-topbar .tk-logo,
+  .profile-topbar .dev-role-label {
+    display: none;
+  }
+
+  .profile-content {
+    padding: 16px 12px;
+  }
+
+  .profile-content h1 {
+    font-size: 1.25rem;
+  }
+
+  .profile-body {
+    padding: 16px 14px 22px;
+  }
+
+  .profile-card {
+    padding: 16px;
+  }
+
+  .profile-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .profile-summary {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 10px 14px;
+  }
+
+  .profile-summary .profile-edit {
+    grid-column: 2;
+    justify-self: start;
+  }
+
+  .profile-avatar {
+    width: 56px;
+    height: 56px;
+    font-size: 1.2rem;
+  }
+}

@@ -4,7 +4,13 @@ import { useSession, useStore } from '../../store'
 import { ageGate, DAYS, SKILLS } from '../../rules'
 import type { SkillCard } from '../../types'
 
-export default function SkillCardForm() {
+interface Props {
+  // Optional hooks for hosts like the profile page, which shows this form as its edit mode.
+  onSaved?: () => void
+  onCancel?: () => void
+}
+
+export default function SkillCardForm({ onSaved, onCancel }: Props = {}) {
   const { state, dispatch } = useStore()
   const session = useSession('jobseeker')
   const existing = state.skillCards[session.userId]
@@ -51,10 +57,11 @@ export default function SkillCardForm() {
     }
     dispatch({ type: 'saveSkillCard', card })
     setMessage('Skill card saved.')
+    onSaved?.()
   }
 
   return (
-    <form onSubmit={submit}>
+    <form className="skill-card-form" onSubmit={submit}>
       <h1>{existing ? 'Your skill card' : 'Create your skill card'}</h1>
 
       <label htmlFor="age">Age</label>
@@ -99,6 +106,11 @@ export default function SkillCardForm() {
         <button type="submit" className="primary">
           Save skill card
         </button>
+        {onCancel && (
+          <button type="button" onClick={onCancel}>
+            Cancel
+          </button>
+        )}
       </div>
     </form>
   )

@@ -5,7 +5,7 @@ import { useSession, useStore } from './store'
 import { usernameFor } from './rules'
 import { clearSession, loadSession } from './auth'
 import Landing from './pages/Landing'
-import SkillCardForm from './pages/jobseeker/SkillCardForm'
+import ProfilePage from './pages/jobseeker/ProfilePage'
 import FindJobs from './pages/jobseeker/FindJobs'
 import MyApplications from './pages/jobseeker/MyApplications'
 import PostJob from './pages/employer/PostJob'
@@ -129,6 +129,20 @@ export default function App() {
     </div>
   )
 
+  if (state.view === 'jobseeker' && jobseekerSection === 'skillcard') {
+    return (
+      <ProfilePage
+        view={state.view}
+        onViewChange={changeView}
+        navigation={JOBSEEKER_NAV}
+        activeNavigation={jobseekerSection}
+        onNavigationChange={(id) => setJobseekerSection(id as JobseekerSection)}
+        actingAs={<ActingAs role="jobseeker" />}
+        onSignOut={signOut}
+      />
+    )
+  }
+
   if (state.view === 'jobseeker') {
     return (
       <FindJobs
@@ -144,11 +158,7 @@ export default function App() {
           </>
         }
         panelContent={
-          jobseekerSection === 'applications' ? (
-            <MyApplications />
-          ) : jobseekerSection === 'skillcard' ? (
-            <SkillCardForm />
-          ) : undefined
+          jobseekerSection === 'applications' ? <MyApplications /> : undefined
         }
       />
     )
