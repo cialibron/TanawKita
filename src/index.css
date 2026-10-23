@@ -2153,3 +2153,233 @@ ul.error {
   border-bottom-color: var(--line);
 }
 
+
+/* ===== Selected business card (lower detail panel): tabs, heading chips, photo / hours / stats ===== */
+.competitor-detail {
+  display: grid;
+  gap: 12px;
+  padding-right: 140px;
+}
+
+.cd-tabs {
+  display: flex;
+  gap: 22px;
+  margin: -6px 0 0;
+  border-bottom: 1px solid var(--line, rgba(120, 190, 255, 0.28));
+}
+
+.cd-tabs button {
+  min-height: 36px;
+  padding: 0 2px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: none;
+  color: #8f9bb3;
+  font: 500 14px/1 'Poppins', system-ui, sans-serif;
+  cursor: pointer;
+}
+
+.cd-tabs button.active {
+  border-bottom-color: #f4f5f6;
+  color: #f4f5f6;
+}
+
+.cd-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 10px;
+}
+
+.workspace-detail .cd-heading h2 {
+  margin: 0;
+  font: 600 1.25rem/1.2 ui-monospace, 'SFMono-Regular', Consolas, monospace;
+  letter-spacing: 0.01em;
+}
+
+.cd-chip {
+  padding: 3px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.06);
+  color: #d7deea;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.cd-chip-category {
+  border-color: color-mix(in srgb, var(--cat) 60%, transparent);
+  background: color-mix(in srgb, var(--cat) 18%, transparent);
+  color: var(--cat);
+}
+
+.cd-chip-verified {
+  border-color: rgba(63, 185, 80, 0.6);
+  background: rgba(63, 185, 80, 0.16);
+  color: #6fdc7f;
+}
+
+.cd-chip-pending {
+  border-color: rgba(249, 171, 0, 0.6);
+  background: rgba(249, 171, 0, 0.14);
+  color: #ffc94a;
+}
+
+.cd-chip-rejected,
+.cd-chip-none {
+  border-color: rgba(255, 107, 97, 0.55);
+  background: rgba(255, 107, 97, 0.12);
+  color: #ff8a80;
+}
+
+.cd-grid {
+  display: grid;
+  grid-template-columns: minmax(200px, 1.1fr) minmax(200px, 1.3fr) minmax(160px, 0.9fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.cd-photo-block {
+  display: grid;
+  gap: 8px;
+}
+
+.cd-photo {
+  height: 96px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 2px;
+  border: 1px dashed color-mix(in srgb, var(--cat) 50%, transparent);
+  background:
+    repeating-linear-gradient(135deg, color-mix(in srgb, var(--cat) 14%, transparent) 0 6px, transparent 6px 12px),
+    rgba(0, 0, 0, 0.25);
+}
+
+.cd-photo span {
+  font-size: 38px;
+  line-height: 1;
+}
+
+.cd-photo small,
+.cd-identity span,
+.cd-years span,
+.cd-hours-top span,
+.cd-stats span {
+  color: #8f9bb3;
+  font-size: 12px;
+}
+
+.cd-identity {
+  display: grid;
+  gap: 2px;
+}
+
+.cd-identity strong {
+  color: #f4f5f6;
+  text-transform: capitalize;
+}
+
+.cd-middle {
+  display: grid;
+  gap: 14px;
+}
+
+.cd-years {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.cd-years strong {
+  color: var(--cat);
+  font: 600 1.1rem/1 'Poppins', system-ui, sans-serif;
+}
+
+.cd-hours {
+  display: grid;
+  gap: 6px;
+}
+
+.cd-hours-top,
+.cd-hours-ends {
+  display: flex;
+  justify-content: space-between;
+}
+
+.cd-hours-ends span {
+  color: #c4ccda;
+  font: 12px/1 ui-monospace, Consolas, monospace;
+}
+
+.cd-open {
+  color: #6fdc7f;
+  font-size: 12px;
+}
+
+.cd-closed {
+  color: #ff8a80;
+  font-size: 12px;
+}
+
+.cd-hours-track {
+  position: relative;
+  height: 6px;
+  background: repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.16) 0 calc(100% / 24 - 2px), transparent calc(100% / 24 - 2px) calc(100% / 24));
+}
+
+.cd-hours-fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: #f4f5f6;
+}
+
+.cd-hours-now {
+  position: absolute;
+  top: -4px;
+  width: 4px;
+  height: 14px;
+  margin-left: -2px;
+  background: #ffc94a;
+  box-shadow: 0 0 8px #ffc94a;
+}
+
+.cd-stats {
+  display: grid;
+  gap: 8px;
+}
+
+.cd-stats > div {
+  display: grid;
+  gap: 4px;
+  padding: 9px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.cd-stats strong {
+  color: #f4f5f6;
+}
+
+.cd-stats-row {
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  max-width: 420px;
+}
+
+.cd-hiring {
+  display: grid;
+  gap: 10px;
+}
+
+@media (max-width: 900px) {
+  .competitor-detail {
+    padding-right: 0;
+    padding-top: 28px;
+  }
+
+  .cd-grid {
+    grid-template-columns: 1fr;
+  }
+}
