@@ -3,6 +3,7 @@ import LandingMap from '../../components/LandingMap'
 import Logo from '../../components/Logo'
 import { DevRolePicker, WorkspaceRail, type WorkspaceNavItem } from '../../components/WorkspaceChrome'
 import { barangayName } from '../../data/barangays'
+import { accountKey, linkLabel, useAccountSetup, type SetupStep } from '../../onboarding'
 import { DAYS, usernameFor } from '../../rules'
 import { useSession, useStore } from '../../store'
 import type { PayUnit, View } from '../../types'
@@ -31,6 +32,8 @@ interface Props {
   // Test-mode account picker from App, shown where the reference puts its account switcher.
   actingAs: ReactNode
   onSignOut: () => void
+  // Opens the account setup panel at one step (for parts skipped during setup).
+  onOpenSetup: (step: SetupStep) => void
 }
 
 // Trimmed: some barangay names in the shared data carry a trailing space.
@@ -67,6 +70,25 @@ function Chips({ items }: { items?: string[] }) {
   )
 }
 
+// One row of the account setup card: its value, or "Not set up" with an Add button.
+function SetupRow({ label, value, onAdd }: { label: string; value: ReactNode; onAdd: () => void }) {
+  return (
+    <div className="setup-row">
+      <div>
+        <dt>{label}</dt>
+        <dd className={value ? undefined : 'not-set'}>{value || 'Not set up'}</dd>
+      </div>
+      <button type="button" className={value ? 'profile-edit' : 'profile-add'} onClick={onAdd}>
+        {value ? (
+          <>Edit <span aria-hidden="true">✎</span></>
+        ) : (
+          <><span aria-hidden="true">+</span> Add</>
+        )}
+      </button>
+    </div>
+  )
+}
+
 function Card({ title, onEdit, children }: { title: string; onEdit?: () => void; children: ReactNode }) {
   return (
     <section className="profile-card">
@@ -85,8 +107,9 @@ function Card({ title, onEdit, children }: { title: string; onEdit?: () => void;
 
 // Full-page "My profile / skill card" for jobseekers: same role rail and developer switch as the map screens,
 // with the skill card shown as read-only cards and the existing SkillCardForm as its edit mode.
-export default function ProfilePage({ view, onViewChange, navigation, activeNavigation, onNavigationChange, actingAs, onSignOut }: Props) {
+export default function ProfilePage({ view, onViewChange, navigation, activeNavigation, onNavigationChange, actingAs, onSignOut, onOpenSetup }: Props) {
   const { state } = useStore()
+  const setup = useAccountSetup(accountKey())
   const session = useSession('jobseeker')
   const card = state.skillCards[session.userId]
   const [section, setSection] = useState<Section>('profile')
@@ -114,6 +137,29 @@ export default function ProfilePage({ view, onViewChange, navigation, activeNavi
   } else if (section === 'profile') {
     content = (
       <>
+        <Card title="Account setup">
+          <dl className="setup-rows">
+            <SetupRow
+              label="Account type"
+              value={setup.role === 'employer' ? 'Employer' : setup.role === 'jobseeker' ? 'Jobseeker' : null}
+              onAdd={() => onOpenSetup('role')}
+            />
+            <SetupRow
+              label="Valid ID"
+              value={setup.validId && `${setup.validId.idType} · ${setup.validId.back ? 'front and back' : 'front'} added`}
+              onAdd={() => onOpenSetup('id')}
+            />
+            <SetupRow
+              label="Resume"
+              value={
+                setup.resume && (
+                  <Chips items={[...setup.resume.files.map((f) => f.fileName), ...setup.resume.links.map(linkLabel)]} />
+                )
+              }
+              onAdd={() => onOpenSetup('resume')}
+            />
+          </dl>
+        </Card>
         <Card title="Personal information" onEdit={edit}>
           <dl className="profile-grid">
             <Field label="Full name">{card.name}</Field>

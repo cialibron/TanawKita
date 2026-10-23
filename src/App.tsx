@@ -1,10 +1,12 @@
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import MapShell, { type WorkspaceNavItem } from './components/MapShell'
 import JobMap from './components/JobMap'
 import { useSession, useStore } from './store'
 import { usernameFor } from './rules'
 import { clearSession, loadSession } from './auth'
 import Landing from './pages/Landing'
+import SetupPanel from './pages/SetupPanel'
+import { accountKey, getSetup, type SetupStep } from './onboarding'
 import ProfilePage from './pages/jobseeker/ProfilePage'
 import FindJobs from './pages/jobseeker/FindJobs'
 import MyApplications from './pages/jobseeker/MyApplications'
@@ -92,6 +94,8 @@ export default function App() {
   const [competitorMode, setCompetitorMode] = useState<CompetitorSearchMode>('local')
   // Landing page first; a demo sign-in (or "Explore without an account") opens the workspace.
   const [entered, setEntered] = useState(() => loadSession() !== null)
+  // Account setup panel: opened after sign-in, or for one step from a profile "Add" button.
+  const [setupRequest, setSetupRequest] = useState<{ initialRole?: Role; startAt?: SetupStep; single?: boolean } | null>(null)
   const changeView = (view: View) => dispatch({ type: 'setView', view })
 
   if (!entered) {
@@ -104,6 +108,7 @@ export default function App() {
             dispatch({ type: 'setView', view: signup.role })
           }
           setEntered(true)
+          if (!getSetup(accountKey()).finished) setSetupRequest({ initialRole: signup?.role })
         }}
       />
     )
@@ -111,6 +116,7 @@ export default function App() {
 
   function signOut() {
     clearSession()
+    setSetupRequest(null)
     setEntered(false)
   }
 
@@ -129,8 +135,9 @@ export default function App() {
     </div>
   )
 
+  let screen: ReactNode
   if (state.view === 'jobseeker' && jobseekerSection === 'skillcard') {
-    return (
+    screen = (
       <ProfilePage
         view={state.view}
         onViewChange={changeView}
@@ -139,12 +146,11 @@ export default function App() {
         onNavigationChange={(id) => setJobseekerSection(id as JobseekerSection)}
         actingAs={<ActingAs role="jobseeker" />}
         onSignOut={signOut}
+        onOpenSetup={(step) => setSetupRequest({ startAt: step, single: true })}
       />
     )
-  }
-
-  if (state.view === 'jobseeker') {
-    return (
+  } else if (state.view === 'jobseeker') {
+    screen = (
       <FindJobs
         view={state.view}
         onViewChange={changeView}
@@ -162,10 +168,8 @@ export default function App() {
         }
       />
     )
-  }
-
-  if (state.view === 'employer') {
-    return (
+  } else if (state.view === 'employer') {
+    screen = (
       <MyBusiness
         key={state.employerId}
         view={state.view}
@@ -210,22 +214,39 @@ export default function App() {
         }
       />
     )
+  } else {
+    screen = (
+      <MapShell
+        navigation={ADMIN_NAV}
+        activeNavigation={adminSection}
+        onNavigationChange={(id) => setAdminSection(id as AdminSection)}
+        view={state.view}
+        onViewChange={changeView}
+        map={<JobMap fill jobs={state.jobs.filter((job) => job.status === 'open')} />}
+        panel={
+          <>
+            {shellHeader}
+            {adminSection === 'overview' ? <Overview /> : <Verifications />}
+          </>
+        }
+      />
+    )
   }
 
   return (
-    <MapShell
-      navigation={ADMIN_NAV}
-      activeNavigation={adminSection}
-      onNavigationChange={(id) => setAdminSection(id as AdminSection)}
-      view={state.view}
-      onViewChange={changeView}
-      map={<JobMap fill jobs={state.jobs.filter((job) => job.status === 'open')} />}
-      panel={
-        <>
-          {shellHeader}
-          {adminSection === 'overview' ? <Overview /> : <Verifications />}
-        </>
-      }
-    />
+    <>
+      {screen}
+      {setupRequest && (
+        <SetupPanel
+          key={`${setupRequest.startAt ?? 'all'}-${accountKey()}`}
+          accountKey={accountKey()}
+          accountName={loadSession()?.name ?? null}
+          initialRole={setupRequest.initialRole}
+          startAt={setupRequest.startAt}
+          single={setupRequest.single}
+          onClose={() => setSetupRequest(null)}
+        />
+      )}
+    </>
   )
 }

@@ -3,6 +3,7 @@ import { Map as LibreMap, Marker as LibreMarker, NavigationControl, Popup, setWo
 import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?url'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import './maplibre.css'
+import PitchToggleControl from './PitchToggleControl'
 import type { JobPost } from '../types'
 import type { Feature, Polygon } from 'geojson'
 import type { CompetitorPlace } from '../businessDirectory'
@@ -257,6 +258,8 @@ export default function MapLibreView({
     }
 
     mapRef.current = instance
+    // Bottom corners stack newest-on-top, so the 2D/3D toggle is added first to sit under the compass.
+    instance.addControl(new PitchToggleControl(), 'bottom-right')
     instance.addControl(new NavigationControl({ visualizePitch: true }), 'bottom-right')
     instance.on('load', () => {
       addDataLayers(instance)
