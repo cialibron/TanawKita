@@ -4962,515 +4962,203 @@ ul.error {
 }
 
 /* =====================================================================================================
-   Light mode (Settings → Theme, or the rail eye menu). The workspace is designed dark; these rules
-   repaint its surfaces in light brand colors. Prefixed with :root[data-theme='light'] so they win.
+   Light mode (Settings → Theme, or the rail eye menu): a lighter shade of the dark navy, between the
+   dark theme and pastel blue. Text and accents stay as in dark mode; only the blue surfaces get lighter.
    ===================================================================================================== */
+:root[data-theme='light'] {
+  --lt-shell: #2a4482;
+  --lt-rail: #223a71;
+  --lt-panel: #2d4989;
+  --lt-card: #34539a;
+  --lt-card-hover: #3b5ca8;
+  --lt-card-selected: #4266b5;
+  --lt-input: #243f7b;
+  --lt-float: rgba(40, 66, 126, 0.96);
+  --lt-line: #6b8ed6;
+  --lt-muted: #c6d4f0;
+}
+
 :root[data-theme='light'] :is(.mapshell, .profile-shell, .setup-page) {
-  --bg: #dbeafa;
-  --card: #e9f3fd;
-  --text: #13203f;
-  --muted: #56627f;
-  --border: #b6d4f2;
-  --accent: #1f5fd6;
-  --accent-text: #fff;
-  --ok: #1a7f37;
-  --error: #b42318;
-  --line: #b6d4f2;
-  --hover: rgba(31, 95, 214, 0.06);
-  color: var(--text);
+  --bg: var(--lt-shell);
+  --card: var(--lt-card);
+  --muted: var(--lt-muted);
+  --border: var(--lt-line);
+  --line: var(--lt-line);
+  --hover: rgba(255, 255, 255, 0.08);
 }
 
 :root[data-theme='light'] .mapshell,
-:root[data-theme='light'] .mapshell-map {
-  background: #dbeafa;
+:root[data-theme='light'] .mapshell-map,
+:root[data-theme='light'] .setup-page {
+  background: var(--lt-shell);
 }
 
-/* Rail */
+/* The profile's brand image is set inline, so it needs !important. */
+:root[data-theme='light'] .profile-shell {
+  background: var(--lt-shell) !important;
+}
+
+:root[data-theme='light'] .profile-panel {
+  background: rgba(45, 73, 137, 0.85);
+}
+
 :root[data-theme='light'] .workspace-rail {
-  border-right-color: #b6d4f2;
-  background: linear-gradient(180deg, #e9f3fd 0%, #dbeafa 100%);
+  border-right-color: var(--lt-line);
+  background: linear-gradient(180deg, #26407a 0%, var(--lt-rail) 100%);
 }
 
 :root[data-theme='light'] .workspace-avatar {
-  border-color: #a9cbef;
-  background: #d0e4f9;
-  color: #1f5fd6;
-}
-
-:root[data-theme='light'] .rail-toggle,
-:root[data-theme='light'] .role-rail-button {
-  color: #4a5878;
+  border-color: var(--lt-line);
+  background: #2f4d8f;
 }
 
 :root[data-theme='light'] .rail-toggle:hover,
 :root[data-theme='light'] .role-rail-button:hover,
 :root[data-theme='light'] .role-rail-button.active {
-  border-color: #a9cbef;
-  background: #d0e4f9;
-  color: #0b1c48;
+  border-color: var(--lt-line);
+  background: #34539a;
 }
 
-:root[data-theme='light'] .role-rail-button.active {
-  box-shadow: inset 3px 0 #1f5fd6;
+:root[data-theme='light'] .role-tooltip,
+:root[data-theme='light'] .dev-role-menu,
+:root[data-theme='light'] .rail-eye-menu {
+  border-color: var(--lt-line);
+  background: #2c4887;
 }
 
-:root[data-theme='light'] .role-tooltip {
-  border-color: #a9cbef;
-  background: #e9f3fd;
-  color: #13203f;
+:root[data-theme='light'] .dev-role-menu button:hover,
+:root[data-theme='light'] .dev-role-menu button.active,
+:root[data-theme='light'] .workspace-rail .rail-eye-menu button:hover {
+  background: #3a5ca6;
 }
 
 :root[data-theme='light'] .rail-divider {
-  background: #b6d4f2;
+  background: var(--lt-line);
 }
 
-/* Left menu panel */
 :root[data-theme='light'] .mapshell-panel {
-  border-right-color: #b6d4f2;
-  background: linear-gradient(180deg, rgba(233, 243, 253, 0.96), rgba(214, 232, 250, 0.97));
-  box-shadow: 8px 0 24px rgba(19, 32, 63, 0.08);
-}
-
-:root[data-theme='light'] .workspace-heading .brand,
-:root[data-theme='light'] .mapshell h2 {
-  color: #13203f;
+  border-right-color: var(--lt-line);
+  background:
+    linear-gradient(180deg, rgba(45, 73, 137, 0.93), rgba(40, 66, 126, 0.96)),
+    url('./assets/brand/bg-4.svg') center / cover;
 }
 
 :root[data-theme='light'] .mapshell .badge {
-  border-color: #a9cbef;
-  background: #dbeafa;
-  color: #3d4a68;
+  border-color: var(--lt-line);
+  background: #34539a;
 }
 
 :root[data-theme='light'] .mapshell .acting-as select,
 :root[data-theme='light'] .mapshell input,
 :root[data-theme='light'] .mapshell select,
-:root[data-theme='light'] .mapshell textarea {
-  border-color: #a9cbef;
-  background: #e9f3fd;
-  color: #13203f;
-}
-
-:root[data-theme='light'] .mapshell .card {
-  border-color: #b6d4f2;
-  background: #e9f3fd;
-  color: #13203f;
-}
-
-:root[data-theme='light'] .mapshell button:not(.tab):not(.chip):not(.rail-toggle):not(.role-rail-button):not(.map-action-button):not(.detail-close):not(.detail-expand-button):not(.detail-collapse-button):not([class*='maplibregl-ctrl']):not([class*='dash-']):not(.rail-eye *):not(.primary):not(.job-row) {
-  border-color: #a9cbef;
-  background: #e9f3fd;
-  color: #13203f;
-}
-
-:root[data-theme='light'] .mapshell button.primary {
-  border-color: #1f5fd6;
-  background: #1f5fd6;
-  color: #fff;
-}
-
-:root[data-theme='light'] .mapshell button.chip {
-  border-color: #b6d4f2;
-  background: #e9f3fd;
-  color: #3d4a68;
-}
-
-:root[data-theme='light'] .mapshell button.chip.active,
-:root[data-theme='light'] .mapshell .job-chips button.chip.active {
-  border-color: #13203f;
-  background: #13203f;
-  color: #fff;
-}
-
-:root[data-theme='light'] .mapshell .job-chips button.chip {
-  background: #d6e8fa;
-  color: #3d4a68;
-}
-
-/* Find jobs list */
-:root[data-theme='light'] .job-count {
-  background: #d6e8fa;
-  color: #3d4a68;
-}
-
-:root[data-theme='light'] .mapshell button.job-locate {
-  color: #13203f;
-}
-
+:root[data-theme='light'] .mapshell textarea,
 :root[data-theme='light'] .job-search {
-  border-color: #a9cbef;
-  background: #e9f3fd;
-  color: #56627f;
+  border-color: var(--lt-line);
+  background: var(--lt-input);
 }
 
-:root[data-theme='light'] .job-search input {
-  color: #13203f;
+:root[data-theme='light'] .mapshell .card,
+:root[data-theme='light'] .profile-card {
+  border-color: var(--lt-line);
+  background: var(--lt-card);
 }
 
-/* !important: the workspace's generic dark button rule is far more specific than this one. */
+/* Job cards are content, not plain buttons, so they keep their surface. !important: the workspace's
+   generic button rule is far more specific. */
 :root[data-theme='light'] .mapshell button.job-row {
-  border-color: #b6d4f2 !important;
-  background: #e9f3fd !important;
-  color: #13203f !important;
-  box-shadow: 0 1px 3px rgba(19, 32, 63, 0.06);
+  border-color: var(--lt-line) !important;
+  background: var(--lt-card) !important;
 }
 
 :root[data-theme='light'] .mapshell button.job-row:hover {
-  border-color: #8fbaea !important;
-  background: #f0f7fe !important;
+  background: var(--lt-card-hover) !important;
 }
 
 :root[data-theme='light'] .mapshell button.job-row.selected {
-  border-color: #1f5fd6 !important;
-  background: #cfe3fa !important;
-  box-shadow: 0 0 0 1px rgba(31, 95, 214, 0.35);
+  border-color: #8fd8ff !important;
+  background: var(--lt-card-selected) !important;
 }
 
 :root[data-theme='light'] .job-route,
 :root[data-theme='light'] .job-row-meta,
-:root[data-theme='light'] .job-row-label {
-  color: #56627f;
+:root[data-theme='light'] .job-row-label,
+:root[data-theme='light'] .job-search {
+  color: var(--lt-muted);
 }
 
-:root[data-theme='light'] .job-row-meta span:last-child {
-  color: #13203f;
-}
-
-:root[data-theme='light'] .job-route-dots,
-:root[data-theme='light'] .job-route-line,
-:root[data-theme='light'] .job-route-line.arrow::after {
-  border-color: #1f5fd6;
-}
-
+:root[data-theme='light'] .job-count,
 :root[data-theme='light'] .job-route-chip {
-  background: #d0e4f9;
-  color: #1a3a80;
+  background: rgba(255, 255, 255, 0.12);
 }
 
-:root[data-theme='light'] .job-badge.good {
-  background: #dcf3e4;
-  color: #17663a;
-}
-
-:root[data-theme='light'] .job-badge.fair {
-  background: #dfeafc;
-  color: #1a4fae;
-}
-
-:root[data-theme='light'] .job-badge.low {
-  background: #fdf0d2;
-  color: #8a5a00;
-}
-
-:root[data-theme='light'] .job-badge.type {
-  background: #d0e4f9;
-  color: #1a3a80;
-}
-
-:root[data-theme='light'] .job-note {
-  color: #3d4a68;
-}
-
-/* Map buttons */
+/* Map buttons and panels floating over the map */
 :root[data-theme='light'] .map-action-button,
 :root[data-theme='light'] .map-zoom-reset,
 :root[data-theme='light'] .map-dimension-toggle {
-  border-color: #a9cbef;
-  background: rgba(233, 243, 253, 0.96);
-  color: #13203f;
-  box-shadow: 0 2px 10px rgba(19, 32, 63, 0.14);
-}
-
-:root[data-theme='light'] .map-action-button:hover {
-  background: #dbeafa;
-}
-
-:root[data-theme='light'] .map-dimension-toggle span {
-  color: #56627f;
-}
-
-:root[data-theme='light'] .dev-role-menu {
-  border-color: #a9cbef;
-  background: #e9f3fd;
-}
-
-:root[data-theme='light'] .dev-role-menu button {
-  color: #13203f;
-}
-
-:root[data-theme='light'] .dev-role-menu button:hover,
-:root[data-theme='light'] .dev-role-menu button.active {
-  background: #d0e4f9;
-  color: #0b1c48;
+  border-color: var(--lt-line);
+  background: var(--lt-float);
 }
 
 :root[data-theme='light'] .maplibre-wrap .maplibregl-ctrl-group button {
-  border-color: #a9cbef;
-  background: #e9f3fd;
-  box-shadow: 0 2px 10px rgba(19, 32, 63, 0.14);
+  border-color: var(--lt-line);
+  background: linear-gradient(160deg, #34539a, #2a4482);
 }
 
-:root[data-theme='light'] .maplibre-wrap .maplibregl-ctrl-group button:hover {
-  background: #dbeafa;
-}
-
-:root[data-theme='light'] .maplibre-wrap .maplibregl-ctrl-group .maplibregl-ctrl-icon {
-  filter: none;
-}
-
-/* The base map is drawn dark navy; light mode turns it into a pastel-blue city plan. */
-:root[data-theme='light'] .maplibre-wrap .maplibregl-canvas {
-  filter: grayscale(1) invert(1) sepia(1) hue-rotate(180deg) saturate(1.25) brightness(1.04);
-}
-
-/* Selected job detail panel */
 :root[data-theme='light'] .workspace-detail {
-  border-color: #a9cbef;
-  background: linear-gradient(160deg, rgba(233, 243, 253, 0.98), rgba(214, 232, 250, 0.98));
-  color: #13203f;
-  box-shadow: 0 8px 28px rgba(19, 32, 63, 0.18);
+  border-color: var(--lt-line);
+  background: linear-gradient(160deg, rgba(51, 80, 143, 0.97) 0%, rgba(42, 68, 130, 0.98) 100%);
 }
 
 :root[data-theme='light'] .workspace-detail-controls button,
 :root[data-theme='light'] .detail-close {
-  border-color: #a9cbef;
-  background: #e9f3fd;
-  color: #13203f;
-}
-
-:root[data-theme='light'] .selected-job-heading h2,
-:root[data-theme='light'] .selected-business-detail h2,
-:root[data-theme='light'] .selected-job-metrics strong,
-:root[data-theme='light'] .job-more-facts dd,
-:root[data-theme='light'] .job-more-list dd {
-  color: #13203f;
-}
-
-:root[data-theme='light'] .detail-kicker,
-:root[data-theme='light'] .settings-group h3 {
-  color: #0b6f8f;
+  border-color: var(--lt-line);
+  background: rgba(36, 63, 123, 0.8);
 }
 
 :root[data-theme='light'] .workspace-detail .selected-job-metrics > div,
 :root[data-theme='light'] .job-more-facts > div {
-  border-color: #b6d4f2;
-  background: #e2eefb;
+  border-color: var(--lt-line);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+:root[data-theme='light'] .selected-job-more,
+:root[data-theme='light'] .settings-panel > header,
+:root[data-theme='light'] .settings-group {
+  border-color: var(--lt-line);
 }
 
 :root[data-theme='light'] .selected-job-metrics span,
 :root[data-theme='light'] .job-more-facts dt,
 :root[data-theme='light'] .job-more-list dt,
-:root[data-theme='light'] .location-photo figcaption {
-  color: #56627f;
+:root[data-theme='light'] .location-photo figcaption,
+:root[data-theme='light'] .settings-note,
+:root[data-theme='light'] .settings-row-hint {
+  color: var(--lt-muted);
 }
 
-:root[data-theme='light'] .selected-job-more {
-  border-top-color: #b6d4f2;
+:root[data-theme='light'] .biz-callout-card {
+  border-color: var(--lt-line);
+  background: rgba(36, 60, 116, 0.95);
 }
 
-:root[data-theme='light'] .mockup-tag {
-  border-color: #c98a00;
-  color: #8a5a00;
-}
-
-:root[data-theme='light'] .location-photo-link {
-  border-color: #1f5fd6;
-  background: #d0e4f9;
-  color: #1a3a80;
-}
-
-/* Profile and account setup pages */
-:root[data-theme='light'] .profile-shell,
-:root[data-theme='light'] .setup-page {
-  background: #dbeafa;
-}
-
-:root[data-theme='light'] .profile-panel {
-  background: rgba(233, 243, 253, 0.88);
-  box-shadow: 0 18px 50px rgba(19, 32, 63, 0.12);
-}
-
-:root[data-theme='light'] .profile-sections button:hover {
-  background: #dbeafa;
-}
-
-:root[data-theme='light'] .profile-sections button.active {
-  background: #d0e4f9;
-  color: #1a4fae;
-}
-
-:root[data-theme='light'] .profile-topbar .badge {
-  color: #1a4fae;
-}
-
-/* Rail eye menu and Settings panel */
-:root[data-theme='light'] .rail-eye-menu {
-  border-color: #a9cbef;
-  background: #e9f3fd;
-  box-shadow: 0 10px 28px rgba(19, 32, 63, 0.18);
-}
-
-:root[data-theme='light'] .workspace-rail .rail-eye-menu button {
-  color: #13203f;
-}
-
-:root[data-theme='light'] .workspace-rail .rail-eye-menu button:hover,
-:root[data-theme='light'] .workspace-rail .rail-eye-menu button:focus-visible {
-  background: #d0e4f9;
-}
-
-:root[data-theme='light'] .settings-switch {
-  border-color: #8fbaea;
-  background: #d0e4f9;
-}
-
-:root[data-theme='light'] .settings-switch > span {
-  background: #e9f3fd;
-  box-shadow: 0 1px 3px rgba(19, 32, 63, 0.3);
-}
-
-:root[data-theme='light'] .settings-switch.on {
-  border-color: #1f5fd6;
-  background: #1f5fd6;
-}
-
+/* Settings panel */
 :root[data-theme='light'] .settings-backdrop {
-  background: rgba(19, 32, 63, 0.3);
+  background: rgba(15, 28, 64, 0.35);
 }
 
 :root[data-theme='light'] .settings-panel {
-  border-right-color: #b6d4f2;
-  background: #e9f3fd;
-  color: #13203f;
-  box-shadow: 12px 0 40px rgba(19, 32, 63, 0.18);
+  border-right-color: var(--lt-line);
+  background: linear-gradient(180deg, #304d8e 0%, #2a4482 100%);
 }
 
-:root[data-theme='light'] .settings-panel > header,
-:root[data-theme='light'] .settings-group {
-  border-color: #bfdaf4;
+:root[data-theme='light'] .settings-segmented,
+:root[data-theme='light'] .settings-close {
+  border-color: var(--lt-line);
 }
 
-:root[data-theme='light'] .settings-close,
-:root[data-theme='light'] .settings-segmented {
-  border-color: #a9cbef;
-}
-
-:root[data-theme='light'] .settings-segmented button {
-  color: #56627f;
-}
-
-:root[data-theme='light'] .settings-segmented button.active {
-  background: #1f5fd6;
-  color: #fff;
-}
-
-:root[data-theme='light'] .settings-note,
-:root[data-theme='light'] .settings-row-hint {
-  color: #56627f;
-}
-
-:root[data-theme='light'] .settings-secondary {
-  border-color: #8fbaea;
-  background: #dbeafa;
-}
-
-:root[data-theme='light'] .settings-done {
-  color: #1a7f37;
-}
-
-:root[data-theme='light'] .mapshell button.job-locate {
-  border-color: transparent;
-  background: transparent;
-}
-
-:root[data-theme='light'] .mapshell button.job-locate:hover {
-  border-color: #a9cbef;
-  background: #dbeafa;
-}
-
-/* Logo word: dark ink on light backgrounds. */
-:root[data-theme='light'] :is(.mapshell, .profile-shell, .setup-page) .tk-logo-tanaw {
-  background: linear-gradient(91.18deg, #0b1c48 14.77%, #1f5fd6 37.81%, #1f5fd6 64.44%, #0b1c48 89.64%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  filter: none;
-}
-
-:root[data-theme='light'] :is(.mapshell, .profile-shell, .setup-page) .tk-logo-kita {
-  color: #0b1c48;
-}
-
-/* The eye's white is invisible on light surfaces; outline it in navy. */
-:root[data-theme='light'] :is(.mapshell, .profile-shell, .setup-page) .tk-eye-icon img:first-child {
-  filter: drop-shadow(0 0 0.7px #0b1c48) drop-shadow(0 0 0.7px #0b1c48);
-}
-
-/* Profile backdrop: the brand image is set inline, so it needs !important; the faint map is flipped light. */
-:root[data-theme='light'] .profile-shell {
-  background: #dbeafa !important;
-}
-
+/* The profile backdrop map uses a separate dark style; let more of the lighter blue through. */
 :root[data-theme='light'] .profile-shell .landing-map .maplibregl-canvas {
-  filter: grayscale(1) invert(1) sepia(1) hue-rotate(180deg) saturate(1.25) brightness(1.04);
-  opacity: 0.55;
-}
-
-:root[data-theme='light'] .profile-topbar {
-  border-bottom-color: #b6d4f2;
-  background: rgba(219, 234, 250, 0.8);
-}
-
-:root[data-theme='light'] .profile-add {
-  border-color: #1f5fd6;
-  background: #d0e4f9;
-  color: #1a3a80;
-}
-
-:root[data-theme='light'] .profile-add:hover {
-  background: #bcd8f6;
-}
-
-/* Account setup page accents in light mode. */
-:root[data-theme='light'] .setup-topbar .badge {
-  border-color: #8fbaea;
-  background: #d0e4f9;
-  color: #1a4fae;
-}
-
-:root[data-theme='light'] .setup-kicker {
-  color: #0b6f8f;
-}
-
-:root[data-theme='light'] .setup-progress li.current {
-  border-color: #1f5fd6;
-  background: #d0e4f9;
-  color: #0b1c48;
-}
-
-:root[data-theme='light'] .setup-progress li.current span,
-:root[data-theme='light'] .setup-progress li.past span {
-  background: #1f5fd6;
-}
-
-:root[data-theme='light'] .setup-next {
-  background: #1f5fd6;
-  color: #fff;
-}
-
-:root[data-theme='light'] .setup-next:hover {
-  background: #194fb4;
-}
-
-:root[data-theme='light'] .setup-links a {
-  color: #1a4fae;
-}
-
-:root[data-theme='light'] .setup-summary .skipped {
-  color: #8a5a00;
-}
-
-:root[data-theme='light'] .setup-error {
-  color: #b42318;
+  opacity: 0.45;
 }
 
 /* =====================================================================================================
@@ -5481,4 +5169,68 @@ ul.error {
 *:not(.tk-logo *, .tk-emblem *, .tk-eye-icon *)::before,
 *:not(.tk-logo *, .tk-emblem *, .tk-eye-icon *, .biz-callout-line, .map-dot)::after {
   border-radius: 0 !important;
+}
+
+/* =====================================================================================================
+   Brand rule: a button with a text label shows only its label. Its box is still there to click, but it
+   only becomes visible on hover or keyboard focus. Icon-only buttons, job cards and map markers keep
+   their frames, and a selected chip or tab keeps its fill to show which one is on.
+   ===================================================================================================== */
+:is(button, .location-photo-link):not(
+    .rail-toggle,
+    .role-rail-button,
+    .rail-eye-button,
+    [class*='maplibregl-ctrl'],
+    .map-home-button,
+    .detail-close,
+    .settings-close,
+    .job-locate,
+    .settings-switch,
+    .job-row,
+    .biz-callout,
+    .active,
+    [aria-pressed='true'],
+    [aria-checked='true'],
+    :disabled
+  ) {
+  border-color: transparent !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
+:is(button, .location-photo-link):not(
+    .rail-toggle,
+    .role-rail-button,
+    .rail-eye-button,
+    [class*='maplibregl-ctrl'],
+    .map-home-button,
+    .detail-close,
+    .settings-close,
+    .job-locate,
+    .settings-switch,
+    .job-row,
+    .biz-callout,
+    .active,
+    [aria-pressed='true'],
+    [aria-checked='true'],
+    :disabled
+  ):is(:hover, :focus-visible) {
+  background: rgba(120, 190, 255, 0.14) !important;
+  box-shadow: inset 0 0 0 1px #6fa8ee !important;
+}
+
+/* Labels that were dark ink on a white button need light ink once the box is hidden. */
+.setup-next {
+  color: #fff !important;
+}
+
+/* Label-only buttons floating over the map get a dark halo so they stay readable on any map color. */
+:is(.map-action-button, .map-zoom-reset, .map-dimension-toggle span:not(.active)) {
+  text-shadow: 0 0 3px #0b1c48, 0 0 6px #0b1c48, 0 1px 2px #0b1c48;
+}
+
+:root[data-theme='light'] .mapshell button.job-locate {
+  border-color: var(--lt-line);
+  background: var(--lt-card);
 }

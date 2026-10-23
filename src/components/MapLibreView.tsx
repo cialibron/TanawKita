@@ -8,7 +8,8 @@ import type { Feature, MultiPolygon, Polygon } from 'geojson'
 import type { CompetitorPlace } from '../businessDirectory'
 import { CATEGORY_STYLE, categoryLabel, estimatedFootprintMeters, openedLabel } from './businessCategoryStyle'
 import { APPROX_RADIUS_PX, areaSquareMeters, areaTier, growOutline, metersPerPixel, pickBuilding, sizeMeters, splitBuildings, type AreaShape } from './buildingHighlight'
-import { BUILDINGS_3D_LAYER, FLAT_BUILDINGS_LAYER, TANAWKITA_MAP_STYLE } from './tanawkitaMapStyle'
+import { applyMapTheme, BUILDINGS_3D_LAYER, FLAT_BUILDINGS_LAYER, TANAWKITA_MAP_STYLE } from './tanawkitaMapStyle'
+import { usePreferences } from '../preferences'
 import brandPin from '../assets/brand/pin.svg'
 import brandEyeWhite from '../assets/brand/eye-white.svg'
 import brandEyeMask from '../assets/brand/eye-mask.svg'
@@ -647,6 +648,12 @@ export default function MapLibreView({
       map.off('click', handleClick)
     }
   }, [map, onPick])
+
+  // Light mode lightens blocks and buildings on the map itself; roads and water stay dark.
+  const { theme } = usePreferences()
+  useEffect(() => {
+    if (map) applyMapTheme(map, theme)
+  }, [map, theme])
 
   // Each mode shows only its own layers, so 2D never draws 3D buildings and 3D never draws the flat shapes.
   useEffect(() => {

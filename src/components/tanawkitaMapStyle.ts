@@ -1,4 +1,4 @@
-import type { ExpressionSpecification, LayerSpecification, StyleSpecification } from 'maplibre-gl'
+import type { ExpressionSpecification, LayerSpecification, Map as LibreMap, StyleSpecification } from 'maplibre-gl'
 
 // TanawKita's own base map: a flat slate-blue city plan drawn from free OpenFreeMap (OpenMapTiles) vector tiles.
 // Light blocks, dark uniform streets, plain buildings, and only place and main-road names.
@@ -44,6 +44,10 @@ function road(id: string, classes: string[], color: string, minzoom: number, sto
     layout: { 'line-cap': 'round', 'line-join': 'round' },
     paint: { 'line-color': color, 'line-width': roadWidth(stops) },
   }
+}
+
+function extrusionColor([low, mid, high]: [string, string, string]): ExpressionSpecification {
+  return ['interpolate', ['linear'], ['coalesce', ['get', 'render_height'], 0], 0, low, 25, mid, 60, high]
 }
 
 const labelPaint = { 'text-color': COLORS.label, 'text-halo-color': COLORS.halo, 'text-halo-width': 1.4 }
@@ -120,7 +124,7 @@ const layers: LayerSpecification[] = [
     paint: {
       'fill-extrusion-base': ['coalesce', ['get', 'render_min_height'], 0],
       'fill-extrusion-height': ['coalesce', ['get', 'render_height'], 8],
-      'fill-extrusion-color': ['interpolate', ['linear'], ['coalesce', ['get', 'render_height'], 0], 0, '#535e88', 25, '#64709e', 60, '#7a87b8'],
+      'fill-extrusion-color': extrusionColor(['#535e88', '#64709e', '#7a87b8']),
       'fill-extrusion-opacity': 0.95,
     },
   },
@@ -179,4 +183,36 @@ export const TANAWKITA_MAP_STYLE: StyleSpecification = {
   sources: { openmaptiles: { type: 'vector', url: 'https://tiles.openfreemap.org/planet' } },
   glyphs: 'https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf',
   layers,
+}
+
+// Light mode: a lighter shade of the same blues for city blocks, parks and buildings. Roads, paths, rail and
+// water keep their dark colors, so the street network still reads clearly.
+export type MapTheme = 'dark' | 'light'
+
+type PaintProperty = Parameters<LibreMap['setPaintProperty']>[1]
+type PaintValue = Parameters<LibreMap['setPaintProperty']>[2]
+
+const THEME_PAINT: Record<MapTheme, [layer: string, property: PaintProperty, value: PaintValue][]> = {
+  dark: [
+    ['tk-background', 'background-color', COLORS.block],
+    ['tk-park', 'fill-color', COLORS.park],
+    ['tk-landuse-park', 'fill-color', COLORS.park],
+    [FLAT_BUILDINGS_LAYER, 'fill-color', COLORS.building],
+    [FLAT_BUILDINGS_LAYER, 'fill-outline-color', COLORS.buildingEdge],
+    [BUILDINGS_3D_LAYER, 'fill-extrusion-color', extrusionColor(['#535e88', '#64709e', '#7a87b8'])],
+  ],
+  light: [
+    ['tk-background', 'background-color', '#7183b6'],
+    ['tk-park', 'fill-color', '#6688b0'],
+    ['tk-landuse-park', 'fill-color', '#6688b0'],
+    [FLAT_BUILDINGS_LAYER, 'fill-color', '#90a1d2'],
+    [FLAT_BUILDINGS_LAYER, 'fill-outline-color', '#5d6ea3'],
+    [BUILDINGS_3D_LAYER, 'fill-extrusion-color', extrusionColor(['#8595c8', '#97a6d5', '#aab7e2'])],
+  ],
+}
+
+export function applyMapTheme(map: LibreMap, theme: MapTheme) {
+  for (const [layer, property, value] of THEME_PAINT[theme]) {
+    if (map.getLayer(layer)) map.setPaintProperty(layer, property, value)
+  }
 }

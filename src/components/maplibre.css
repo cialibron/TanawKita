@@ -378,33 +378,3 @@
   font-size: 22px;
   line-height: 1;
 }
-
-:root[data-theme='light'] .map-home-button span {
-  color: #13203f;
-}
-
-/* Light mode: business callouts in the pastel-blue palette, with dark text. */
-:root[data-theme='light'] .biz-callout-card {
-  border-color: #a9cbef;
-  background: rgba(233, 243, 253, 0.97);
-  color: #13203f;
-  box-shadow: 0 8px 20px rgba(19, 32, 63, 0.18);
-}
-
-:root[data-theme='light'] .biz-callout-name {
-  color: #13203f;
-}
-
-:root[data-theme='light'] .biz-callout-row {
-  background: #d0e4f9;
-  color: #3d4a68;
-}
-
-:root[data-theme='light'] .biz-callout-row b {
-  color: #13203f;
-}
-
-:root[data-theme='light'] .biz-callout.selected .biz-callout-card {
-  border-color: var(--cat);
-  box-shadow: 0 0 0 1px var(--cat), 0 0 18px color-mix(in srgb, var(--cat) 45%, transparent), 0 8px 20px rgba(19, 32, 63, 0.18);
-}
