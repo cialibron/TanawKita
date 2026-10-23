@@ -71,8 +71,8 @@ const FLIGHT_MS = 3500
 const toLngLat = ([lat, lng]: [number, number]): [number, number] => [lng, lat]
 
 // Faint, non-interactive map of Davao City behind the landing page. Glides to the next stop every few seconds;
-// stays on the first stop for users who prefer reduced motion.
-export default function LandingMap() {
+// stays on the first stop for users who prefer reduced motion. `still` shows only the map: no pins, routes or tour.
+export default function LandingMap({ still = false }: { still?: boolean }) {
   const container = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -86,6 +86,8 @@ export default function LandingMap() {
       // Credit is shown as page text instead (the map's edges fade out); see Landing.
       attributionControl: false,
     })
+
+    if (still) return () => map.remove()
 
     map.on('load', () => {
       map.addSource('landing-routes', { type: 'geojson', data: { type: 'FeatureCollection', features: ROUTES } })
@@ -118,7 +120,7 @@ export default function LandingMap() {
       markers.forEach((m) => m.remove())
       map.remove()
     }
-  }, [])
+  }, [still])
 
   return <div className="landing-map" aria-hidden="true" ref={container} />
 }

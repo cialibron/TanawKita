@@ -1,4 +1,5 @@
 import { useState, type ReactNode } from 'react'
+import LandingMap from '../../components/LandingMap'
 import Logo from '../../components/Logo'
 import { DevRolePicker, WorkspaceRail, type WorkspaceNavItem } from '../../components/WorkspaceChrome'
 import { barangayName } from '../../data/barangays'
@@ -6,6 +7,9 @@ import { DAYS, usernameFor } from '../../rules'
 import { useSession, useStore } from '../../store'
 import type { PayUnit, View } from '../../types'
 import SkillCardForm from './SkillCardForm'
+import background from '../../assets/brand/bg-4.svg'
+// Shares the landing page's faint-map styles (.landing-map).
+import '../../landing.css'
 
 type Section = 'profile' | 'skills' | 'availability' | 'preferences'
 
@@ -174,7 +178,9 @@ export default function ProfilePage({ view, onViewChange, navigation, activeNavi
   }
 
   return (
-    <main className="profile-shell">
+    <main className="profile-shell" style={{ backgroundImage: `url("${background}")` }}>
+      {/* Same backdrop as the landing page, without its motion: brand background plus a still, faint map. */}
+      <LandingMap still />
       <WorkspaceRail view={view} navigation={navigation} activeNavigation={activeNavigation} onNavigationChange={onNavigationChange} />
 
       <div className="profile-main">
@@ -234,6 +240,12 @@ export default function ProfilePage({ view, onViewChange, navigation, activeNavi
               {content}
             </div>
           </div>
+          <p className="profile-map-credit">
+            Map:{' '}
+            <a href="https://openfreemap.org" target="_blank" rel="noreferrer">OpenFreeMap</a> ©{' '}
+            <a href="https://www.openmaptiles.org/" target="_blank" rel="noreferrer">OpenMapTiles</a> ©{' '}
+            <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a> contributors
+          </p>
         </div>
       </div>
     </main>
