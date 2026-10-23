@@ -82,13 +82,45 @@
   box-shadow: 0 1px 5px rgba(0, 0, 0, 0.5);
 }
 
-.picked-pin {
+/* Plain TanawKita eye pin (picked location, or a business without a demo profile): tip on the point. */
+.brand-pin {
   position: absolute;
-  left: -12px;
-  top: -28px;
+  left: 0;
+  bottom: 0;
+}
+
+.brand-pin-art {
+  position: absolute;
+  left: -16px;
+  bottom: 0;
+  width: 32px;
+  height: 39px;
+  filter: drop-shadow(0 0 6px rgba(62, 232, 255, 0.55)) drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5));
+}
+
+.brand-pin-art .biz-callout-pin-art {
+  width: 43px;
+  height: 52px;
+  transform: scale(0.75);
+  transform-origin: 0 0;
+}
+
+/* A picked location is just the pin; a business pin carries its name in a small tag to the right. */
+.brand-pin-label {
+  position: absolute;
+  left: 18px;
+  bottom: 14px;
+  padding: 4px 8px;
+  border: 1px solid rgba(120, 190, 255, 0.4);
+  background: rgba(6, 9, 18, 0.94);
+  color: #eef1f6;
+  font: 500 12.5px/1.2 'Poppins', system-ui, sans-serif;
   white-space: nowrap;
-  font-size: 24px;
-  filter: drop-shadow(0 1px 2px #fff);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.45);
+}
+
+.picked-pin .brand-pin-label {
+  display: none;
 }
 
 /* ===== 2D / 3D switch and default-zoom button (bottom-right, above the zoom buttons) ===== */
@@ -465,4 +497,9 @@
 
 .biz-callout.pin-only .biz-callout-card > :not(.biz-callout-pin) {
   display: none;
+}
+
+/* A business whose point sits under a panel or map button: hidden, so its pin never covers that control. */
+.biz-callout.covered {
+  visibility: hidden;
 }

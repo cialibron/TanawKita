@@ -4458,7 +4458,7 @@ ul.error {
   display: contents;
 }
 
-.area-map.has-callout .biz-pin {
+.area-map.has-callout .business-pin {
   display: none;
 }
 
@@ -5939,4 +5939,24 @@ button.skill-picker-option.custom {
 /* Chips over the map lose their box too, so they get the same dark halo as the other map buttons. */
 .map-overlay .chips button.chip:not(.active) {
   text-shadow: 0 0 3px #0b1c48, 0 0 6px #0b1c48, 0 1px 2px #0b1c48;
+}
+
+/* "My posts" and other card rows that are one big button: space the text inside the hover/focus outline. */
+.card button.link {
+  box-sizing: border-box;
+  padding: 10px 12px;
+}
+
+/* Landing: "Create an account" keeps clear of its outline, and drops under the heading when space is tight. */
+.landing-card-head {
+  flex-wrap: wrap;
+}
+
+/* `.landing .landing-link` resets all spacing, so this needs the same weight to add it back. */
+.landing .landing-link.landing-card-signup {
+  display: inline-flex;
+  align-items: center;
+  box-sizing: border-box;
+  padding: 0 14px;
+  white-space: nowrap;
 }

@@ -86,8 +86,9 @@ export default function App() {
   const [jobseekerSection, setJobseekerSection] = useState<JobseekerSection>('jobs')
   const [employerSection, setEmployerSection] = useState<EmployerSection>('area')
   const [adminSection, setAdminSection] = useState<AdminSection>('overview')
-  // Landing page first; a demo sign-in (or "Explore without an account") opens the workspace.
-  const [entered, setEntered] = useState(() => loadSession() !== null)
+  // Every visit starts at the landing page, even with a saved demo sign-in; a sign-in (or "Explore without an
+  // account") opens the workspace.
+  const [entered, setEntered] = useState(false)
   // Account setup panel: opened after sign-in, or for one step from a profile "Add" button.
   const [setupRequest, setSetupRequest] = useState<{ initialRole?: Role; startAt?: SetupStep; single?: boolean } | null>(null)
   const changeView = (view: View) => dispatch({ type: 'setView', view })
